@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
 
 add_filter( 'cmplz_known_script_tags', 'cmplz_recaptcha_script' );
 function cmplz_recaptcha_script( $tags ) {
-	if (defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) return $tags;
+	if ((defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) && (!class_exists('IQFix_WPCF7_Deity'))) return $tags;
 
 	if (cmplz_get_option('block_recaptcha_service') === 'yes'){
 		$tags[] = array(
@@ -30,7 +30,7 @@ function cmplz_recaptcha_script( $tags ) {
 
 add_action( 'cmplz_banner_css', 'cmplz_recaptcha_css' );
 function cmplz_recaptcha_css() {
-	if (defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) return;
+	if ((defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) && (!class_exists('IQFix_WPCF7_Deity'))) return $tags;
 
 	?>
 		.cmplz-blocked-content-container.recaptcha-invisible,
