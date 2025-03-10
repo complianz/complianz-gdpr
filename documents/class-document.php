@@ -1687,7 +1687,7 @@ if ( ! class_exists( "cmplz_document" ) ) {
 				//ensure a transient, in case none is found. This prevents continuing requests on the page list
 				cmplz_set_transient( "cmplz_shortcode_$type-$region", 'none', HOUR_IN_SECONDS );
 				$query = $wpdb->prepare(
-					"SELECT * FROM $wpdb->posts WHERE (post_content LIKE %s OR post_content LIKE %s) AND post_status = 'publish' AND post_type = 'page' ",
+					"SELECT * FROM $wpdb->posts WHERE (post_content LIKE %s OR post_content LIKE %s) AND post_status = 'publish' AND post_type = 'page'",
 					'%' . '[cmplz-document' . '%',
 					'%' . 'wp:complianz\/document' . '%'
 				);

@@ -158,7 +158,8 @@ if ( ! class_exists( "cmplz_admin" ) ) {
 			if (class_exists('SG_Security')) return false; // Siteground security
 			if (defined('DEFENDER_VERSION')) return false;
 			if (defined('SUCURISCAN_INIT')) return false;
-			if (defined('JETPACK__VERSION')) return false;
+			if (defined('JETPACK__VERSION')) return false; // Jetpack.
+			if (defined('JETPACK_PROTECT_VERSION')) return false; // Jetpack Protect.
 			if (defined('BULLETPROOF_VERSION')) return false;
 			if (class_exists('MCWPSettings')) return false;
 			if (function_exists('GOTMLS_install')) return false; //anti malware security and brute force firewall
