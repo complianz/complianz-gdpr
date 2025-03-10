@@ -265,9 +265,49 @@ if ( ! class_exists( "cmplz_config" ) ) {
 			 * 7: Impressum in germany
 			 * */
 			define( 'CMPLZ_LEGAL_VERSION', '8' );
-			require_once( cmplz_path . '/config/countries.php' );
 
-			//common options type
+
+			/**
+			 * Preload fields with a filter, to allow for overriding types
+			 */
+			// load countries, purpose, documents, common types...  on init because of the translated strings
+			add_action( 'init', array($this, 'load_translated' ), 0 );
+			add_action( 'init', array( $this, 'init' ), 5 );
+			add_action( 'init', array( $this, 'load_pages' ), 10 );
+		}
+
+		static function this() {
+			return self::$_this;
+		}
+
+		/**
+		 * Loads configuration files and translations at the 'init' action to avoid early
+		 * loading issues for the `complianz-gdpr` text domain, as required by WordPress 6.7.
+		 *
+		 * @return void
+		 */
+		public function load_translated():void {
+			// load common types
+			$this->load_common_types();
+			// require all files with translated strings
+			require_once( cmplz_path . '/config/countries.php' );
+			require_once( cmplz_path . '/config/purpose.php' );
+			require_once( cmplz_path . '/config/documents/documents.php' );
+			require_once( cmplz_path . 'settings/config/config.php' );
+			if ( file_exists(cmplz_path . 'pro/settings/config.php') ) {
+				require_once( cmplz_path . 'pro/settings/config.php');
+				require_once( cmplz_path . 'pro/config/dynamic-document-elements.php');
+			}
+			require_once( cmplz_path . '/cookiebanner/settings.php' );
+		}
+
+		/**
+		 * Load common types used in the plugin.
+		 *
+		 *
+		 * @return void
+		 */
+		private function load_common_types():void {
 			$this->yes_no = array(
 				'yes' => __( 'Yes', 'complianz-gdpr' ),
 				'no'  => __( 'No', 'complianz-gdpr' ),
@@ -296,26 +336,6 @@ if ( ! class_exists( "cmplz_config" ) ) {
 				'twitter' => 'Twitter',
 				'tiktok' => 'Tik Tok'
 			);
-
-			require_once( cmplz_path . '/config/purpose.php' );
-			require_once( cmplz_path . '/config/documents/documents.php' );
-			//always load the fields, for translation purposes etc.
-			require_once( cmplz_path . 'settings/config/config.php' );
-			if ( file_exists(cmplz_path . 'pro/settings/config.php') ) {
-				require_once( cmplz_path . 'pro/settings/config.php');
-				require_once( cmplz_path . 'pro/config/dynamic-document-elements.php');
-			}
-			require_once( cmplz_path . '/cookiebanner/settings.php' );
-
-			/**
-			 * Preload fields with a filter, to allow for overriding types
-			 */
-			add_action( 'plugins_loaded', array( $this, 'init' ), 10 );
-			add_action( 'plugins_loaded', array( $this, 'load_pages' ), 10 );
-		}
-
-		static function this() {
-			return self::$_this;
 		}
 
 		/**
@@ -326,17 +346,21 @@ if ( ! class_exists( "cmplz_config" ) ) {
 			return array_intersect_key( COMPLIANZ::$config->regions, cmplz_get_regions(false, 'short') );
 		}
 
-
-		public function init(){
-			/**
-			 * For the Brazil privacy law there are some additional options. These should only be enabled when the only chosen region is Brazil.
-			 */
-			if ( cmplz_has_region('br') && cmplz_multiple_regions() == false) {
-				$this->lawful_bases['7'] = __('It is necessary to carry out studies by a research body, ensuring, whenever possible, the anonymization of personal data', 'complianz-gdpr');
-				$this->lawful_bases['8'] = __('It is necessary for the regular exercise of rights in judicial, administrative or arbitration proceedings', 'complianz-gdpr');
-				$this->lawful_bases['9'] = __('It is necessary for the protection of health, exclusively, in a procedure performed by health professionals, health services or health authority', 'complianz-gdpr');
-				$this->lawful_bases['10'] = __('It is necessary for credit protection', 'complianz-gdpr');
+		/**
+		 * For the Brazil privacy law there are some additional options. These should only be enabled when the only chosen region is Brazil.
+		 */
+		private function load_additional_br_options() {
+			if ( !cmplz_has_region('br') || cmplz_multiple_regions() ) {
+				return;
 			}
+
+			$this->lawful_bases['7'] = __('It is necessary to carry out studies by a research body, ensuring, whenever possible, the anonymization of personal data', 'complianz-gdpr');
+			$this->lawful_bases['8'] = __('It is necessary for the regular exercise of rights in judicial, administrative or arbitration proceedings', 'complianz-gdpr');
+			$this->lawful_bases['9'] = __('It is necessary for the protection of health, exclusively, in a procedure performed by health professionals, health services or health authority', 'complianz-gdpr');
+			$this->lawful_bases['10'] = __('It is necessary for credit protection', 'complianz-gdpr');
+		}
+
+		private function load_documents() {
 			$files = [];
 			$regions = cmplz_get_regions();
 			$privacy_statement = cmplz_get_option( 'privacy-statement' ) === 'generated';
@@ -355,6 +379,13 @@ if ( ! class_exists( "cmplz_config" ) ) {
 					require_once( cmplz_path . $file );
 				}
 			}
+		}
+
+		public function init() {
+			// load br additional options
+			$this->load_additional_br_options();
+			// load documents
+			$this->load_documents();
 
 			$this->stats_markers = apply_filters( 'cmplz_stats_markers', $this->stats_markers );
 			//ensure that indexes are sequential with array_values
