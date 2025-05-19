@@ -560,41 +560,21 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 			$posts = get_transient( 'cmplz_pages_list' );
 			if ( ! $posts ) {
 				$posts = ['home', 'remote'];
-				$all_types_posts = [];
 				$post_types = $this->get_scannable_post_types();
-				//from each post type, get one, for faster results.
 				foreach ( $post_types as $post_type ) {
 					$args      = array(
-							'post_type'      => $post_type,
-							'posts_per_page' => 1,
-							'meta_query'     => array(
-									array(
-											'key'     => '_cmplz_scanned_post',
-											'compare' => 'NOT EXISTS'
-									),
-							)
+						'post_type'       => $post_type,
+						'posts_per_page'  => 5,
+						'fields'          => 'ids',
+						'meta_query'      => array(
+							array(
+								'key'     => '_cmplz_scanned_post',
+								'compare' => 'NOT EXISTS'
+							),
+						)
 					);
 					$new_posts = get_posts( $args );
-					$all_types_posts     = $all_types_posts + $new_posts;
-				}
-
-				$all_types_array = count($all_types_posts)>0 ? wp_list_pluck($all_types_posts, 'ID') : [];
-				$posts     = array_merge( $posts, $all_types_array );
-				foreach ( $post_types as $post_type ) {
-					$args      = array(
-							'post__not_in' 	 => $all_types_array,
-							'post_type'      => $post_type,
-							'posts_per_page' => 5,
-							'meta_query'     => array(
-									array(
-										'key'     => '_cmplz_scanned_post',
-										'compare' => 'NOT EXISTS'
-									),
-							)
-					);
-					$new_posts = get_posts( $args );
-					$new_posts_array = count($new_posts)>0 ? wp_list_pluck($new_posts, 'ID') : [];
-					$posts     = $posts + $new_posts_array;
+					$posts     = array_merge( $posts, $new_posts );
 				}
 				if ( count( $posts ) === 0 && ! $this->automatic_cookiescan_disabled() ) {
 					/*
