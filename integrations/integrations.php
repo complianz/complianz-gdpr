@@ -587,6 +587,11 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 		'label'                => 'Greenshift',
 		'firstparty_marketing' => false,
 	),
+	'funnelkit' => array(
+		'constant_or_function' => 'WFFN_VERSION',
+		'label'				   => 'FunnelKit',
+		'firstparty_marketing' => false,
+	),
 ) );
 
 

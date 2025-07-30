@@ -108,6 +108,7 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 			'tiktok'    => 'TikTok',
 			'disqus'    => 'Disqus',
 			'pinterest' => 'Pinterest',
+			'snapchat'  => 'Snapchat',
 		);
 
 		/**
@@ -163,6 +164,7 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'instawidget.net/js/instawidget.js',
 				'instagram.com',
 			),
+			'snapchat' => array('snapchat.com'),
 		);
 
 		/**
