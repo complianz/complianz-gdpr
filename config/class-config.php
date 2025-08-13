@@ -563,8 +563,8 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 		 * @return void
 		 */
 		private function load_hooks(): void {
-			add_action( 'init', array( $this, 'load_documents' ) );
 			add_action( 'init', array( $this, 'init' ) );
+			add_action( 'init', array( $this, 'load_documents' ) );
 		}
 
 

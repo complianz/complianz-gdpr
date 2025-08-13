@@ -233,6 +233,13 @@ if (!class_exists("cmplz_wsc_settings")) {
 						],
 					],
 					[
+						'id' => cmplz_wsc::WSC_SITE_ID_OPTION_KEY,
+						'type' => 'hidden',
+						'required' => false,
+						'visible' => false,
+						'default' => '',
+					],
+					[
 						'id' => 'websitescan_status',
 						'menu_id' => 'settings-cd',
 						'group_id' => 'settings-websitescan',
@@ -404,7 +411,10 @@ if (!class_exists("cmplz_wsc_settings")) {
 			$cmplz_options = [
 				cmplz_wsc::WSC_EMAIL_OPTION_KEY,
 				cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY,
-				cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY
+				cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY,
+				cmplz_wsc::WSC_SITE_ID_OPTION_KEY,
+				cmplz_license::WSC_LICENSE_SYNC_ID,
+				cmplz_license::WSC_LICENSE_SYNC_STATUS,
 			];
 
 			$cmplz_transients = [

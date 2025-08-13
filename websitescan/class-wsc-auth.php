@@ -27,6 +27,10 @@ if (!class_exists("cmplz_wsc_auth")) {
 			add_action("admin_init", array($this, 'confirm_email_auth'), 10, 3); // Verify the authentication link in the email
 			add_action('cmplz_every_day_hook', array($this, 'check_failed_consent_onboarding'));
 			add_action('cmplz_every_day_hook', array($this, 'check_failed_newsletter_signup'));
+			// Set the hooks to create the site id for the WSC.
+			add_action( 'cmplz_every_day_hook', array( $this, 'maybe_sync_wsc_site_id' ) );
+			add_action( 'cmplz_maybe_sync_wsc_site_id', array( $this, 'maybe_sync_wsc_site_id' ), 0 );
+			add_action( 'cmplz_schedule_create_wsc_site_id', array( $this, 'schedule_create_wsc_site_id' ), 0 );
 		}
 
 
@@ -193,6 +197,8 @@ if (!class_exists("cmplz_wsc_auth")) {
 						delete_option('cmplz_wsc_error_missing_token');
 						// reset the processed pages
 						delete_transient('cmplz_processed_pages_list');
+						// Since client_id and client_secret are stored, we can trigger the site creation.
+						do_action( 'cmplz_maybe_sync_wsc_site_id' );
 					} else {
 						if (WP_DEBUG) {
 							error_log('COMPLIANZ: cannot confirm email, client id or secret not found in response');
@@ -553,6 +559,7 @@ if (!class_exists("cmplz_wsc_auth")) {
 			return false;
 		}
 
+
 		/**
 		 * Check for failed onboarding consent store attempts
 		 * If there's a failed attempt, try to store it again
@@ -598,6 +605,7 @@ if (!class_exists("cmplz_wsc_auth")) {
 			return true;
 		}
 
+
 		/**
 		 * Checks if the WSC (Website Scan) is authenticated.
 		 *
@@ -616,6 +624,150 @@ if (!class_exists("cmplz_wsc_auth")) {
 			}
 
 			return true;
+		}
+
+
+		/**
+		 * Schedules the synchronization of the WSC site ID.
+		 *
+		 * This function checks if the site ID is already set. If not, it schedules a cron job
+		 * to create the site ID after 10 minutes.
+		 *
+		 * @return void
+		 */
+		public function maybe_sync_wsc_site_id(): void {
+			// If the site id is already set, return.
+			if ( $this->retrieve_wsc_site_id() > 0 ) {
+				return;
+			}
+
+			// Use the cron to schedule the site_id creation.
+			if ( ! wp_next_scheduled( 'cmplz_schedule_create_wsc_site_id' ) ) {
+				wp_schedule_single_event( time() + 300, 'cmplz_schedule_create_wsc_site_id' );
+			}
+		}
+
+
+		/**
+		 * Schedules the creation of a site ID for the Website Scan.
+		 *
+		 * This function calls the `wsc_create_site_id` method to create a site ID.
+		 *
+		 * @return void
+		 */
+		public function schedule_create_wsc_site_id(): void {
+			$this->wsc_create_site_id();
+		}
+
+
+		/**
+		 * Creates a site ID for the Website Scan.
+		 *
+		 * This function performs several checks and actions to create a site ID:
+		 * 1. Checks if the site ID is already set.
+		 * 2. Verifies if the user is authenticated.
+		 * 3. Checks if the API is open for signups.
+		 * 4. Retrieves an access token.
+		 * 5. Retrieves the site language.
+		 * 6. Defines the request body and sends a POST request to create the site ID.
+		 * 7. Handles the response and stores the site ID if successful.
+		 *
+		 * @return void
+		 */
+		private function wsc_create_site_id(): void {
+			// If the site id is already set, return.
+			if ( $this->retrieve_wsc_site_id() > 0 ) {
+				return;
+			}
+
+			// If the user is not authenticated, return.
+			if ( ! self::wsc_is_authenticated() ) {
+				return;
+			}
+
+			// If the api is not open, return.
+			if ( ! self::wsc_api_open( 'signup' ) ) {
+				return;
+			}
+
+			// Retrieve the token.
+			$token = self::get_token( true );
+
+			if ( ! $token ) {
+				return;
+			}
+
+			// Retrieve the site language.
+			$language = substr( get_locale(), 0, 2 ) ?? '';
+
+			// Define the request body.
+			$body = array(
+				'data' => array(
+					'type'       => 'sites',
+					'attributes' => array(
+						'url'       => esc_url_raw( home_url() ),
+						'language' => $language,
+						'site_type' => 'web',
+					),
+				),
+			);
+
+			$wsc_endpoint = base64_decode(self::WSC_ENDPOINT);
+
+			// Send the request.
+			$response = wp_remote_post(
+				$wsc_endpoint . '/api/v2/sites',
+				array(
+					'headers'   => array(
+						'Content-Type'  => 'application/json',
+						'Authorization' => 'Bearer ' . $token,
+					),
+					'timeout'   => 15,
+					'sslverify' => true,
+					'body'      => wp_json_encode( $body ),
+				)
+			);
+
+			// Handle the response.
+			if ( is_wp_error( $response ) ) {
+				$error_message = $response->get_error_message();
+				cmplz_wsc_logger::log_errors( __FUNCTION__, $error_message );
+				return;
+			}
+
+			// Check the response code.
+			$response_code = wp_remote_retrieve_response_code( $response );
+
+			if ( 201 !== $response_code ) {
+				cmplz_wsc_logger::log_errors( __FUNCTION__, 'Unexpected response code in ' . __FUNCTION__ . ' request: ' . $response_code );
+				return;
+			}
+
+			// Decode the response body.
+			$response_body = json_decode( wp_remote_retrieve_body( $response ) );
+
+			// Check if the site id is found in the response.
+			if ( ! isset( $response_body->data ) || ! isset( $response_body->data->id ) ) {
+				cmplz_wsc_logger::log_errors( __FUNCTION__, 'No site id found in response' );
+				return;
+			}
+
+			// Store the site_id.
+			$site_id = (int) $response_body->data->id;
+			cmplz_update_option( cmplz_wsc::WSC_SITE_ID_OPTION_KEY, $site_id );
+			do_action( 'cmplz_maybe_sync_wsc_license' );
+		}
+
+
+		/**
+		 * Retrieves the WSC site ID.
+		 *
+		 * This function fetches the site ID for the Website Scan feature from the stored options.
+		 *
+		 * @return int The site ID.
+		 */
+		public static function retrieve_wsc_site_id(): int {
+			return (int) cmplz_get_option( cmplz_wsc::WSC_SITE_ID_OPTION_KEY );
 		}
 	}
 }

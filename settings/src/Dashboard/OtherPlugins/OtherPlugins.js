@@ -12,18 +12,24 @@ const OtherPlugins = () => {
 
     const otherPluginElement = (plugin, i) => {
         return (
-           <div key={i} className={"cmplz-other-plugins-element cmplz-"+plugin.slug}>
-			   <a href={plugin.wordpress_url} target="_blank" rel="noopener noreferrer" title={plugin.title}>
-                   <div className="cmplz-bullet"></div>
-                   <div className="cmplz-other-plugins-content">{plugin.title}</div>
-               </a>
-               <div className="cmplz-other-plugin-status">
-				   {plugin.pluginAction==='upgrade-to-premium' && <a target="_blank" href={plugin.upgrade_url} rel="noopener noreferrer">{__("Upgrade", "complianz-gdpr")}</a>}
-                	{plugin.pluginAction!=='upgrade-to-premium' && plugin.pluginAction!=='installed' &&
-                    <a href="#" onClick={ (e) => pluginActions(plugin.slug, plugin.pluginAction, e) } >{plugin.pluginActionNice}</a>}
-                	{plugin.pluginAction==='installed' && __("Installed", "complianz-gdpr")}
-               </div>
-           </div>
+            <div key={i}  className={"cmplz-suggested-plugin cmplz-"+plugin.slug}>
+                <img className="cmplz-suggested-plugin-img" src={cmplz_settings.plugin_url+'/upgrade/img/'+plugin.image} />
+                <div className="cmplz-suggested-plugin-group">
+                    <div className="cmplz-suggested-plugin-group-title">{plugin.title}</div>
+                    <div className="cmplz-suggested-plugin-group-desc">{plugin.summary}</div>
+                </div>
+                <div className="cmplz-suggested-plugin-desc-long">
+                    {plugin.description}
+                </div>
+                <div>
+                    <div className="cmplz-other-plugin-status">
+                        {plugin.pluginAction==='upgrade-to-premium' && <a type="button" className="button-secondary cmplz-install-plugin" target="_blank" href={plugin.upgrade_url} rel="noopener noreferrer">{__("Upgrade", "complianz-gdpr")}</a>}
+                        {plugin.pluginAction!=='upgrade-to-premium' && plugin.pluginAction!=='installed' &&
+                            <button type="button" className="button-secondary cmplz-install-plugin" onClick={ (e) => pluginActions(plugin.slug, plugin.pluginAction, e) } >{plugin.pluginActionNice}</button>}
+                        {plugin.pluginAction==='installed' && __("Installed", "complianz-gdpr")}
+                    </div>
+                </div>
+            </div>
         )
     }
 

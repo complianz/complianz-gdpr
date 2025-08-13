@@ -22,6 +22,7 @@ if (!class_exists("cmplz_wsc")) {
 		const WSC_EMAIL_OPTION_KEY = 'cmplz_wsc_email';
 		const WSC_CLIENT_ID_OPTION_KEY = 'cmplz_wsc_client_id';
 		const WSC_CLIENT_SECRET_OPTION_KEY = 'cmplz_wsc_client_secret';
+		const WSC_SITE_ID_OPTION_KEY = 'cmplz_wsc_site_id';
 		const WSC_OPT_ONBOARDING_DATE = 'cmplz_wsc_onboarding_start';
 		const WSC_ONBOARDING_STAGED_END = 'april 30 2025';
 

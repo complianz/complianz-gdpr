@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkcomplianz_gdpr=globalThis.webpackChunkcomplianz_gdpr||[]).push([[4612],{4612:(e,a,l)=>{l.r(a),l.d(a,{default:()=>n});var p=l(51609);const n=(0,l(86087).memo)((({value:e})=>(0,p.createElement)("input",{type:"hidden",value:e})))}}]);

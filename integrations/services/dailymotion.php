@@ -9,6 +9,8 @@ function cmplz_dailymotion_iframetags( $tags ) {
 		'placeholder' => 'dailymotion',
 		'urls' => array(
 			'dailymotion.com/embed/video/',
+			'geo.dailymotion.com/player.html',
+			'dailymotion.com/video/',
 		),
 	);
 

@@ -19,7 +19,7 @@ if ( false ) { // phpcs:ignore Generic.CodeAnalysis.UnconditionalIfStatement.Fou
 	__( 'It is necessary to carry out studies by a research body, ensuring, whenever possible, the anonymization of personal data', 'complianz-gdpr' );
 	__( 'It is necessary for the regular exercise of rights in judicial, administrative or arbitration proceedings', 'complianz-gdpr' );
 	__( 'It is necessary for the protection of health, exclusively, in a procedure performed by health professionals, health services or health authority', 'complianz-gdpr' );
-	__( 'It is necessary for credit protection', 'compianz-gdpr' );
+	__( 'It is necessary for credit protection', 'complianz-gdpr' );
 	__( 'Default', 'complianz-gdpr' );
 	__( 'English', 'complianz-gdpr' );
 	__( 'Danish', 'complianz-gdpr' );

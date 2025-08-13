@@ -16,6 +16,7 @@ function cmplz_recaptcha_script( $tags ) {
 						'recaptcha.js',
 						'recaptcha/api',
 						'apis.google.com/js/platform.js',
+						'gstatic.com/recaptcha',
 				),
 				'enable_placeholder' => '1',
 				'placeholder_class' => 'recaptcha-invisible,g-recaptcha',

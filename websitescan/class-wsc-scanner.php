@@ -730,7 +730,7 @@ if (!class_exists("cmplz_wsc_scanner")) {
 		 * @param int $retry The number of retries for the scan request.
 		 * @return void
 		 */
-		private function wsc_checks_retrieve( int $retry ) {
+		public function wsc_checks_retrieve( int $retry ) {
 			$max_retries = 3;
 
 			$is_polling = get_option( 'cmplz_wsc_checks_scan_polling' );
@@ -796,9 +796,36 @@ if (!class_exists("cmplz_wsc_scanner")) {
 			*/
 
 			// Block #1 | Consent Mode V2 (error) | Notice if you have google services but no GCM.
-			$is_gcm_detected      = isset( $meta->googleConsentMode->found ) ? $meta->googleConsentMode->found : false;
-			$services_detected    = array();
-			$gcm_services         = array( 'Google Analytics (Universal Analytics)', 'Google Analytics', 'Google Analytics 4', 'Google Tag Manager', 'Google Ads Remarketing', 'Google Conversion linker' );
+			$is_gcm_detected   = isset( $meta->googleConsentMode->found ) ? $meta->googleConsentMode->found : false;
+			$services_detected = array();
+			$gcm_services      = array(
+				'Google Analytics (Universal Analytics)',
+				'Google Analytics',
+				'Google Analytics 4',
+				'Google Tag Manager',
+				'Google Ads Remarketing',
+				'Google Conversion linker',
+				'Google Ad Manager',
+				'Google Ad Manager Audience Extension',
+				'Google Ads Audience Expansion',
+				'Google Ads conversion tracking',
+				'Google Ads Customer Match',
+				'Google Ads enhanced conversions',
+				'Google Ads Optimized Targeting',
+				'Google Ads Similar audiences',
+				'Google Ads Smart Bidding',
+				'Google AdSense',
+				'Google Analytics Advertising Reporting Features',
+				'Google Analytics Demographics and Interests reports',
+				'Google Analytics Granular location and device data collection',
+				'Google Campaign Manager 360',
+				'Google Floodlight conversion tracking (Floodlight tag)',
+				'Google Programmable Search Engine with AdSense',
+				'Google Publisher Tag',
+				'Google Search Ads 360',
+				'Google Signals'
+			);
+
 			$is_cmplz_gcm_enabled = cmplz_consent_mode(); // on free return false as default.
 			// look for additional technologies matching the services.
 			foreach ( $additional_technologies as $technology ) {
@@ -824,8 +851,44 @@ if (!class_exists("cmplz_wsc_scanner")) {
 			}
 
 			// Block #2 | TCF (error) | Notice if you have Google Advertising Product but no TCF.
-			$is_tcf_installed      = isset( $meta->tcf->installed ) ? $meta->tcf->installed : false;
-			$cmp_services          = array( 'Google AdSense', 'Ezoic', 'Nexx360', 'Mediavine', 'Media.net', 'Raptive' );
+			$is_tcf_installed = isset( $meta->tcf->installed ) ? $meta->tcf->installed : false;
+			$cmp_services     = array(
+				'Google AdSense',
+				'Google Ad Manager',
+				'Google Ads',
+				'Google Marketing Platform',
+				'Google Campaign Manager 360',
+				'Google Floodlight',
+				'Google Analytics Advertising Features',
+				'Adobe Advertising Cloud',
+				'Adobe Audience Manager',
+				'Amazon Advertising',
+				'Criteo',
+				'The Trade Desk',
+				'Index Exchange',
+				'Magnite',
+				'PubMatic',
+				'OpenX',
+				'TripleLift',
+				'Xandr',
+				'Taboola',
+				'Outbrain',
+				'Quantcast',
+				'Teads',
+				'LiveRamp',
+				'ID5',
+				'Lotame',
+				'InMobi',
+				'Smaato',
+				'Adform',
+				'AppNexus',
+				'Media.net',
+				'Ezoic',
+				'Nexx360',
+				'Mediavine',
+				'Raptive'
+			);
+
 			$cmp_services_detected = array();
 
 			foreach ( $additional_technologies as $technology ) {

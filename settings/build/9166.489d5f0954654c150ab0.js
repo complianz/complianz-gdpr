@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkcomplianz_gdpr=globalThis.webpackChunkcomplianz_gdpr||[]).push([[9166],{99166:(e,n,i)=>{i.r(n),i.d(n,{default:()=>o});const o=e=>function(n){return new Promise((i=>setTimeout((()=>i(n)),e)))}}}]);

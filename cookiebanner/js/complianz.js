@@ -1092,6 +1092,11 @@ window.show_cookie_banner = function () {
 		if ( !disableCookiebanner ) {
 			cmplz_banner.classList.remove('cmplz-hidden');
 			cmplz_manage_consent_button.classList.remove('cmplz-hidden');
+			// Set focus to the close button when banner is shown
+			const closeButton = cmplz_banner.querySelector('.cmplz-close');
+			if (closeButton) {
+				closeButton.focus();
+			}
 		}
 	}
 	document.getElementsByTagName("head")[0].appendChild(link);
@@ -1168,6 +1173,14 @@ window.cmplz_set_banner_status = function ( status ){
 	let event = new CustomEvent('cmplz_banner_status', { detail: status });
 	document.dispatchEvent(event);
 	cmplz_start_clean();
+
+	if ( status === 'show' ) {
+		// Set focus to the close button when banner is shown
+		const closeButton = cmplz_banner.querySelector('.cmplz-close');
+		if (closeButton) {
+			closeButton.focus();
+		}
+	}
 }
 
 /*
@@ -1658,6 +1671,14 @@ cmplz_add_event('click', '.cmplz-view-preferences', function(e){
 		cmplz_banner.querySelector('.cmplz-categories' ).classList.add('cmplz-fade-in');
 		cmplz_banner.querySelector('.cmplz-view-preferences' ).style.display = 'none';
 		cmplz_banner.querySelector('.cmplz-save-preferences' ).style.display = 'block';
+		
+		// Set focus to the first category when preferences are shown
+		const firstCategory = cmplz_banner.querySelector('.cmplz-categories .cmplz-category');
+		console.log(firstCategory);
+		if (firstCategory) {
+			firstCategory.setAttribute('tabindex', '-1');
+			firstCategory.focus();
+		}
 	}
 });
 /*

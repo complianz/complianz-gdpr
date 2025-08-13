@@ -180,7 +180,9 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         '_transient_cmplz_%',
         '_transient_timeout_cmplz_%',
         '_transient_complianz_%',
-        '_transient_timeout_complianz_%'
+        '_transient_timeout_complianz_%',
+        '_transient_cmplz_dn_notifications_%',
+        '_transient_timeout_cmplz_dn_notifications_%',
     ];
 
     foreach ($transients as $transient) {

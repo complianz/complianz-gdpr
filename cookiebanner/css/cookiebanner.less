@@ -72,7 +72,8 @@
 	}
 	animation: mc_slideOut 0.5s forwards;
 
-	&:hover {
+	&:hover,
+	&:focus {
 	  animation: mc_slideIn 0.5s forwards;
 	  animation-delay: 0;
 	}
@@ -288,9 +289,6 @@
 		  display: flex;
 		  align-items: center;
 		  margin: 0;
-		  label>span {
-			display:none;
-		  }
 		  input[data-category=cmplz_functional]{
 			display:none;
 		  }

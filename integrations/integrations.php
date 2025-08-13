@@ -236,7 +236,7 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 	),
 
 	'clarity'               => array(
-		'constant_or_function' => 'clarity_add_origins',
+		'constant_or_function' => 'clarity_register_settings',
 		'label'                => 'Microsoft Clarity',
 	),
 

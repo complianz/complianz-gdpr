@@ -1,4 +1,222 @@
-<?php
+<?php // phpcs:ignore Squiz.Commenting.FileComment.Missing
+
+/**
+ * Complianz Dynamic Notifications
+ *
+ * This code is used to fetch and store the dynamic notifications from Complianz and inform the user of the latest news.
+ *
+ * @package Complianz
+ * @since 7.5.3
+ */
+
+const COMPLIANZ_DYNAMIC_NOTIFICATIONS_ENDPOINT             = 'https://notifications.complianz.io/';
+const COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_KEY        = 'cmplz_dn_notifications_';
+const COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION = 24 * HOUR_IN_SECONDS;
+
+// Hook into the admin_init action to update the notifications.
+add_action( 'admin_init', 'cmplz_dn_update' );
+// Hook into the cmplz_warning_types filter to include the notifications in the warnings array.
+add_filter( 'cmplz_warning_types', 'cmplz_dn_include_notifications' );
+
+/**
+ * Update the notifications.
+ *
+ * @return void
+ */
+function cmplz_dn_update(): void {
+	// Retrieve the user language, return just the language code (en, nl, de, etc).
+	$language = cmplz_dn_get_language();
+	// Generate the transient key.
+	$transient_key = cmplz_dn_transient_key( $language );
+	// Check for the presence of the transients of the fetched notifications.
+	$notifications = get_transient( $transient_key, false );
+
+	// If the transient is not set, fetch the notifications.
+	if ( ! is_array( $notifications ) ) {
+		$notifications = cmplz_dn_fetch_notifications();
+	}
+}
+
+/**
+ * Fetch the notifications from the endpoint.
+ *
+ * @return void
+ */
+function cmplz_dn_fetch_notifications(): void {
+	$notifications = array();
+
+	$endpoint       = cmplz_dn_endpoint();
+	$plugin_version = COMPLIANZ::$wsc_scanner->get_cmplz_version();
+	$language       = cmplz_dn_get_language();
+
+	// Define the transient key.
+	$transient_key = cmplz_dn_transient_key( $language );
+
+	$payload = array(
+		'version'  => $plugin_version,
+		'language' => $language,
+	);
+
+	$response = wp_remote_post(
+		$endpoint,
+		array(
+			'headers' => array(
+				'Content-Type' => 'application/json',
+			),
+			'body'    => wp_json_encode( $payload ),
+			'timeout' => 15,
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		// Avoid fetching notifications repeatedly if the response is invalid and set an empty array.
+		cmplz_dn_set_empty_notifications( $transient_key );
+		return;
+	}
+
+	$status = wp_remote_retrieve_response_code( $response );
+
+	if ( 200 !== $status ) {
+		// Avoid fetching notifications repeatedly if the response is invalid and set an empty array.
+		cmplz_dn_set_empty_notifications( $transient_key );
+		return;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+
+	$raw_notifications = json_decode( $body, true );
+
+	// Check if the response is valid.
+	if ( ! is_array( $raw_notifications ) || ! isset( $raw_notifications['notifications'] ) || ! is_array( $raw_notifications['notifications'] ) ) {
+		// Avoid fetching notifications repeatedly if the response is invalid and set an empty array.
+		cmplz_dn_set_empty_notifications( $transient_key );
+		return;
+	}
+
+	// Get the sub-array with the notifications.
+	$notifications = $raw_notifications['notifications'];
+
+	// Store the notifications for 24 hours.
+	$saved = set_transient( $transient_key, $notifications, COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION );
+}
+
+/**
+ * Set the transient to an empty array to avoid fetching notifications repeatedly.
+ *
+ * @param string $transient_key The transient key.
+ * @return void
+ */
+function cmplz_dn_set_empty_notifications( string $transient_key ): void {
+	set_transient( $transient_key, array(), COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION );
+}
+
+/**
+ * Include the notifications in the warnings array.
+ *
+ * @param array $warnings The warnings array.
+ * @return array The warnings array with the notifications included.
+ */
+function cmplz_dn_include_notifications( array $warnings ): array {
+	$language      = cmplz_dn_get_language();
+	$transient_key = cmplz_dn_transient_key( $language );
+	$notifications = get_transient( $transient_key );
+
+	if ( empty( $notifications ) ) {
+		return $warnings;
+	}
+
+	// Map the notifications to the warnings array.
+	$var = cmplz_dn_map_notifications( $notifications );
+
+	// Add the notifications to the warnings array.
+	$warnings = array_merge( $var, $warnings );
+
+	return $warnings;
+}
+
+/**
+ * Map the notifications to the warnings array.
+ *
+ * @param array $notifications The notifications array.
+ * @return array The warnings array with the notifications included.
+ */
+function cmplz_dn_map_notifications( array $notifications ): array {
+	$mapped_notifications = array();
+
+	// Map the notifications to the warnings array.
+	// First, skip the expired notifications.
+	$notifications = array_filter(
+		$notifications,
+		function ( $notification ) {
+			// If the expiration is not set, it means it's a permanent notification. So must be included.
+			if ( ! isset( $notification['expiration'] ) ) {
+				return true;
+			}
+
+			// If the expiration is set, check if it's in the future.
+			$expiration = strtotime( $notification['expiration'] );
+
+			return $expiration > time();
+		}
+	);
+
+	foreach ( $notifications as $notification ) {
+		$mapped_notifications[ $notification['id'] ] = $notification;
+		// If the content is not set, nothing to show, skip the notification.
+		if ( ! isset( $notification['content'] ) ) {
+			continue;
+		}
+
+		// If it's an admin notice, we need to show it as open.
+		if ( isset( $notification['admin_notice'] ) ) {
+			$mapped_notifications[ $notification['id'] ]['open'] = $notification['content'];
+		} else {
+			$mapped_notifications[ $notification['id'] ][ $notification['status'] ] = $notification['content'];
+		}
+
+		// Remove the content from the array.
+		unset( $mapped_notifications[ $notification['id'] ]['content'] );
+
+		// If the notification is completed, we need to for the success conditions to be true.
+		if ( 'completed' === $notification['status'] ) {
+			$mapped_notifications[ $notification['id'] ]['success_conditions'] = array( '_true_' );
+		}
+	}
+
+	return $mapped_notifications;
+}
+
+/**
+ * Get the endpoint for the notifications.
+ *
+ * @return string The endpoint for the notifications.
+ */
+function cmplz_dn_endpoint(): string {
+	return COMPLIANZ_DYNAMIC_NOTIFICATIONS_ENDPOINT;
+}
+
+/**
+ * Get the transient key for the notifications.
+ *
+ * @param string $language The language code.
+ * @return string The transient key for the notifications.
+ */
+function cmplz_dn_transient_key( string $language ): string {
+	return COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_KEY . $language;
+}
+
+/**
+ * Get the language for the notifications.
+ *
+ * @return string The language for the notifications.
+ */
+function cmplz_dn_get_language(): string {
+	$language = get_user_locale();
+	// Cut the language, stripping after the underscore.
+	return substr( $language, 0, strpos( $language, '_' ) );
+}
+
+/** End of Dynamic Notifications */
 
 
 function cmplz_load_warning_types() {
@@ -235,14 +453,6 @@ function cmplz_load_warning_types() {
 			'include_in_progress' => false,
 			'dismissible' => false,
 			'url' => 'https://complianz.io/pricing/?src=cmplz-plugin',
-		),
-
-		'bf-notice2023' => array(
-			'warning_condition'  => 'admin->is_bf',
-			'plus_one' => true,
-			'premium' => __( "Black Friday sale! Get 40% Off Complianz GDPR/CCPA premium!", 'complianz-gdpr' ),
-			'include_in_progress' => false,
-			'url' => 'https://complianz.io/pricing'
 		),
 
 		'ecommerce-legal' => array(
