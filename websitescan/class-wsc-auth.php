@@ -1,32 +1,97 @@
-<?php
+<?php //phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+/**
+ * Class cmplz_wsc_auth
+ */
 
-defined('ABSPATH') or die();
+defined( 'ABSPATH' ) || die();
 
-if (!class_exists("cmplz_wsc_auth")) {
+if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
-	class cmplz_wsc_auth
-	{
+	/**
+	 * Website Scan Authentication handler.
+	 *
+	 * Handles authentication, token management, and API communication
+	 * for the Website Scan feature.
+	 *
+	 * @since 1.0.0
+	 */
+	class cmplz_wsc_auth {
 
-		const WSC_ENDPOINT = 'aHR0cHM6Ly9hcGkuY29tcGxpYW56Lmlv';
+		/**
+		 * The Website Scan endpoint.
+		 *
+		 * @var string $WSC_ENDPOINT The website scan endpoint.
+		 */
+		const WSC_ENDPOINT = 'https://api.complianz.io';
+
+		/**
+		 * The Website Scan status endpoint.
+		 *
+		 * @var string $WSC_CB_ENDPOINT The website scan status endpoint.
+		 */
 		const WSC_CB_ENDPOINT = 'aHR0cHM6Ly9leHRlcm5hbC1wdWJsaWMtZ2VuZXJhbC5zMy5ldS13ZXN0LTEuYW1hem9uYXdzLmNvbS9zdGF0dXMuanNvbg==';
+
+		/**
+		 * The Website Scan policy endpoint.
+		 *
+		 * @var string $WSC_TERMS_ENDPOINT The website scan terms endpoint.
+		 */
 		const WSC_TERMS_ENDPOINT = 'aHR0cHM6Ly9jb29raWVkYXRhYmFzZS5vcmcvd3AtanNvbi93c2MvdjEvdGVybXM=';
+
+		/**
+		 * The Newsletter policy endpoint.
+		 *
+		 * @var string $NEWSLETTER_TERMS_ENDPOINT The newsletter terms endpoint.
+		 */
 		const NEWSLETTER_TERMS_ENDPOINT = 'aHR0cHM6Ly9jb29raWVkYXRhYmFzZS5vcmcvd3AtanNvbi9uZXdzbGV0dGVyL3YxL3Rlcm1z';
-		const NEWSLETTER_SIGNUP_ENDPOINT = 'aHR0cHM6Ly9tYWlsaW5nbGlzdC5jb21wbGlhbnouaW8=';
-		const CONS_ENDPOINT = 'aHR0cHM6Ly9jb25zZW50LmNvbXBsaWFuei5pby9wdWJsaWMvY29uc2VudA==';
+
+		/**
+		 * The Newsletter signup endpoint.
+		 *
+		 * @var string $NEWSLETTER_SIGNUP_ENDPOINT The newsletter signup endpoint.
+		 */
+		const NEWSLETTER_SIGNUP_ENDPOINT = 'https://mailinglist.complianz.io';
+
+		/**
+		 * The Consent endpoint.
+		 *
+		 * @var string $CONS_ENDPOINT The consent endpoint.
+		 */
+		const CONS_ENDPOINT = 'https://consent.complianz.io/public/consent';
+
+		/**
+		 * The Consent public key.
+		 *
+		 * @var string $CONS_ENDPOINT_PK The consent public key.
+		 */
 		const CONS_ENDPOINT_PK = 'qw0Jv5legvI9fQdn5OvNedpG4zibaTNT';
-		const WSC_ENDPOINT_AUTH_HEADER = 'QmFzaWMgZEdWaGJXSnNkV1ZmYzNSaFoybHVaenBGYm05bVJHZzRjV0Y2YVhCemFUWkxSM05FVlE9PQ==';
+
+		/**
+		 * The Partner ID.
+		 *
+		 * @var string $PARTNER_ID The partner ID.
+		 */
 		const PARTNER_ID = 'NjQ1MTc4NjMtM2YzMS00NDA3LWJjMWUtMjc4MjNlOTJhNThl';
-		const CONS_IDENTIFIERS = [
-			'wsc_consent' => 'terms',
+
+		/**
+		 * The Consent identifiers.
+		 *
+		 * @var array $CONS_IDENTIFIERS The consent identifiers.
+		 */
+		const CONS_IDENTIFIERS = array(
+			'wsc_consent'        => 'terms',
 			'newsletter_consent' => 'newsletter',
-		];
+		);
 
-
-		public function init_hooks()
-		{
-			add_action("admin_init", array($this, 'confirm_email_auth'), 10, 3); // Verify the authentication link in the email
-			add_action('cmplz_every_day_hook', array($this, 'check_failed_consent_onboarding'));
-			add_action('cmplz_every_day_hook', array($this, 'check_failed_newsletter_signup'));
+		/**
+		 * Initializes the hooks.
+		 *
+		 * @return void
+		 */
+		public function init_hooks() {
+			add_action( 'admin_init', array( $this, 'confirm_email_auth' ), 10, 3 ); // Verify the authentication link in the email.
+			add_action( 'cmplz_every_day_hook', array( $this, 'check_failed_consent_onboarding' ) );
+			add_action( 'cmplz_every_day_hook', array( $this, 'check_failed_newsletter_signup' ) );
 			// Set the hooks to create the site id for the WSC.
 			add_action( 'cmplz_every_day_hook', array( $this, 'maybe_sync_wsc_site_id' ) );
 			add_action( 'cmplz_maybe_sync_wsc_site_id', array( $this, 'maybe_sync_wsc_site_id' ), 0 );
@@ -47,65 +112,78 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 * @param string $email The email address to send the authentication email to.
 		 * @return void
 		 */
-		public static function send_auth_email(string $email): void
-		{
-			if (!cmplz_user_can_manage() || empty($email)) {
+		public static function send_auth_email( string $email ): void {
+			if ( ! cmplz_user_can_manage() || empty( $email ) ) {
 				return;
 			}
 
-			if (!is_email($email)) {
-				update_option('cmplz_wsc_error_email_not_sent', true, false);
+			if ( ! is_email( $email ) ) {
+				update_option( 'cmplz_wsc_error_email_not_sent', true, false );
 				return;
 			}
 
-			$wsc_endpoint = base64_decode(self::WSC_ENDPOINT);
-			$wsc_endpoint_auth_header = base64_decode(self::WSC_ENDPOINT_AUTH_HEADER);
-			$partner_id = base64_decode(self::PARTNER_ID);
+			$partner_id = base64_decode( self::PARTNER_ID ); //phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+			// Rate limiting per IP.
+			$user_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+			$rate_limit_max_requests = 10;
+			$rate_limit_time_window  = 5;
+
+			$transient_key = 'cmplz_rate_limit_auth_email_' . md5( $user_ip );
+			$request_count = (int) get_transient( $transient_key );
+
+			if ( $request_count >= $rate_limit_max_requests ) {
+				return; // Rate limit exceeded.
+			}
+
+			++$request_count;
+			set_transient( $transient_key, $request_count, $rate_limit_time_window );
 
 			$request = wp_remote_post(
-				$wsc_endpoint . '/api/lite/users',
+				self::WSC_ENDPOINT . '/api/lite/users',
 				array(
-					'headers' => array(
+					'headers'   => array(
 						'Content-Type' => 'application/json',
-						'Authorization' => $wsc_endpoint_auth_header,
 					),
-					'timeout' => 15,
+					'timeout'   => 15,
 					'sslverify' => true,
-					'body' => json_encode(array(
-						'email' => sanitize_email($email),
-						"base_url" => esc_url_raw(admin_url()),
-						"partner" => $partner_id
-					))
+					'body'      => wp_json_encode(
+						array(
+							'email'    => sanitize_email( $email ),
+							'base_url' => esc_url_raw( admin_url() ),
+							'partner'  => $partner_id,
+						)
+					),
 				)
 			);
 
-			if (is_wp_error($request)) {
+			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: cannot send email, request failed');
-					if ($error_message) {
-						error_log('COMPLIANZ: ' . $error_message);
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: cannot send email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					if ( $error_message ) {
+						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
-				update_option('cmplz_wsc_error_email_not_sent', true, false);
+				update_option( 'cmplz_wsc_error_email_not_sent', true, false );
 			} else {
-				$response_code = wp_remote_retrieve_response_code($request);
-				if ($response_code === 200) {
-					cmplz_update_option_no_hooks(cmplz_wsc::WSC_EMAIL_OPTION_KEY, $email);
-					update_option('cmplz_wsc_signup_status', 'pending', false);
-					update_option('cmplz_wsc_status', 'pending', false);
-					update_option('cmplz_wsc_signup_date', time(), false);
-					delete_option('cmplz_wsc_error_email_not_sent');
+				$response_code = wp_remote_retrieve_response_code( $request );
+				if ( 200 === $response_code ) {
+					cmplz_update_option_no_hooks( cmplz_wsc::WSC_EMAIL_OPTION_KEY, $email );
+					update_option( 'cmplz_wsc_signup_status', 'pending', false );
+					update_option( 'cmplz_wsc_status', 'pending', false );
+					update_option( 'cmplz_wsc_signup_date', time(), false );
+					delete_option( 'cmplz_wsc_error_email_not_sent' );
 					delete_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE );
 				} else {
-					$response_message = wp_remote_retrieve_response_message($request);
-					if (WP_DEBUG) {
-						error_log('COMPLIANZ: cannot send email, request failed');
-						if ($response_message) {
-							error_log('COMPLIANZ: ' . $response_message);
+					$response_message = wp_remote_retrieve_response_message( $request );
+					if ( WP_DEBUG ) {
+						error_log( 'COMPLIANZ: cannot send email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+						if ( $response_message ) {
+							error_log( 'COMPLIANZ: ' . $response_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 						}
 					}
-					update_option('cmplz_wsc_error_email_not_sent', true, false);
+					update_option( 'cmplz_wsc_error_email_not_sent', true, false );
 				}
 			}
 		}
@@ -122,98 +200,97 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 *
 		 * @return void
 		 */
-		public function confirm_email_auth(): void
-		{
-			if (!cmplz_user_can_manage()) {
+		public function confirm_email_auth(): void {
+			if ( ! cmplz_user_can_manage() ) {
 				return;
 			}
 
-			if (!isset($_GET['page']) || $_GET['page'] !== 'complianz') {
+			if ( ! isset( $_GET['page'] ) || 'complianz' !== $_GET['page'] ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
 
-			if (!isset($_GET['lite-user-confirmation'])) {
+			if ( ! isset( $_GET['lite-user-confirmation'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
 			}
 
-			$stored_email = cmplz_get_option(cmplz_wsc::WSC_EMAIL_OPTION_KEY);
+			$stored_email = cmplz_get_option( cmplz_wsc::WSC_EMAIL_OPTION_KEY );
 
-			if (!isset($_GET['email']) || $_GET['email'] !== $stored_email) {
-				update_option('cmplz_wsc_error_email_mismatch', true, false);
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: email does not match the stored email');
+			if ( ! isset( $_GET['email'] ) || $_GET['email'] !== $stored_email ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				update_option( 'cmplz_wsc_error_email_mismatch', true, false );
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: email does not match the stored email' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 				return;
 			}
-			if (!isset($_GET['token'])) {
-				update_option('cmplz_wsc_error_missing_token', true, false);
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: token not found in the authentication url');
+			if ( ! isset( $_GET['token'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				update_option( 'cmplz_wsc_error_missing_token', true, false );
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: token not found in the authentication url' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 				return;
 			}
 
-			$token = sanitize_text_field($_GET['token']);
-			$wsc_endpoint = base64_decode(self::WSC_ENDPOINT);
-			$wsc_endpoint_auth_header = base64_decode(self::WSC_ENDPOINT_AUTH_HEADER);
+			$token = sanitize_text_field( wp_unslash( $_GET['token'] ) ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-			$request = wp_remote_post($wsc_endpoint . '/api/lite/oauth_applications', array(
-				'headers' => array(
-					'Content-Type' => 'application/json',
-					'Authorization' => $wsc_endpoint_auth_header,
-				),
-				'timeout' => 15,
-				'sslverify' => true,
-				'body' => json_encode(
-					array(
-						'email' => sanitize_title($stored_email),
-						'token' => $token,
-					)
-				),
-			));
+			$request = wp_remote_post(
+				self::WSC_ENDPOINT . '/api/lite/oauth_applications',
+				array(
+					'headers'   => array(
+						'Content-Type' => 'application/json',
+					),
+					'timeout'   => 15,
+					'sslverify' => true,
+					'body'      => wp_json_encode(
+						array(
+							'email' => sanitize_title( $stored_email ),
+							'token' => $token,
+						)
+					),
+				)
+			);
 
-			if (is_wp_error($request)) {
+			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: cannot confirm email, request failed');
-					if ($error_message) {
-						error_log('COMPLIANZ: ' . $error_message);
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: cannot confirm email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					if ( $error_message ) {
+						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
-				update_option('cmplz_wsc_error_email_auth_failed', true, false);
+				update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 			} else {
-				$response_code = wp_remote_retrieve_response_code($request);
-				if ($response_code === 201) {
-					$response_body = json_decode(wp_remote_retrieve_body($request));
-					if (isset($response_body->client_id) && isset($response_body->client_secret)) {
-						cmplz_update_option_no_hooks(cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY, $response_body->client_id);
-						cmplz_update_option_no_hooks(cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY, $response_body->client_secret);
-						update_option('cmplz_wsc_signup_status', 'enabled', false);
-						update_option('cmplz_wsc_status', 'enabled', false);
-						update_option('cmplz_wsc_auth_completed', true, false);
-						cmplz_wsc_onboarding::update_onboarding_status('terms', true);
-						delete_option('cmplz_wsc_error_email_auth_failed');
-						delete_option('cmplz_wsc_error_email_mismatch');
-						delete_option('cmplz_wsc_error_missing_token');
-						// reset the processed pages
-						delete_transient('cmplz_processed_pages_list');
+				$response_code = wp_remote_retrieve_response_code( $request );
+				if ( 201 === $response_code ) {
+					$response_body = json_decode( wp_remote_retrieve_body( $request ) );
+					if ( isset( $response_body->client_id ) && isset( $response_body->client_secret ) ) {
+						cmplz_update_option_no_hooks( cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY, $response_body->client_id );
+						cmplz_update_option_no_hooks( cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY, $response_body->client_secret );
+						update_option( 'cmplz_wsc_signup_status', 'enabled', false );
+						update_option( 'cmplz_wsc_status', 'enabled', false );
+						update_option( 'cmplz_wsc_auth_completed', true, false );
+						cmplz_wsc_onboarding::update_onboarding_status( 'terms', true );
+						delete_option( 'cmplz_wsc_error_email_auth_failed' );
+						delete_option( 'cmplz_wsc_error_email_mismatch' );
+						delete_option( 'cmplz_wsc_error_missing_token' );
+						// reset the processed pages.
+						delete_transient( 'cmplz_processed_pages_list' );
 						// Since client_id and client_secret are stored, we can trigger the site creation.
 						do_action( 'cmplz_maybe_sync_wsc_site_id' );
 					} else {
-						if (WP_DEBUG) {
-							error_log('COMPLIANZ: cannot confirm email, client id or secret not found in response');
+						if ( WP_DEBUG ) {
+							error_log( 'COMPLIANZ: cannot confirm email, client id or secret not found in response' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 						}
-						update_option('cmplz_wsc_error_email_auth_failed', true, false);
+						update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 					}
 				} else {
-					if (WP_DEBUG) {
-						error_log('COMPLIANZ: cannot confirm email, request failed');
+					if ( WP_DEBUG ) {
+						error_log( 'COMPLIANZ: cannot confirm email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
-					update_option('cmplz_wsc_error_email_auth_failed', true, false);
+					update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 				}
 			}
 
-			wp_redirect(cmplz_admin_url('#settings/settings-cd'));
+			wp_safe_redirect( cmplz_admin_url( '#settings/settings-cd' ) );
 
 			exit;
 		}
@@ -226,108 +303,109 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 * if it is available. If the token is not found, it tries to retrieve a fresh one
 		 * using the provided email, client ID, and client secret.
 		 *
-		 * @param bool $new Whether to retrieve a new token.
-		 * @param bool $no_store Whether to store the token.
+		 * @param bool        $new_token Whether to retrieve a new token.
+		 * @param bool        $no_store Whether to store the token.
 		 * @param array|false $client_credentials The client credentials.
 		 *
 		 * @return string|bool The access token if available, 'pending' if the WSC signup status is pending,
 		 *                     false if the email, client ID, or client secret is not found, or false if there
 		 *                     was an error retrieving the token.
-		 *
+		 * @throws InvalidArgumentException If the $new, $no_store, or $client_credentials parameters are not of the correct type.
 		 */
-		public static function get_token($new = false, $no_store = false, $client_credentials = false)
-		{
-			// emulating the union type  array|false $client_credentials
-			if (!is_bool($new)) {
-				throw new InvalidArgumentException('$new needs to be of type bool');
+		public static function get_token( $new_token = false, $no_store = false, $client_credentials = false ) {
+			// emulating the union type array|false $client_credentials.
+			if ( ! is_bool( $new_token ) ) {
+				throw new InvalidArgumentException( '$new_token needs to be of type bool' );
 			}
-			if (!is_bool($no_store)) {
-				throw new InvalidArgumentException('$no_store needs to be of type bool');
+			if ( ! is_bool( $no_store ) ) {
+				throw new InvalidArgumentException( '$no_store needs to be of type bool' );
 			}
-			if ($client_credentials !== false && !is_array($client_credentials)) {
-				throw new InvalidArgumentException('$client_credentials must be an array or false');
+			if ( false !== $client_credentials && ! is_array( $client_credentials ) ) {
+				throw new InvalidArgumentException( '$client_credentials must be an array or false' );
 			}
 
-			// clear stored token
-			if ($new) cmplz_delete_transient('cmplz_wsc_access_token');
+			// clear stored token.
+			if ( $new_token ) {
+				cmplz_delete_transient( 'cmplz_wsc_access_token' );
+			}
 
-			$token = cmplz_get_transient('cmplz_wsc_access_token');
-			if ($token) {
+			$token = cmplz_get_transient( 'cmplz_wsc_access_token' );
+			if ( $token ) {
 				return $token;
 			}
 
-			//if no token found, try retrieving a fresh one
-			$email = (string)cmplz_get_option(cmplz_wsc::WSC_EMAIL_OPTION_KEY);
-			$client_id = (string)cmplz_get_option(cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY);
-			$client_secret = (string)cmplz_get_option(cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY);
+			// if no token found, try retrieving a fresh one.
+			$email         = (string) cmplz_get_option( cmplz_wsc::WSC_EMAIL_OPTION_KEY );
+			$client_id     = (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY );
+			$client_secret = (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY );
 
-			// if client credentials are provided, use them
-			if ($client_credentials) {
-				$client_id = $client_credentials['client_id'];
+			// if client credentials are provided, use them.
+			if ( $client_credentials ) {
+				$client_id     = $client_credentials['client_id'];
 				$client_secret = $client_credentials['client_secret'];
-			} else {
-				if ($email === '' || $client_id === '' || $client_secret === '') {
-					// if (WP_DEBUG) {
-					// 	error_log('COMPLIANZ: cannot retrieve token, email or client id or secret not found');
-					// }
-					return false;
+			} elseif ( '' === $email || '' === $client_id || '' === $client_secret ) {
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: cannot retrieve token, email or client id or secret not found' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
+				return false;
 			}
 
-			$wsc_endpoint = base64_decode(self::WSC_ENDPOINT);
-			$wsc_endpoint_auth_header = base64_decode(self::WSC_ENDPOINT_AUTH_HEADER);
-
 			$request = wp_remote_post(
-				$wsc_endpoint . '/oauth/token',
+				self::WSC_ENDPOINT . '/oauth/token',
 				array(
-					'headers' => array(
+					'headers'   => array(
 						'Content-Type' => 'application/json',
-						'Authorization' => $wsc_endpoint_auth_header,
 					),
-					'timeout' => 15,
+					'timeout'   => 15,
 					'sslverify' => true,
-					'body' => json_encode(
+					'body'      => wp_json_encode(
 						array(
-							'grant_type' => "client_credentials",
-							"client_id" => $client_id,
-							"client_secret" => $client_secret,
-							"scope" => "write"
+							'grant_type'    => 'client_credentials',
+							'client_id'     => $client_id,
+							'client_secret' => $client_secret,
+							'scope'         => 'write',
 						)
-					)
+					),
 				)
 			);
 
-			if (!is_wp_error($request)) { // request success true
+			if ( ! is_wp_error( $request ) ) { // request success true.
 
-				$request = json_decode(wp_remote_retrieve_body($request));
+				$request = json_decode( wp_remote_retrieve_body( $request ) );
 
-				if (isset($request->access_token)) { // if there's an access token
-					if ($no_store) return $request->access_token;
+				if ( isset( $request->access_token ) ) { // if there's an access token.
+					if ( $no_store ) {
+						return $request->access_token;
+					}
 
-					delete_option('cmplz_wsc_error_token_api');
-					update_option('cmplz_wsc_connection_updated', time(), false);
+					delete_option( 'cmplz_wsc_error_token_api' );
+					update_option( 'cmplz_wsc_connection_updated', time(), false );
 
-					$token = $request->access_token;
+					$token   = $request->access_token;
 					$expires = $request->expires_in ?? 7200;
-					cmplz_set_transient('cmplz_wsc_access_token', $token, $expires - 10);
+					cmplz_set_transient( 'cmplz_wsc_access_token', $token, $expires - 10 );
 
 					return $token;
 				} else {
-					if ($no_store) return false;
+					if ( $no_store ) {
+						return false;
+					}
 
-					update_option('cmplz_wsc_error_token_api', true, false);
-					if (WP_DEBUG && $request->error) {
-						error_log('COMPLIANZ: cannot retrieve token, token not found in response');
+					update_option( 'cmplz_wsc_error_token_api', true, false );
+					if ( WP_DEBUG && $request->error ) {
+						error_log( 'COMPLIANZ: cannot retrieve token, token not found in response' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 					return false;
 				}
 			} else {
-				if (!$no_store) update_option('cmplz_wsc_error_token_api', true, false);
+				if ( ! $no_store ) {
+					update_option( 'cmplz_wsc_error_token_api', true, false );
+				}
 				$error_message = $request->get_error_message();
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: cannot retrieve token, request failed');
-					if ($error_message) {
-						error_log('COMPLIANZ: ' . $error_message);
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: cannot retrieve token, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					if ( $error_message ) {
+						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
 				return false;
@@ -342,130 +420,130 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 * The method is triggered once using the cron job during the onboarding process
 		 * or using check_failed_consent_onboarding() method ($retry = true)
 		 *
-		 * @param string $type || Could be wsc terms, wsc newsletter 'wsc_consent' // 'newsletter_consent'
-		 * @param array $posted_data
-		 * @param bool $retry
-		 * @param string $consent_data
+		 * @param string $type || Could be wsc terms, wsc newsletter 'wsc_consent' or 'newsletter_consent'.
+		 * @param array  $posted_data The data associated with the consent.
+		 * @param bool   $retry Whether to retry the consent if it fails.
+		 * @param string $consent_data The consent data.
 		 * @return void
 		 */
-		public static function store_onboarding_consent(string $type, array $posted_data, bool $retry = false, string $consent_data = ''): void
-		{
-			// Check if the given type exists in the cons_identifiers array.
-			if (!array_key_exists($type, self::CONS_IDENTIFIERS)) {
+		public static function store_onboarding_consent( string $type, array $posted_data, bool $retry = false, string $consent_data = '' ): void {
+			// Check if the given type exists in the CONS_IDENTIFIERS array.
+			if ( ! array_key_exists( $type, self::CONS_IDENTIFIERS ) ) {
 				return;
 			}
 			// Check if the posted_data array is empty.
-			if (empty($posted_data)) {
+			if ( empty( $posted_data ) ) {
 				return;
 			}
 
-			// if it's a retry because there's an old failed store attempts
-			// set the old consent
-			if ($retry) {
+			// if it's a retry because there's an old failed store attempts, set the old consent.
+			if ( $retry ) {
 				$consent = $consent_data;
 			} else {
-				// else let's create a new consent data
-				// check posted data
-				$email = sanitize_email($posted_data['email']);
-				if (!is_email($email)) {
+				// else let's create a new consent data.
+				$email = sanitize_email( $posted_data['email'] );
+				if ( ! is_email( $email ) ) {
 					return;
 				}
 
-				// Create a subject id
-				$site_url = site_url();
-				$encodedSiteUrl = base64_encode($site_url);
-				$encodedEmail = base64_encode($email);
-				$consent_subject_id = sprintf('cmplz-%s#%s', $encodedSiteUrl, $encodedEmail);
+				// Create a subject id.
+				$site_url           = site_url();
+				$encoded_site_url   = base64_encode( $site_url ); //phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				$encoded_email      = base64_encode( $email ); //phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+				$consent_subject_id = sprintf( 'cmplz-%s#%s', $encoded_site_url, $encoded_email );
 
-				// Check for timestamp and url
-				$timestamp = isset($posted_data['timestamp']) // check if timestamp is set
-					? (int)$posted_data['timestamp'] / (strlen($posted_data['timestamp']) > 10 ? 1000 : 1) // if timestamp is in milliseconds, convert to seconds
-					: time(); // if $posted_data['timestamp'] is not set, use the current time
+				// Check for timestamp and url.
+				$timestamp = isset( $posted_data['timestamp'] )
+					? (int) $posted_data['timestamp'] / ( strlen( $posted_data['timestamp'] ) > 10 ? 1000 : 1 ) // if timestamp is in milliseconds, convert to seconds.
+					: time(); // if $posted_data['timestamp'] is not set, use the current time.
 
-				$url = esc_url_raw($posted_data['url']) ?? site_url();
+				$url = esc_url_raw( $posted_data['url'] ) ?? site_url();
 
-				// Generate the consent
-				$consent = json_encode([
-					'timestamp' => date('c', $timestamp),
-					'subject' => [
-						'id' => $consent_subject_id,
-						'email' => $email,
-					],
-					'preferences' => [
-						$type => true
-					],
-					'legal_notices' => [
-						[
-							'identifier' => self::CONS_IDENTIFIERS[$type] // terms or newsletter
-						]
-					],
-					'proofs' => [
-						[
-							// pass all $posted_data as content
-							'content' => json_encode([
-								'email' => $email,
-								'timestamp' => $timestamp,
-								'url' => $url,
-							]),
-							'form' => 'complianz-onboarding__' . $type, // complianz onboarding form ??
-						]
-					],
-				]);
+				// Generate the consent.
+				$consent = wp_json_encode(
+					array(
+						'timestamp'     => date( 'c', $timestamp ),
+						'subject'       => array(
+							'id'    => $consent_subject_id,
+							'email' => $email,
+						),
+						'preferences'   => array(
+							$type => true,
+						),
+						'legal_notices' => array(
+							array(
+								'identifier' => self::CONS_IDENTIFIERS[ $type ], // terms or newsletter.
+							),
+						),
+						'proofs'        => array(
+							array(
+								// pass all $posted_data as content.
+								'content' => wp_json_encode(
+									array(
+										'email'     => $email,
+										'timestamp' => $timestamp,
+										'url'       => $url,
+									)
+								),
+								'form'    => 'complianz-onboarding__' . $type, // complianz onboarding form.
+							),
+						),
+					)
+				);
 			}
 
-			// safe store the consent locally
-			update_option('cmplz_' . $type . '_consentdata', $consent, false);
+			// safe store the consent locally.
+			update_option( 'cmplz_' . $type . '_consentdata', $consent, false );
 
-			$cons_endpoint = base64_decode(self::CONS_ENDPOINT);
-			// Send the request
+			// Send the request.
 			$request = wp_remote_post(
-				$cons_endpoint,
+				self::CONS_ENDPOINT,
 				array(
-					'headers' => array(
+					'headers'   => array(
 						'Content-Type' => 'application/json',
-						'ApiKey' => self::CONS_ENDPOINT_PK,
+						'ApiKey'       => self::CONS_ENDPOINT_PK,
 					),
-					'timeout' => 15,
+					'timeout'   => 15,
 					'sslverify' => true,
-					'body' => $consent
+					'body'      => $consent,
 				)
 			);
 
-			if (is_wp_error($request)) {
+			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if (WP_DEBUG) {
-					error_log('COMPLIANZ: cannot store consent, request failed for identifier: ' . $type);
-					if ($error_message) {
-						error_log('COMPLIANZ: ' . $error_message);
+				if ( WP_DEBUG ) {
+					error_log( 'COMPLIANZ: cannot store consent, request failed for identifier: ' . $type ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					if ( $error_message ) {
+						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
-				// 	// define an error into the options
-				update_option('cmplz_consent_error_timestamp_' . $type, time());
-				// store the consent for the time we can resend the request
-				update_option('cmplz_consent_error_consentdata_' . $type, $consent);
+				// define an error into the options.
+				update_option( 'cmplz_consent_error_timestamp_' . $type, time() );
+				// store the consent for the time we can resend the request.
+				update_option( 'cmplz_consent_error_consentdata_' . $type, $consent );
 			} else {
-				$response_code = wp_remote_retrieve_response_code($request);
-				if ($response_code == 200) {
-					delete_option('cmplz_consent_' . $type);
-					// delete possible consent errors
-					delete_option('cmplz_consent_error_timestamp_' . $type);
-					delete_option('cmplz_consent_error_consentdata_' . $type);
+				$response_code = wp_remote_retrieve_response_code( $request );
+				if ( 200 === $response_code ) {
+					delete_option( 'cmplz_consent_' . $type );
+					// delete possible consent errors.
+					delete_option( 'cmplz_consent_error_timestamp_' . $type );
+					delete_option( 'cmplz_consent_error_consentdata_' . $type );
 
-					$body = json_decode(wp_remote_retrieve_body($request));
-					// store the consent locally
-					update_option('cmplz_consent_' . $type, $body);
+					$body = json_decode( wp_remote_retrieve_body( $request ) );
+					// store the consent locally.
+					update_option( 'cmplz_consent_' . $type, $body );
 				} else {
-					$response_message = wp_remote_retrieve_response_message($request);
-					if (WP_DEBUG) {
-						error_log('COMPLIANZ: cannot store consent, request failed for identifier: ' . $type);
-						if ($response_message) {
-							error_log('COMPLIANZ: ' . $response_message);
+					$response_message = wp_remote_retrieve_response_message( $request );
+					if ( WP_DEBUG ) {
+						error_log( 'COMPLIANZ: cannot store consent, request failed for identifier: ' . $type ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+						if ( $response_message ) {
+							error_log( 'COMPLIANZ: ' . $response_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 						}
 					}
-					// 	// define an error into the options
-					update_option('cmplz_consent_error_timestamp_' . $type, time());
-					// store the consent for the time we can resend the rquest
-					update_option('cmplz_consent_error_consentdata_' . $type, $consent);
+					// define an error into the options.
+					update_option( 'cmplz_consent_error_timestamp_' . $type, time() );
+					// store the consent for the time we can resend the request.
+					update_option( 'cmplz_consent_error_consentdata_' . $type, $consent );
 				}
 			}
 		}
@@ -475,54 +553,57 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 * Subscribes a user to the newsletter.
 		 *
 		 * @param string $email The email address of the user.
-		 * @param bool $retry Whether to retry the subscription if it fails.
+		 * @param bool   $retry Whether to retry the subscription if it fails.
 		 * @return void
 		 */
-		public static function newsletter_sign_up(string $email, bool $retry = false): void
-		{
+		public static function newsletter_sign_up( string $email, bool $retry = false ): void {
 			$license_key = '';
 
-			if (defined('rsssl_pro_version')) {
+			if ( defined( 'rsssl_pro_version' ) ) {
 				$license_key = COMPLIANZ::$license->license_key();
-				$license_key = COMPLIANZ::$license->maybe_decode($license_key);
+				$license_key = COMPLIANZ::$license->maybe_decode( $license_key );
 			}
 
 			$api_params = array(
-				'has_premium' => defined('cmplz_premium'), // not required
-				'license' => $license_key, // not required
-				'email' => sanitize_email($email),
-				'domain' => esc_url_raw(site_url()),
+				'has_premium' => defined( 'cmplz_premium' ),
+				'license'     => $license_key,
+				'email'       => sanitize_email( $email ),
+				'domain'      => esc_url_raw( site_url() ),
 			);
 
-			$newsletter_signup_endpoint = base64_decode(self::NEWSLETTER_SIGNUP_ENDPOINT);
+			$request = wp_remote_post(
+				self::NEWSLETTER_SIGNUP_ENDPOINT,
+				array(
+					'timeout'   => 15,
+					'sslverify' => true,
+					'body'      => $api_params,
+				)
+			);
 
-			$request = wp_remote_post($newsletter_signup_endpoint, array('timeout' => 15, 'sslverify' => true, 'body' => $api_params));
-
-			if (is_wp_error($request)) {
-				update_option('cmplz_newsletter_signup_error_email', $email, false); // save the email in an option
-				update_option('cmplz_newsletter_signup_error', true, false); // save the failed attempt
-				update_option('cmplz_newsletter_signup_error_timestamp', time(), false); // set an error with the timestamp
-				// log the error
-				if (WP_DEBUG) {
+			if ( is_wp_error( $request ) ) {
+				update_option( 'cmplz_newsletter_signup_error_email', $email, false );
+				update_option( 'cmplz_newsletter_signup_error', true, false );
+				update_option( 'cmplz_newsletter_signup_error_timestamp', time(), false );
+				if ( WP_DEBUG ) {
 					$error_message = $request->get_error_message();
-					if ($error_message) {
-						error_log('COMPLIANZ: ' . $error_message);
+					if ( $error_message ) {
+						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					}
 				}
 			} else {
-				$response_code = wp_remote_retrieve_response_code($request); // 200 ok
-				if ($response_code === 200) {
-					// if the method is called by the cron or there's a mismatch between the emails clean the options
-					if ($retry || $email !== get_option('cmplz_newsletter_signup_error_email')) {
-						// remove any failed attempts
-						delete_option('cmplz_newsletter_signup_error_email');
-						delete_option('cmplz_newsletter_signup_error');
-						delete_option('cmplz_newsletter_signup_error_timestamp');
+				$response_code = wp_remote_retrieve_response_code( $request );
+				if ( 200 === $response_code ) {
+					// if the method is called by the cron or there's a mismatch between the emails clean the options.
+					if ( $retry || get_option( 'cmplz_newsletter_signup_error_email' ) !== $email ) {
+						// remove any failed attempts.
+						delete_option( 'cmplz_newsletter_signup_error_email' );
+						delete_option( 'cmplz_newsletter_signup_error' );
+						delete_option( 'cmplz_newsletter_signup_error_timestamp' );
 					}
-					// save the email in the options
-					cmplz_update_option_no_hooks('notifications_email_address', $email); // save the email in the options
-					cmplz_update_option_no_hooks('send_notifications_email', 1); // enable the notifications
-					cmplz_wsc_onboarding::update_onboarding_status('newsletter', true);
+					// save the email in the options.
+					cmplz_update_option_no_hooks( 'notifications_email_address', $email );
+					cmplz_update_option_no_hooks( 'send_notifications_email', 1 );
+					cmplz_wsc_onboarding::update_onboarding_status( 'newsletter', true );
 				}
 			}
 		}
@@ -536,23 +617,21 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 *
 		 * @param string $service The service to check | signup or scanner.
 		 * @return bool Returns true if the Website scan endpoint accepts user signups, false otherwise.
-		 *
 		 */
-		public static function wsc_api_open(string $service): bool
-		{
-			$wsc_cb_endpoint = base64_decode(self::WSC_CB_ENDPOINT);
-			$request = wp_remote_get($wsc_cb_endpoint);
+		public static function wsc_api_open( string $service ): bool {
+			$wsc_cb_endpoint = base64_decode( self::WSC_CB_ENDPOINT ); //phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+			$request         = wp_remote_get( $wsc_cb_endpoint );
 
-			if (is_wp_error($request)) {
+			if ( is_wp_error( $request ) ) {
 				cmplz_wsc_logger::log_errors( 'wsc_api_open', $request->get_error_message() );
 				return false;
 			}
 
-			$service = sprintf('%s_enabled', $service);
+			$service = sprintf( '%s_enabled', $service );
 
-			$response_body = json_decode(wp_remote_retrieve_body($request));
+			$response_body = json_decode( wp_remote_retrieve_body( $request ) );
 
-			if (isset($response_body->$service) && $response_body->$service === 'true') {
+			if ( isset( $response_body->$service ) && 'true' === $response_body->$service ) {
 				return true;
 			}
 
@@ -561,24 +640,22 @@ if (!class_exists("cmplz_wsc_auth")) {
 
 
 		/**
-		 * Check for failed onboarding consent store attempts
-		 * If there's a failed attempt, try to store it again
-		 *
+		 * Check for failed onboarding consent store attempts.
+		 * If there's a failed attempt, try to store it again.
 		 *
 		 * @return void
 		 */
-		public function check_failed_consent_onboarding(): void
-		{
+		public function check_failed_consent_onboarding(): void {
 			$identifiers = self::CONS_IDENTIFIERS;
 
-			foreach ($identifiers as $key => $type) {
-				// check for the errors
-				$error_timestamp = get_option('cmplz_consent_error_timestamp_' . $key, false);
-				// store the consent for the time we can resend the rquest
-				$error_consentdata = get_option('cmplz_consent_error_consentdata_' . $key, false);
+			foreach ( $identifiers as $key => $type ) {
+				// check for the errors.
+				$error_timestamp = get_option( 'cmplz_consent_error_timestamp_' . $key, false );
+				// store the consent for the time we can resend the request.
+				$error_consentdata = get_option( 'cmplz_consent_error_consentdata_' . $key, false );
 
-				if ($error_consentdata && $error_timestamp < time() - 68400) {
-					$this->store_onboarding_consent($key, [], true, $error_consentdata);
+				if ( $error_consentdata && $error_timestamp < time() - 68400 ) {
+					$this->store_onboarding_consent( $key, array(), true, $error_consentdata );
 				}
 			}
 		}
@@ -588,21 +665,20 @@ if (!class_exists("cmplz_wsc_auth")) {
 		 * Check for failed newsletter signups
 		 * If there's a failed attempt, try to sign up again
 		 *
-		 * @return bool
+		 * @return void
 		 */
-		public function check_failed_newsletter_signup(): bool
-		{
-			$failed = get_option('cmplz_newsletter_signup_error');
-			$timestamp = get_option('cmplz_newsletter_signup_error_timestamp');
-			$email = get_option('cmplz_newsletter_signup_error_email');
-			if ($failed && $timestamp && $email) {
-				// check if the error is older than 24 hours
-				if ($timestamp < time() - 86400) {
-					// try to sign up again
-					self::newsletter_sign_up($email, true);
+		public function check_failed_newsletter_signup(): void {
+			$failed    = get_option( 'cmplz_newsletter_signup_error' );
+			$timestamp = get_option( 'cmplz_newsletter_signup_error_timestamp' );
+			$email     = get_option( 'cmplz_newsletter_signup_error_email' );
+			if ( $failed && $timestamp && $email ) {
+				// check if the error is older than 24 hours.
+				if ( $timestamp < time() - 86400 ) {
+					// try to sign up again.
+					self::newsletter_sign_up( $email, true );
 				}
 			}
-			return true;
+			return;
 		}
 
 
@@ -706,17 +782,15 @@ if (!class_exists("cmplz_wsc_auth")) {
 					'type'       => 'sites',
 					'attributes' => array(
 						'url'       => esc_url_raw( home_url() ),
-						'language' => $language,
+						'language'  => $language,
 						'site_type' => 'web',
 					),
 				),
 			);
 
-			$wsc_endpoint = base64_decode(self::WSC_ENDPOINT);
-
 			// Send the request.
 			$response = wp_remote_post(
-				$wsc_endpoint . '/api/v2/sites',
+				self::WSC_ENDPOINT . '/api/v2/sites',
 				array(
 					'headers'   => array(
 						'Content-Type'  => 'application/json',

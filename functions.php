@@ -419,8 +419,8 @@ if ( ! function_exists( 'cmplz_get_stats_tool_nice' ) ) {
 				return "Google Tag Manager";
 			case 'matomo-tag-manager':
 				return "Matomo Tag Manager";
-				case 'clarity':
-					return "Clarity";
+			case 'clarity':
+				return "Clarity";
 			default:
 				return __("Not found","complianz-gdpr");
 		}
@@ -1319,9 +1319,11 @@ if ( ! function_exists( 'cmplz_tcf_active' ) ) {
 			return false;
 		}
 
-		return cmplz_get_option('uses_ad_cookies_personalized') === 'tcf' || cmplz_get_option('uses_ad_cookies_personalized') === 'yes';
+		$tcf_active = cmplz_get_option('uses_ad_cookies_personalized') === 'tcf' || cmplz_get_option('uses_ad_cookies_personalized') === 'yes';
+		return apply_filters( 'cmplz_is_tcf_active', $tcf_active );
 	}
 }
+
 
 if ( !function_exists('cmplz_get_transient') ) {
 
@@ -2446,6 +2448,24 @@ if ( ! function_exists( 'cmplz_uses_optin' ) ) {
 }
 
 
+if ( ! function_exists( 'cmplz_has_only_functional_category' ) ) {
+	/**
+	 * Check if the site only has functional cookies available
+	 * This means no marketing, statistics, or preferences cookies are used
+	 *
+	 * @return bool
+	 */
+	function cmplz_has_only_functional_category() {
+		// Check if any other categories besides functional are used
+		$uses_marketing = cmplz_uses_marketing_cookies();
+		$uses_statistics = cmplz_uses_statistic_cookies();
+		$uses_preferences = cmplz_uses_preferences_cookies();
+		
+		// If none of the other categories are used, only functional is available
+		return !$uses_marketing && !$uses_statistics && !$uses_preferences;
+	}
+}
+
 if ( ! function_exists( 'cmplz_uses_optout' ) ) {
 	function cmplz_uses_optout() {
 		return ( in_array( 'optout', cmplz_get_used_consenttypes() ) );
@@ -2641,6 +2661,25 @@ if ( ! function_exists( 'cmplz_get_cookiebanners' ) ) {
 		}
 
 		return $cookiebanners;
+	}
+}
+
+/**
+ * Force re-save all cookie banners to regenerate CSS and clear caches
+ *
+ * Used during upgrades to ensure banners render correctly with template changes.
+ *
+ * @return void
+ */
+if ( ! function_exists( 'cmplz_resave_all_banners' ) ) {
+	function cmplz_resave_all_banners() {
+		$banners = cmplz_get_cookiebanners();
+		if ( $banners ) {
+			foreach ( $banners as $banner_item ) {
+				$banner = new CMPLZ_COOKIEBANNER( $banner_item->ID );
+				$banner->save();
+			}
+		}
 	}
 }
 
@@ -2871,10 +2910,13 @@ if (!function_exists('cmplz_wsc_is_enabled')) {
 	}
 }
 
-if ( ! function_exists('cmplz_targets_quebec') ) {
-	if ( cmplz_get_option('ca_targets_quebec') === 'yes') {
-		return true;
-	}
 
-	return false;
+if ( ! function_exists('cmplz_targets_quebec') ) {
+	function cmplz_targets_quebec() {
+		if ( cmplz_get_option('ca_targets_quebec') === 'yes') {
+			return true;
+		}
+
+		return false;
+	}
 }

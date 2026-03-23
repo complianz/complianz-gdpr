@@ -286,6 +286,12 @@ if ( false ) { // phpcs:ignore Generic.CodeAnalysis.UnconditionalIfStatement.Fou
 	__( 'Texas (TDPSA)', 'complianz-gdpr' );
 	__( 'Utah (UCPA)', 'complianz-gdpr' );
 	__( 'Virginia (CDPA)', 'complianz-gdpr' );
+	__( 'Tennessee (TIPA)', 'complianz-gdpr' );
+	__( 'Minnesota (MCDPA)', 'complianz-gdpr' );
+	__( 'Maryland (MODPA)', 'complianz-gdpr' );
+	__( 'Indiana (ICDPA)', 'complianz-gdpr' );
+	__( 'Kentucky (KCDPA)', 'complianz-gdpr' );
+	__( 'Rhode Island (DTPPA)', 'complianz-gdpr' );
 	__( 'European Union (GDPR)', 'complianz-gdpr' );
 	__( 'United Kingdom (UK-GDPR, PECR, Data Protection Act)', 'complianz-gdpr' );
 	__( 'United States', 'complianz-gdpr' );

@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) or die();
  * - a premium field can be marked as such with the premium label
  * 	'premium' => [
  *      'label' => __("premium label','complianz-gdpr') //if the label is different in premium
- *      'url' => 'https://complianz.io/pricing',
+ *      'url' => 'https://complianz.io/pricing/',
  *      'default' => 'no', //if the default is different in premium
  *      'react_conditions //you can also override the default conditions
  *  ],

@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
+defined( 'ABSPATH' ) || die( "you do not have access to this page!" );
 if ( cmplz_admin_logged_in() ) {
 	require_once( 'admin/integrations.php' );
 }
@@ -590,6 +590,11 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 	'funnelkit' => array(
 		'constant_or_function' => 'WFFN_VERSION',
 		'label'				   => 'FunnelKit',
+		'firstparty_marketing' => false,
+	),
+	'pinterest-for-woocommerce' => array(
+		'constant_or_function' => 'PINTEREST_FOR_WOOCOMMERCE_PLUGIN_FILE',
+		'label'				   => 'Pinterest for WooCommerce',
 		'firstparty_marketing' => false,
 	),
 ) );

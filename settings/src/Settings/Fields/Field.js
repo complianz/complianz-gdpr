@@ -79,6 +79,9 @@ const COMPONENT_MAP = {
 	'colorpicker': {
 		componentPath: 'Settings/ColorPicker/ColorPickerControl',
 	},
+	'wcag_contrast_checker': {
+		componentPath: 'Settings/WcagContrastChecker/WcagContrastChecker',
+	},
 	'document': {
 		componentPath: 'Settings/DocumentControl',
 	},

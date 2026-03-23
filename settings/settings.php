@@ -239,7 +239,7 @@ function cmplz_plugin_admin_scripts() {
 								),
 								admin_url( 'admin-ajax.php' ) ),
 						'dashboard_url'     => cmplz_admin_url(),
-						'upgrade_link'      => 'https://complianz.io/pricing',
+						'upgrade_link'      => cmplz_get_referral_url( 'menu', 'header'),
 						'plugin_url'        => CMPLZ_URL,
 						'license_url'      =>  is_multisite() ? cmplz_main_site_url('#settings/license') : '#settings/license',
 						'blocks'            => cmplz_blocks(),
@@ -252,6 +252,11 @@ function cmplz_plugin_admin_scripts() {
                         'is_multisite'      => is_multisite(),
                         'is_multisite_plugin'=> defined('cmplz_premium_multisite'),
 						'onboarding_complete' => COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
+						'referral'          => [
+							'source'      => cmplz_get_source(),
+							'ref_id'      => cmplz_get_ref(),
+							'has_partner' => cmplz_get_ref() !== false,
+						],
 				] )
 		);
 	}
@@ -368,7 +373,7 @@ function cmplz_add_option_menu() {
 			$submenu['complianz'][] = array(
 					__( 'Upgrade to premium', 'complianz-gdpr' ),
 					apply_filters('cmplz_capability','manage_privacy'),
-					'https://complianz.io/l/pricing'
+					cmplz_get_referral_url( 'menu', 'admin-submenu', 'https://complianz.io/l/pricing' )
 			);
 			if ( isset( $submenu['complianz'][$highest_index] ) ) {
 				if (! isset ($submenu['complianz'][$highest_index][4])) $submenu['complianz'][$highest_index][4] = '';
@@ -1022,7 +1027,7 @@ function cmplz_sanitize_field( $value, string $type, string $id ) {
 			}
 			return array_map( 'sanitize_text_field', $value );
 		case 'email':
-			return sanitize_email( $value );
+			return strtolower(sanitize_email( $value ));
 		case 'processors':
 			return cmplz_sanitize_processors($value);
 		case 'thirdparties':

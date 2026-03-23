@@ -474,7 +474,8 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			//if a cookie warning is needed for the stats we don't add a native class, so it will be disabled by the cookie blocker by default
 			$category        = 'statistics';
 			$uses_tagmanager = cmplz_get_option( 'compile_statistics' ) === 'google-tag-manager' ? true : false;
-			$matomo          = cmplz_get_option( 'compile_statistics' ) === 'matomo' ? true : false;
+            $matomo          = cmplz_get_option( 'compile_statistics' ) === 'matomo' ? true : false;
+            $clarity          = cmplz_get_option( 'compile_statistics' ) === 'clarity' ? true : false;
 
 			//without tag manager, set as functional if no cookie warning required for stats
 			if ( ! $uses_tagmanager && ! $this->cookie_warning_required_stats() ) {
@@ -489,6 +490,10 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			if ( $matomo && cmplz_get_option( 'matomo_anonymized' ) === 'yes' ) {
 				$category = 'functional';
 			}
+
+            if ( $clarity && cmplz_get_option( 'clarity_consent_mode' ) === 'yes' ) {
+                $category = 'functional';
+            }
 
 			/*
 			 * Run Tag Manager or gtag by default if consent mode is enabled
@@ -662,8 +667,8 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 				$script = cmplz_get_template( 'statistics/matomo-tag-manager.js' );
 				$script = str_replace( '{container_id}', esc_attr( cmplz_get_option( 'matomo_container_id' ) ), $script );
 				$script = str_replace( '{matomo_url}', esc_url_raw( trailingslashit( cmplz_get_option( 'matomo_tag_url' ) ) ), $script );
-			}
-			echo apply_filters( 'cmplz_script_filter', $script );
+            }
+            echo apply_filters( 'cmplz_script_filter', $script );
 
 		}
 
@@ -717,8 +722,11 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 				$script = cmplz_get_template( 'statistics/clicky.js' );
 				$script = str_replace( '{site_ID}', esc_attr( cmplz_get_option( 'clicky_site_id' ) ), $script );
 			} elseif ( $statistics === 'clarity' ) {
-				$script = cmplz_get_template( 'statistics/clarity.js' );
-				$script = str_replace( '{site_ID}', esc_attr( cmplz_get_option( 'clarity_id' ) ), $script );
+                $is_consent_for_anonymous_stats = cmplz_get_option( 'consent_for_anonymous_stats' ) === 'yes';
+                $is_clarity_consent_mode = cmplz_get_option( 'clarity_consent_mode' ) === 'yes';
+                $clarity_script = $is_clarity_consent_mode && $is_consent_for_anonymous_stats ? '-consent-mode' : '';
+                $script = cmplz_get_template("statistics/clarity$clarity_script.js");
+                $script = str_replace('{site_ID}', esc_attr(cmplz_get_option('clarity_id')), $script);
 			} elseif ( $statistics === 'yandex' ) {
 				$script         = cmplz_get_template( 'statistics/yandex.js' );
 				$data_layer     = cmplz_get_option( 'yandex_ecommerce' ) === 'yes';
@@ -1438,7 +1446,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			$tagmanager                                = $statistics === 'google-tag-manager';
 			$matomo                                    = $statistics === 'matomo';
 			$google_analytics                          = $statistics === 'google-analytics';
-			$clicky                                    = $statistics === 'clicky';
+            $clicky                                    = $statistics === 'clicky';
 			$accepted_google_data_processing_agreement = false;
 			$ip_anonymous                              = false;
 			$no_sharing                                = false;

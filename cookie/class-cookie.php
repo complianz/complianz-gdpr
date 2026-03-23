@@ -1,11 +1,11 @@
-<?php defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
-if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
+<?php defined( 'ABSPATH' ) or die( 'you do not have access to this page!' );
+if ( ! class_exists( 'CMPLZ_COOKIE' ) ) {
 	/**
 	 * All properties are public, because otherwise the empty check on a property fails, and requires an intermediate variable assignment.
 	 * https://stackoverflow.com/questions/16918973/php-emptystring-return-true-but-string-is-not-empty
 	 */
 	class CMPLZ_COOKIE {
-		public $ID = false;
+		public $ID     = false;
 		public $object = false;
 		public $name;
 
@@ -62,14 +62,14 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		public $language;
 
 		function __construct( $name = false, $language = 'en', $service_name = false ) {
-			if ( is_object($name) ){
+			if ( is_object( $name ) ) {
 				$this->name = $name->name;
-				$this->ID = $name->ID;
-				//after the sync, we are still missing the purpose in the objects. We load the cookie from the database to get the purpose.
-				if ( !empty($name->purpose) ) {
+				$this->ID   = $name->ID;
+				// after the sync, we are still missing the purpose in the objects. We load the cookie from the database to get the purpose.
+				if ( ! empty( $name->purpose ) ) {
 					$this->object = $name;
 				}
-			} else if ( is_numeric( $name ) ) {
+			} elseif ( is_numeric( $name ) ) {
 				$this->ID = (int) $name;
 			} else {
 				$this->name = $this->sanitize_cookie( $name );
@@ -81,7 +81,7 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			}
 
 			if ( $this->name !== false ) {
-				//initialize the cookie with this id.
+				// initialize the cookie with this id.
 				$this->get();
 			}
 		}
@@ -97,47 +97,50 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		 *
 		 * @return bool|int cookie_id
 		 */
-
 		public function add(
-			$name, $languages = array( 'en' ), $return_language = false, $service_name = false, bool $sync_on = true
+			$name,
+			$languages = array( 'en' ),
+			$return_language = false,
+			$service_name = false,
+			bool $sync_on = true
 		) {
-			//don't add cookies with the site url in the name
-			if ( strpos($name, site_url())!==false ) {
+			// don't add cookies with the site url in the name
+			if ( strpos( $name, site_url() ) !== false ) {
 				return false;
 			}
 
-			if ( !cmplz_user_can_manage() ) {
+			if ( ! cmplz_user_can_manage() ) {
 				return 0;
 			}
 
 			$this->name = $this->sanitize_cookie( $name );
 
-			//the parent cookie gets "en" as default language
-			$this->language = 'en';
-			$return_id      = 0;
+			// the parent cookie gets "en" as default language
+			$this->language  = 'en';
+			$return_id       = 0;
 			$this->languages = cmplz_sanitize_languages( $languages );
 
-			//check if there is a parent cookie for this name
+			// check if there is a parent cookie for this name
 			$this->get( true );
-			//if no ID is found, insert  in the database
+			// if no ID is found, insert  in the database
 			if ( ! $this->ID ) {
 				$this->service      = $service_name;
 				$this->sync         = $sync_on;
 				$this->showOnPolicy = true;
 			}
 
-			//we save, to update previous, but also to make sure last add date is saved.
+			// we save, to update previous, but also to make sure last add date is saved.
 			$this->lastAddDate = time();
 			$this->save();
 
-			//we now should have an ID, which will be the parent item
+			// we now should have an ID, which will be the parent item
 			$parent_ID = $this->ID;
 
 			if ( $return_language === 'en' ) {
 				$return_id = $this->ID;
 			}
 
-			//make sure each language is available
+			// make sure each language is available
 			foreach ( $this->languages as $language ) {
 				if ( $language === 'en' ) {
 					continue;
@@ -151,15 +154,19 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 				$translated_cookie->isTranslationFrom = $parent_ID;
 				$translated_cookie->service           = $service_name;
 				$translated_cookie->lastAddDate       = time();
+				// Copy field values from parent to translation
+				$translated_cookie->retention             = $this->retention;
+				$translated_cookie->cookieFunction        = $this->cookieFunction;
+				$translated_cookie->purpose               = $this->purpose;
+				$translated_cookie->type                  = $this->type;
+				$translated_cookie->collectedPersonalData = $this->collectedPersonalData;
 				$translated_cookie->save();
 				if ( $return_language && $language === $return_language ) {
 					$return_id = $translated_cookie->ID;
 				}
-
 			}
 
 			return $return_id;
-
 		}
 
 		public function __get( $property ) {
@@ -179,8 +186,7 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		/**
 		 * Delete this cookie, and all translations linked to it.
 		 */
-
-		public function delete($permanently=false) {
+		public function delete( $permanently = false ) {
 			if ( ! cmplz_user_can_manage() ) {
 				return;
 			}
@@ -191,8 +197,8 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			$translations = $this->get_translations();
 			global $wpdb;
 			foreach ( $translations as $ID ) {
-				if ($permanently){
-					$wpdb->delete($wpdb->prefix . 'cmplz_cookies', array('ID' => $ID));
+				if ( $permanently ) {
+					$wpdb->delete( $wpdb->prefix . 'cmplz_cookies', array( 'ID' => $ID ) );
 				} else {
 					$wpdb->update(
 						$wpdb->prefix . 'cmplz_cookies',
@@ -206,7 +212,6 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		/**
 		 * Restore a deleted cookie
 		 */
-
 		public function restore() {
 			if ( ! cmplz_user_can_manage() ) {
 				return;
@@ -229,20 +234,20 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 
 		public function get_translations() {
 			global $wpdb;
-			//check if this cookie is a parent
+			// check if this cookie is a parent
 			if ( ! $this->isTranslationFrom ) {
-				//is parent. Get all cookies where translationfrom = this id
+				// is parent. Get all cookies where translationfrom = this id
 				$parent_id = $this->ID;
 			} else {
-				//not parent.
+				// not parent.
 				$parent_id = $this->isTranslationFrom;
 			}
 
-			$sql = $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where isTranslationFrom = %s", $parent_id );
+			$sql          = $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where isTranslationFrom = %s", $parent_id );
 			$results      = $wpdb->get_results( $sql );
 			$translations = wp_list_pluck( $results, 'ID' );
 
-			//add the parent id
+			// add the parent id
 			$translations[] = $parent_id;
 
 			return $translations;
@@ -253,7 +258,6 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		 *
 		 * @param bool $parent get only the parent cookie, not a translation
 		 */
-
 		private function get( bool $parent = false ) {
 			global $wpdb;
 
@@ -262,43 +266,43 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			}
 			$sql = '';
 			if ( $parent ) {
-				$sql = " AND isTranslationFrom = FALSE";
+				$sql = ' AND isTranslationFrom = FALSE';
 			}
 
-			//if the service is set, we check within the service as well.
+			// if the service is set, we check within the service as well.
 			if ( $this->service ) {
-				$service = new CMPLZ_SERVICE($this->service, $this->language );
-				if ($service->ID) {
-					$sql .= $wpdb->prepare(" AND serviceID = %s", $service->ID);
+				$service = new CMPLZ_SERVICE( $this->service, $this->language );
+				if ( $service->ID ) {
+					$sql .= $wpdb->prepare( ' AND serviceID = %s', $service->ID );
 				}
 			}
 
-			if ($this->object){
+			if ( $this->object ) {
 				$cookie = $this->object;
-			} else if ( $this->ID ) {
-				$cookie = wp_cache_get('cmplz_cookie_'.$this->ID, 'complianz');
-				if ( !$cookie ) {
+			} elseif ( $this->ID ) {
+				$cookie = wp_cache_get( 'cmplz_cookie_' . $this->ID, 'complianz' );
+				if ( ! $cookie ) {
 					$cookie = $wpdb->get_row( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where ID = %s ", $this->ID ) );
-					wp_cache_set('cmplz_cookie_'.$this->ID, $cookie, 'complianz', HOUR_IN_SECONDS);
+					wp_cache_set( 'cmplz_cookie_' . $this->ID, $cookie, 'complianz', HOUR_IN_SECONDS );
 				}
 			} else {
 				$cookie = $wpdb->get_row( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where name = %s and language = %s $sql", $this->name, $this->language ) );
-				//if not found with service, try without service.
-				if ( !$cookie ) {
+				// if not found with service, try without service.
+				if ( ! $cookie ) {
 					$cookie = $wpdb->get_row( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where name = %s and language = %s", $this->name, $this->language ) );
 				}
 			}
 
-			//if there's still no match, try to do a fuzzy match
+			// if there's still no match, try to do a fuzzy match
 			if ( ! $cookie ) {
-				$cookies = $wpdb->get_results( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where language = %s $sql", $this->language ) );
-				$cookies = wp_list_pluck( $cookies, 'name', 'ID' );
+				$cookies   = $wpdb->get_results( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where language = %s $sql", $this->language ) );
+				$cookies   = wp_list_pluck( $cookies, 'name', 'ID' );
 				$cookie_id = $this->get_fuzzy_match( $cookies, $this->name );
 
-				//if no cookie_id found yet, try without service
-				if ( !$cookie_id ) {
-					$cookies = $wpdb->get_results( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where language = %s", $this->language ) );
-					$cookies = wp_list_pluck( $cookies, 'name', 'ID' );
+				// if no cookie_id found yet, try without service
+				if ( ! $cookie_id ) {
+					$cookies   = $wpdb->get_results( $wpdb->prepare( "select * from {$wpdb->prefix}cmplz_cookies where language = %s", $this->language ) );
+					$cookies   = wp_list_pluck( $cookies, 'name', 'ID' );
 					$cookie_id = $this->get_fuzzy_match( $cookies, $this->name );
 				}
 
@@ -309,7 +313,7 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 
 			if ( $cookie ) {
 				$this->ID                    = $cookie->ID;
-				$this->name                  = substr($cookie->name, 0, 200); //maximize cookie name length
+				$this->name                  = substr( $cookie->name, 0, 200 ); // maximize cookie name length
 				$this->serviceID             = $cookie->serviceID;
 				$this->sync                  = (bool) $cookie->sync;
 				$this->language              = $cookie->language;
@@ -320,8 +324,8 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 				$this->isOwnDomainCookie     = (bool) $cookie->isOwnDomainCookie;
 				$this->domain                = $cookie->domain;
 				$this->cookieFunction        = $cookie->cookieFunction;
-				$this->purpose               = html_entity_decode($cookie->purpose);
-				$this->isMembersOnly         = $cookie->isMembersOnly && cmplz_get_option('wp_admin_access_users') === 'yes';
+				$this->purpose               = html_entity_decode( $cookie->purpose, ENT_QUOTES );
+				$this->isMembersOnly         = $cookie->isMembersOnly && cmplz_get_option( 'wp_admin_access_users' ) === 'yes';
 				$this->collectedPersonalData = $cookie->collectedPersonalData;
 				$this->isTranslationFrom     = $cookie->isTranslationFrom;
 				$this->showOnPolicy          = (bool) $cookie->showOnPolicy;
@@ -333,9 +337,9 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 				$this->old                   = $cookie->lastAddDate < strtotime( '-3 months' ) && $cookie->lastAddDate > 0;
 			}
 
-			//legacy, upgrade data
-			if ( empty($this->domain) ) {
-				if ( $this->isOwnDomainCookie) {
+			// legacy, upgrade data
+			if ( empty( $this->domain ) ) {
+				if ( $this->isOwnDomainCookie ) {
 					$this->domain = 'self';
 				} else {
 					$this->domain = 'thirdparty';
@@ -343,40 +347,81 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			}
 
 			/**
+			 * Fallback to parent cookie values for custom cookies
+			 * If translation has empty fields, inherit from English parent
+			 */
+			if ( $this->isTranslationFrom ) {
+				$needs_fallback = empty( $this->retention ) || empty( $this->cookieFunction ) || empty( $this->purpose );
+				if ( $needs_fallback ) {
+					// Load parent directly from database to avoid recursion.
+					global $wpdb;
+					$parent_data = $wpdb->get_row(
+						$wpdb->prepare(
+							"SELECT * FROM {$wpdb->prefix}cmplz_cookies WHERE ID = %s",
+							$this->isTranslationFrom
+						)
+					);
+					if ( $parent_data ) {
+						if ( empty( $this->retention ) ) {
+							$this->retention = $parent_data->retention;
+						}
+						if ( empty( $this->cookieFunction ) ) {
+							$this->cookieFunction = $parent_data->cookieFunction;
+						}
+						if ( empty( $this->purpose ) ) {
+							$this->purpose = html_entity_decode( $parent_data->purpose, ENT_QUOTES );
+						}
+						if ( empty( $this->type ) ) {
+							$this->type = $parent_data->type;
+						}
+						if ( empty( $this->collectedPersonalData ) ) {
+							$this->collectedPersonalData = $parent_data->collectedPersonalData;
+						}
+					}
+				}
+			}
+			/**
 			 * Don't translate purpose with Polylang, as polylang does not use the fieldname to translate. This causes mixed up strings when context differs.
 			 * To prevent newly added cookies from getting translated, only translate when not in admin or cron, leaving front-end, where cookies aren't saved.
 			 */
-			if ( $this->language !== 'en' && !is_admin() && !wp_doing_cron() ) {
-				if ( !defined('POLYLANG_VERSION') || !$this->sync ) {
-					if (!empty($this->purpose) ) $this->purpose = cmplz_translate($this->purpose, 'cookie_purpose');
+			if ( $this->language !== 'en' && ! is_admin() && ! wp_doing_cron() ) {
+				if ( ! defined( 'POLYLANG_VERSION' ) || ! $this->sync ) {
+					if ( ! empty( $this->purpose ) ) {
+						$this->purpose = cmplz_translate( $this->purpose, 'cookie_purpose' );
+					}
 				}
-				if (!empty( $this->retention ) ) $this->retention = cmplz_translate( $this->retention, 'cookie_retention' );
-				if (!empty( $this->cookieFunction) ) $this->cookieFunction = cmplz_translate($this->cookieFunction, 'cookie_function');
-				if (!empty( $this->collectedPersonalData) ) $this->collectedPersonalData = cmplz_translate($this->collectedPersonalData, 'cookie_collected_personal_data');
+				if ( ! empty( $this->retention ) ) {
+					$this->retention = cmplz_translate( $this->retention, 'cookie_retention' );
+				}
+				if ( ! empty( $this->cookieFunction ) ) {
+					$this->cookieFunction = cmplz_translate( $this->cookieFunction, 'cookie_function' );
+				}
+				if ( ! empty( $this->collectedPersonalData ) ) {
+					$this->collectedPersonalData = cmplz_translate( $this->collectedPersonalData, 'cookie_collected_personal_data' );
+				}
 			}
 
 			/**
 			 * complianz cookie retention can be retrieved form this site
 			 */
 
-			if ( !empty( $this->name) ) {
+			if ( ! empty( $this->name ) ) {
 				if ( strpos( $this->name, 'cmplz' ) !== false || strpos( $this->name, 'complianz' ) !== false ) {
-					$this->retention = cmplz_sprintf( __( "%s days", "complianz-gdpr" ), cmplz_get_option( 'cookie_expiry' ) );
+					$this->retention = cmplz_sprintf( __( '%s days', 'complianz-gdpr' ), cmplz_get_option( 'cookie_expiry' ) );
 				}
 			}
 
-			//get serviceid from service name
+			// get serviceid from service name
 			if ( $this->serviceID ) {
 				$service       = new CMPLZ_SERVICE( $this->serviceID, $this->language );
 				$this->service = $service->name;
 			}
 
-			$this->complete = ( !empty( $this->name )
-			                    && !empty( $this->purpose )
-			                    && !empty( $this->retention )
-			                    && !empty( $this->service )
+			$this->complete = ( ! empty( $this->name )
+								&& ! empty( $this->purpose )
+								&& ! empty( $this->retention )
+								&& ! empty( $this->service )
 			);
-
 		}
 
 		/**
@@ -391,23 +436,22 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		 *
 		 * @param bool $updateAllLanguages
 		 */
-
 		public function save( $updateAllLanguages = false ) {
-			if ( !cmplz_user_can_manage() ) {
+			if ( ! cmplz_user_can_manage() ) {
 				return;
 			}
 
-			//let's skip cookies with this site url in the name
-			if ( strpos($this->name, site_url())!==false ) {
+			// let's skip cookies with this site url in the name
+			if ( strpos( $this->name, site_url() ) !== false ) {
 				return;
 			}
 
-			//don't save empty items.
+			// don't save empty items.
 			if ( empty( $this->name ) ) {
 				return;
 			}
-			//get serviceid from service name
-			if ( !empty( $this->service ) ) {
+			// get serviceid from service name
+			if ( ! empty( $this->service ) ) {
 				$service = new CMPLZ_SERVICE( $this->service, $this->language );
 				if ( ! $service->ID ) {
 					$languages       = $this->get_used_languages();
@@ -422,7 +466,7 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			 */
 
 			if ( strpos( $this->name, 'cmplz' ) !== false || strpos( $this->name, 'complianz' ) !== false ) {
-				$this->retention = cmplz_sprintf( __( "%s days", "complianz-gdpr" ), cmplz_get_option( 'cookie_expiry' ) );
+				$this->retention = cmplz_sprintf( __( '%s days', 'complianz-gdpr' ), cmplz_get_option( 'cookie_expiry' ) );
 			}
 
 			/**
@@ -438,8 +482,8 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 				cmplz_register_translation( $this->collectedPersonalData, 'cookie_collected_personal_data' );
 			}
 
-			//update legacy data
-			if ( empty($this->domain) ) {
+			// update legacy data
+			if ( empty( $this->domain ) ) {
 				if ( $this->isOwnDomainCookie ) {
 					$this->domain = 'self';
 				} else {
@@ -465,14 +509,14 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 				'showOnPolicy'          => $this->showOnPolicy,
 				'lastUpdatedDate'       => (int) $this->lastUpdatedDate,
 				'lastAddDate'           => (int) $this->lastAddDate,
-				'slug'                  => empty($this->slug) ? '' : sanitize_title( $this->slug ),
+				'slug'                  => empty( $this->slug ) ? '' : sanitize_title( $this->slug ),
 			);
-			if ( empty( $this->firstAddDate) ) {
+			if ( empty( $this->firstAddDate ) ) {
 				$update_array['firstAddDate'] = time();
 			}
 
 			global $wpdb;
-			//if we have an ID, we update the existing value
+			// if we have an ID, we update the existing value
 			if ( $this->ID ) {
 				$wpdb->update( $wpdb->prefix . 'cmplz_cookies', $update_array, array( 'ID' => $this->ID ) );
 			} else {
@@ -481,34 +525,34 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			}
 
 			if ( $updateAllLanguages ) {
-				//keep all translations in sync
+				// keep all translations in sync
 				$translationIDS = $this->get_translations();
 				foreach ( $translationIDS as $translationID ) {
 					if ( $this->ID == $translationID ) {
 						continue;
 					}
-					$translation                 = new CMPLZ_COOKIE( $translationID );
-					$translation->name                  = $this->name;
-					$translation->serviceID             = $this->serviceID;
-					$translation->sync                  = $this->sync;
-					$translation->isMembersOnly         = $this->isMembersOnly;
-					$translation->slug                  = $this->slug;
-					$translation->showOnPolicy          = $this->showOnPolicy;
-					$translation->deleted               = $this->deleted;
-					$translation->ignored               = $this->ignored;
-					$translation->domain                = $this->domain;
+					$translation                = new CMPLZ_COOKIE( $translationID );
+					$translation->name          = $this->name;
+					$translation->serviceID     = $this->serviceID;
+					$translation->sync          = $this->sync;
+					$translation->isMembersOnly = $this->isMembersOnly;
+					$translation->slug          = $this->slug;
+					$translation->showOnPolicy  = $this->showOnPolicy;
+					$translation->deleted       = $this->deleted;
+					$translation->ignored       = $this->ignored;
+					$translation->domain        = $this->domain;
 					$translation->save();
 				}
 			}
-			cmplz_delete_transient('cmplz_cookie_shredder_list');
-			wp_cache_delete('cmplz_cookie_'.$this->ID, 'complianz');
+			cmplz_delete_transient( 'cmplz_cookie_shredder_list' );
+			wp_cache_delete( 'cmplz_cookie_' . $this->ID, 'complianz' );
 		}
 
 
 		private function get_used_languages() {
 			global $wpdb;
 
-			$sql = "SELECT language FROM {$wpdb->prefix}cmplz_cookies group by language";
+			$sql       = "SELECT language FROM {$wpdb->prefix}cmplz_cookies group by language";
 			$languages = $wpdb->get_results( $sql );
 			$languages = wp_list_pluck( $languages, 'language' );
 
@@ -522,7 +566,6 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		 *
 		 * @return string|bool
 		 */
-
 		private function sanitize_cookie( $cookie ) {
 			if ( ! $this->is_valid_cookie( $cookie ) ) {
 				return false;
@@ -530,13 +573,13 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 
 			$cookie = sanitize_text_field( $cookie );
 
-			//100 characters max
-			$cookie = substr($cookie, 0, 100);
+			// 100 characters max
+			$cookie = substr( $cookie, 0, 100 );
 
-			//remove whitespace
+			// remove whitespace
 			$cookie = trim( $cookie );
 
-			//strip double and single quotes
+			// strip double and single quotes
 			$cookie = str_replace( '"', '', $cookie );
 			return str_replace( "'", '', $cookie );
 		}
@@ -548,9 +591,8 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 		 *
 		 * @return bool
 		 */
-
 		private function is_valid_cookie( $id ) {
-			if ( ! is_string( $id ) || empty($id) ) {
+			if ( ! is_string( $id ) || empty( $id ) ) {
 				return false;
 			}
 
@@ -561,15 +603,15 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 
 
 		private function get_fuzzy_match( $cookies, $search ) {
-			//to prevent match from wp_comment_123 on wp_*
-			//we keep track of all matches, and only return the longest match, which is the closest match.
+			// to prevent match from wp_comment_123 on wp_*
+			// we keep track of all matches, and only return the longest match, which is the closest match.
 			$match            = false;
 			$new_match        = false;
 			$match_length     = 0;
 			$new_match_length = 0;
 			$partial          = '*';
 
-			//clear up items without any match possibility
+			// clear up items without any match possibility
 			foreach ( $cookies as $post_id => $cookie_name ) {
 				if ( strpos( $cookie_name, $partial ) === false ) {
 					unset( $cookies[ $post_id ] );
@@ -577,27 +619,32 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 			}
 
 			foreach ( $cookies as $post_id => $compare_cookie_name ) {
-				//check if the string "partial" is in the comparison cookie name
-				//check if it has an underscore before or after the partial. If so, take it into account
+				// check if the string "partial" is in the comparison cookie name
+				// check if it has an underscore before or after the partial. If so, take it into account
 
-				//get the substring before or after the partial
-				$str1 = substr( $compare_cookie_name, 0,
-					strpos( $compare_cookie_name, $partial ) );
-				$str2 = substr( $compare_cookie_name,
+				// get the substring before or after the partial
+				$str1 = substr(
+					$compare_cookie_name,
+					0,
 					strpos( $compare_cookie_name, $partial )
-					+ strlen( $partial ) );
-				//a partial match is enough on this type
+				);
+				$str2 = substr(
+					$compare_cookie_name,
+					strpos( $compare_cookie_name, $partial )
+					+ strlen( $partial )
+				);
+				// a partial match is enough on this type
 
-				//$str2: match should end with this string
+				// $str2: match should end with this string
 				if ( strlen( $str1 ) === 0 ) {
-					$len     = strlen( $search ); //"*test" : 5
-					$pos     = strpos( $search, $str2 ); //"*test" : 1
+					$len     = strlen( $search ); // "*test" : 5
+					$pos     = strpos( $search, $str2 ); // "*test" : 1
 					$sub_len = strlen( $str2 ); // 4
 					if ( $pos !== false && ( $len - $sub_len == $pos ) ) {
 						$new_match_length = strlen( $str1 ) + strlen( $str2 );
 						$new_match        = $post_id;
 					}
-					//match should start with this string
+					// match should start with this string
 				} elseif ( strlen( $str2 ) === 0 ) {
 
 					$pos = strpos( $search, $str1 );
@@ -606,12 +653,12 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 						$new_match        = $post_id;
 					}
 				} else {
-					$len2     = strlen( $search ); //"*test" : 5
-					$pos2     = strpos( $search, $str2 ); //"*test" : 1
+					$len2     = strlen( $search ); // "*test" : 5
+					$pos2     = strpos( $search, $str2 ); // "*test" : 1
 					$sub_len2 = strlen( $str2 ); // 4
 					if ( strpos( $search, $str1 ) === 0
-					     && strpos( $search, $str2 ) !== false
-					     && ( $len2 - $sub_len2 == $pos2 )
+						&& strpos( $search, $str2 ) !== false
+						&& ( $len2 - $sub_len2 == $pos2 )
 					) {
 						$new_match_length = strlen( $str1 ) + strlen( $str2 );
 						$new_match        = $post_id;
@@ -626,7 +673,6 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
 
 			return $match;
 		}
-
 	}
 }
 
@@ -635,16 +681,16 @@ if ( ! class_exists( "CMPLZ_COOKIE" ) ) {
  * */
 add_action( 'cmplz_install_tables', 'cmplz_install_cookie_table' );
 function cmplz_install_cookie_table() {
-	//only load on front-end if it's a cron job
-	if ( !is_admin() && !wp_doing_cron() ) {
+	// only load on front-end if it's a cron job
+	if ( ! is_admin() && ! wp_doing_cron() ) {
 		return;
 	}
 
-	if (!wp_doing_cron() && !cmplz_user_can_manage() ) {
+	if ( ! wp_doing_cron() && ! cmplz_user_can_manage() ) {
 		return;
 	}
 	if ( get_option( 'cmplz_cookietable_version' ) != CMPLZ_VERSION ) {
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		global $wpdb;
 		$charset_collate = $wpdb->get_charset_collate();
 		$table_name      = $wpdb->prefix . 'cmplz_cookies';
@@ -696,7 +742,7 @@ function cmplz_install_cookie_table() {
                 ) $charset_collate;";
 		dbDelta( $sql );
 
-		//don't set to preload false, as we need this one in the get_cookies function.
+		// don't set to preload false, as we need this one in the get_cookies function.
 		update_option( 'cmplz_cookietable_version', CMPLZ_VERSION );
 
 	}

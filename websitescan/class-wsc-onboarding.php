@@ -69,7 +69,7 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 				// used on onboarding to sign up
 				case 'signup_wsc':
 					$posted_data = $request->get_json_params();
-					$email = sanitize_email($posted_data['email']);
+					$email = strtolower(sanitize_email($posted_data['email']));
 					if (is_email($email)) {
 						cmplz_wsc_auth::send_auth_email($email);
 						// Schedule storing onboarding consent asynchronously

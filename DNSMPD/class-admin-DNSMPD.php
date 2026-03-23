@@ -319,6 +319,9 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 
 		private function create_csv_file($data, $add_header = true ){
 			$delimiter=",";
+			$enclosure = '"';
+			$escape = '\\';
+
 			require_once(ABSPATH . 'wp-admin/includes/file.php');
 			$upload_dir = cmplz_upload_dir();
 
@@ -338,7 +341,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 			//create a line with headers
 			if ( $add_header ) {
 				$headers = $this->parse_headers_from_array( $data );
-				fputcsv( $csv_handle, $headers, $delimiter );
+				fputcsv( $csv_handle, $headers, $delimiter, $enclosure, $escape );
 			}
 
 			if ( is_array($data) ) {
@@ -347,7 +350,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 					$line = array_values(get_object_vars($line));
 					$line = array_map( 'sanitize_text_field', $line );
 					$line[] = $date;
-					fputcsv( $csv_handle, $line, $delimiter );
+					fputcsv( $csv_handle, $line, $delimiter, $enclosure, $escape );
 				}
 			}
 			fclose ($csv_handle);

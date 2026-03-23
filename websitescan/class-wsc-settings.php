@@ -165,8 +165,6 @@ if (!class_exists("cmplz_wsc_settings")) {
 								'id' => 'settings-websitescan',
 								'title' => __('Website Scan', 'complianz-gdpr'),
 								'intro' => __('Here you can manage your credentials. If you don’t want to use the Website Scan, you can reset it. A token will be created to verify your website. After creating your credentials, please make sure to check your email for a confirmation.', 'complianz-gdpr'),
-								'premium' => false,
-								'upgrade' => 'https://complianz.io/pricing',
 								'premium_text' => __("View and manage Processing Agreements with %sComplianz GDPR Premium%s", 'complianz-gdpr'),
 								'helpLink' => 'https://complianz.io/about-the-website-scan/',
 							];
@@ -408,14 +406,13 @@ if (!class_exists("cmplz_wsc_settings")) {
 				cmplz_wsc::WSC_OPT_ONBOARDING_DATE,
 			];
 
-			$cmplz_options = [
-				cmplz_wsc::WSC_EMAIL_OPTION_KEY,
-				cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY,
-				cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY,
-				cmplz_wsc::WSC_SITE_ID_OPTION_KEY,
-				cmplz_license::WSC_LICENSE_SYNC_ID,
-				cmplz_license::WSC_LICENSE_SYNC_STATUS,
-			];
+			$cmplz_options = apply_filters( 'cmplz_remove_wsc_options', array(
+					cmplz_wsc::WSC_EMAIL_OPTION_KEY,
+					cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY,
+					cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY,
+					cmplz_wsc::WSC_SITE_ID_OPTION_KEY,
+				)
+			);
 
 			$cmplz_transients = [
 				'cmplz_wsc_access_token'
@@ -447,8 +444,7 @@ if (!class_exists("cmplz_wsc_settings")) {
 					$this->log_user_deletion_error('cmplz_wsc_user_deletion_token_error', 'Token not retrieved');
 				} else {
 					// Make the API request to delete the application
-					$wsc_endpoint = base64_decode(cmplz_wsc_auth::WSC_ENDPOINT);
-					$request = wp_remote_request($wsc_endpoint . '/api/lite/oauth_applications', array(
+					$request = wp_remote_request(cmplz_wsc_auth::WSC_ENDPOINT . '/api/lite/oauth_applications', array(
 						'method' => 'DELETE',
 						'headers' => array(
 							'Content-Type' => 'application/json',
@@ -547,8 +543,7 @@ if (!class_exists("cmplz_wsc_settings")) {
 						continue;
 					}
 
-					$wsc_endpoint = base64_decode(cmplz_wsc_auth::WSC_ENDPOINT);
-					$request = wp_remote_request($wsc_endpoint . '/api/lite/oauth_applications', array(
+					$request = wp_remote_request(cmplz_wsc_auth::WSC_ENDPOINT . '/api/lite/oauth_applications', array(
 						'method' => 'DELETE',
 						'headers' => array(
 							'Content-Type' => 'application/json',

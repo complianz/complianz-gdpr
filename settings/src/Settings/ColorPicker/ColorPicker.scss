@@ -1,29 +1,58 @@
 .cmplz-color-picker-control {
-  button {
-	margin-right:10px;
-	background-color: transparent;
-	border-radius: 6px;
-	border: 1px solid var(--rsp-grey-400);
-	min-width:140px;
-	font-size:13px;
-  }
-  .cmplz-color-picker-control-item {
-	cursor: pointer;
 	display: flex;
-	padding: 5px;
-	gap: 14px;
-	align-items: center;
-
-	.cmplz-color-picker-color {
-	  border-radius: 50%;
-	  width: 20px;
-	  height: 20px;
-	  border: 1px solid var(--rsp-grey-300);
-
+	flex-direction: column;
+	gap: 16px;
+  
+	button {
+	  margin-right: 10px;
+	  background-color: transparent;
+	  border-radius: 6px;
+	  border: 1px solid var(--rsp-grey-400);
+	  min-width: 140px;
+	  font-size: 13px;
 	}
-  }
+  
+	.cmplz-color-picker-control-items {
+	  flex: 1;
+	}
+  
+	.cmplz-color-picker-control-item {
+	  cursor: pointer;
+	  display: flex;
+	  padding: 5px;
+	  gap: 14px;
+	  align-items: center;
+  
+	  .cmplz-color-picker-color {
+		border-radius: 50%;
+		width: 20px;
+		height: 20px;
+		border: 1px solid var(--rsp-grey-300);
+	  }
+	}
+  
+	.cmplz-contrast-checker {
+	  flex: 1;
+	  text-align: left;
+	  margin-top: 12px; 
+	}
+  
+	@media (min-width: 768px) {
+	  flex-direction: row;
+  
+	  .cmplz-color-picker-control-items {
+		flex: 1.6;
+	  }
+  
+	  .cmplz-contrast-checker {
+		flex: 1.3;
+		align-self: flex-start;
+		margin-top: 0;
+	  }
+	}
 }
-  [data-radix-popper-content-wrapper] {
-	z-index: 20 !important;
-  }
-
+  
+[data-radix-popper-content-wrapper] {
+z-index: 20 !important;
+}
+  

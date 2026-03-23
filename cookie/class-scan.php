@@ -251,14 +251,11 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 				update_option( 'cmplz_last_cookie_scan', $time );
 
 				$url = $this->get_next_page_url();
-				if ( ! $url ) {
+				if ( ! $url || 'remote' === $url ) {
 					return;
 				}
 
-				if ( $url === 'remote' ) {
-					//as the wsc cookie scan has a wait of 10 seconds on each request, we do this on cron instead
-					//do_action('cmplz_remote_cookie_scan');
-				} else if ( strpos( $url, 'complianz_id' ) !== false ) {
+				if ( strpos( $url, 'complianz_id' ) !== false ) {
 					//get the html of this page.
 					$response = wp_remote_get( $url );
 					if ( ! is_wp_error( $response ) ) {
@@ -266,6 +263,7 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 						$this->parse_html($html);
 					}
 				}
+				
 				//load in iframe so the scripts run.
 				echo '<iframe id="cmplz_cookie_scan_frame" class="hidden" src="' . $url . '"></iframe>';
 			}
@@ -500,7 +498,7 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 				case 'remote':
 					return 'remote';
 				case 'home':
-					$url = site_url();
+					$url = home_url();
 					break;
 				case 'loginpage':
 					$url = wp_login_url();
@@ -783,13 +781,22 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 				update_option( 'cmplz_last_cookie_scan', $time );
 
 				$next_url = $this->get_next_page_url();
-				if ($next_url==='remote') {
+				if ( 'remote' === $next_url ) {
 					do_action('cmplz_remote_cookie_scan');
 					//only proceed to next page if remote scan is complete
 					if ( COMPLIANZ::$wsc_scanner->wsc_scan_completed() ) {
 						$next_url = $this->get_next_page_url();
+					} else {
+						// Don't return 'remote' to React app - it will create iframe with src="remote".
+						// Return a data URL that won't cause network requests or 404 errors.
+						$next_url = 'data:text/html,<html><body>WSC scan in progress...</body></html>';
+
+						// Mark 'remote' as processed so we can move to next page, but only when NOT in cron context - although it might not be necessary.
+						if ( ! wp_doing_cron() ) {
+							$this->set_page_as_processed( 'remote' );
+						}
 					}
-				} else if ( strpos( $next_url, 'complianz_id' ) !== false ) {
+				} else if ( false !== strpos( $next_url, 'complianz_id' ) ) {
 					$response = wp_remote_get( $next_url );
 					if ( ! is_wp_error( $response ) ) {
 						$html = $response['body'];

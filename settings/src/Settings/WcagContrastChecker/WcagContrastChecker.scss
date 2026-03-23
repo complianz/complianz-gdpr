@@ -1,0 +1,55 @@
+.cmplz-contrast-checker {
+	.cmplz-contrast-row {
+        display: flex;
+        justify-content: flex-start;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 8px;
+    
+        p {
+            margin: 0;
+        }
+	}
+  
+	.cmplz-contrast-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    
+        .cmplz-icon-contrast svg {
+            display: block;
+    
+            path {
+            fill: currentColor;
+            }
+        }
+    
+        strong {
+            font-weight: 700;
+        }
+    
+        span {
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+    
+        &.cmplz-pass-aaa {
+            background-color: #e9f9ef;
+            color: #155724;
+        }
+    
+        &.cmplz-pass-aa {
+            background-color: #fff4e5;
+            color: #8a4d00;
+        }
+    
+        &.cmplz-fail {
+            background-color: #fdeaea;
+            color: #842029;
+        }
+	}
+}

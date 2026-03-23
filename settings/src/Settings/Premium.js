@@ -5,18 +5,17 @@ import { __ } from '@wordpress/i18n';
  */
 const Premium = ({premium, id}) => {
 
-
 	if ( cmplz_settings.is_premium || !premium ) {
 		 return null
 	}
 
-	let url = premium.url ? premium.url : 'https://complianz.io/pricing';
-	url+='?ref='+id;
+	const fallbackPremiumUrl = cmplz_settings.upgrade_link || 'https://complianz.io/pricing/';
+	const url = premium.url && premium.url.trim() !== '' ? premium.url : fallbackPremiumUrl;
+
 	return (
 			<div className="cmplz-premium">
 				<a target="_blank" rel="noopener noreferrer" href={url}>{__("Upgrade", "complianz-gdpr")}</a>
 			</div>
-
 	);
 
 }

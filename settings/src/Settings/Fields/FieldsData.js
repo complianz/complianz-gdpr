@@ -91,23 +91,29 @@ const useFields = create(( set, get ) => ({
 	},
 
 	addHelpNotice : (id, label, text, title, url) => {
-        //create help object
-        let help = {};
-        help.label=label;
-        help.text=text;
-        if (url) help.url=url;
-        if (title) help.title=title;
+		// Create help object
+		let help = {};
+		help.label = label;
+		help.text = text;
+		if (title) help.title = title;
+
+		// Apply referral tracking to complianz.io URLs
+		if (url) {
+			help.url = url.includes('complianz.io')
+				? get().getReferralUrl('help', id, url)
+				: url;
+		}
+
 		set(
 			produce((state) => {
 				const fieldIndex = state.fields.findIndex(field => {
-					return field.id===id;
+					return field.id === id;
 				});
-				if (fieldIndex!==-1) {
+				if (fieldIndex !== -1) {
 					state.fields[fieldIndex].help = help;
 				}
 			})
 		)
-
 	},
 	removeHelpNotice : (id) => {
 		set(
@@ -119,6 +125,58 @@ const useFields = create(( set, get ) => ({
 			})
 		)
 	},
+
+	/**
+	 * Generate a URL with referral tracking parameters
+	 *
+	 * @param {string} type     - Link type: 'articles', 'menu', 'fields', 'warnings', 'help'
+	 * @param {string} fieldId  - Identifier for utm_content parameter
+	 * @param {string} url      - Base URL to enhance (defaults to pricing page)
+	 * @returns {string}        - URL with UTM and referral parameters
+	 */
+	getReferralUrl: (type = 'articles', fieldId = '', url = '') => {
+		const defaultUrl = 'https://complianz.io/pricing/';
+		let baseUrl = url || defaultUrl;
+
+		// Ensure trailing slash before adding query params
+		if (!baseUrl.endsWith('/') && !baseUrl.includes('?')) {
+			baseUrl += '/';
+		}
+
+		// Skip non-complianz URLs
+		if (!baseUrl.includes('complianz.io')) {
+			return baseUrl;
+		}
+
+		const referral = cmplz_settings.referral || {};
+		const source = referral.source || 'cmplz_free';
+		const refId = referral.ref_id || false;
+		const hasPartner = referral.has_partner || false;
+
+		// Build UTM parameters
+		const params = new URLSearchParams();
+		params.set('utm_source', source);
+		params.set('utm_medium', `plugin_${type}`);
+		if (fieldId) {
+			params.set('utm_content', fieldId);
+		}
+
+		// Determine campaign and add partner referral
+		if (hasPartner && type !== 'articles' && source === 'cmplz_free') {
+			params.set('utm_campaign', 'partners');
+			params.set('ref', refId);
+			params.set('utm_id', refId);
+		} else if (source === 'cmplz_free' && type !== 'articles') {
+			params.set('utm_campaign', 'upgrade');
+		} else {
+			params.set('utm_campaign', 'articles');
+		}
+
+		// Append parameters to URL
+		const separator = baseUrl.includes('?') ? '&' : '?';
+		return baseUrl + separator + params.toString();
+	},
+
 	getFieldValue : (id) => {
 		let fields = get().fields;
 		for (const fieldItem of fields){

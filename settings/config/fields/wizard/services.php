@@ -20,7 +20,7 @@ function cmplz_services_fields( $fields ) {
 					'title' => __( "Cookie Shredder", 'complianz-gdpr' ),
 					'text'  => __( "This feature includes real-time cookie removal with the CookieShredder.", "complianz-gdpr" ) . ' ' . __( "This could break website functionality.",
 							'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/consent-per-service/',
+					'url'   => 'https://complianz.io/introducing-the-cookieshredder/',
 				],
 			],
 			[

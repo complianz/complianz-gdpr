@@ -1032,6 +1032,11 @@ function cmplz_check_upgrade() {
 		}
 	}
 
+	// Re-save all banners to regenerate CSS and clear caches
+	if ( $prev_version && version_compare( $prev_version, '7.4.5', '<' ) ) {
+		cmplz_resave_all_banners();
+	}
+
 	#regenerate cookie policy snapshot.
 	update_option('cmplz_generate_new_cookiepolicy_snapshot', true, false);
 

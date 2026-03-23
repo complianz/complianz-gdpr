@@ -209,14 +209,14 @@ if ( ! class_exists( "cmplz_admin" ) ) {
 
 			$support_link = defined( 'cmplz_free' )
 				? "https://wordpress.org/support/plugin/complianz-gdpr"
-				: "https://complianz.io/support";
+				: cmplz_get_referral_url( 'articles', 'plugins-page-support', 'https://complianz.io/support' );
 			$faq_link     = '<a target="_blank" href="' . $support_link . '">'
 			                . __( 'Support', 'complianz-gdpr' ) . '</a>';
 			array_unshift( $links, $faq_link );
 
 			if ( ! defined( 'cmplz_premium' ) ) {
 				$upgrade_link
-					= '<a style="color:#2DAAE1;font-weight:bold" target="_blank" href="https://complianz.io/l/pricing">'
+					= '<a style="color:#2DAAE1;font-weight:bold" target="_blank" href="' . cmplz_get_referral_url( 'menu', 'plugins-page', 'https://complianz.io/l/pricing' ) . '">'
 					  . __( 'Upgrade to premium', 'complianz-gdpr' ) . '</a>';
 				array_unshift( $links, $upgrade_link );
 			}

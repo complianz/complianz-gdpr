@@ -420,7 +420,7 @@ if ( ! class_exists( "cmplz_documents_admin" ) ) {
 			if ( current_theme_supports( 'menus' ) ) {
 				$empty_menu_link = admin_url( 'nav-menus.php' ) ;
 			} else {
-				$empty_menu_link = "https://complianz.io/how-to-create-a-menu-in-wordpress/";
+				$empty_menu_link = cmplz_get_referral_url( 'articles', 'document-menu', "https://complianz.io/how-to-create-a-menu-in-wordpress/" );
 			}
 
 			$regions = cmplz_get_regions( true , 'full' );

@@ -134,7 +134,7 @@
 .cmplz-tcf-container .cmplz-tcf-vendor-container.cmplz-vendortype-tcf .cmplz-vendortype-label {
   display: none;
 }
-.cmplz-tcf-container .cmplz-tcf-vendor-container label {
+.cmplz-tcf-container .cmplz-tcf-vendor-container > label {
   display: flex;
   align-items: center;
   gap: 10px;

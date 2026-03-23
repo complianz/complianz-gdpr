@@ -105,7 +105,7 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 			if ( $service ) {
 				$this->ID                  = $service->ID;
 				$this->name                = $service->name;
-				$this->serviceType         = html_entity_decode($service->serviceType);
+				$this->serviceType         = html_entity_decode($service->serviceType, ENT_QUOTES);
 				$this->sharesData
 				                           = $service->thirdParty; //legacy, sharesData was first called thirdparty
 				$this->secondParty         = $service->secondParty;
@@ -125,6 +125,28 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 				                           && $this->sharesData )
 				                      || empty( $this->serviceType )
 				                      || empty( $this->name ) );
+			}
+
+			/**
+			 * Fallback to parent service values for custom services
+			 * If translation has empty fields, inherit from English parent
+			 */
+			if ( $this->isTranslationFrom ) {
+				$needs_fallback = empty($this->serviceType) || empty($this->privacyStatementURL);
+				if ( $needs_fallback ) {
+					// Load parent directly from database to avoid recursion.
+					global $wpdb;
+					$parent_data = $wpdb->get_row( $wpdb->prepare( 
+						"SELECT * FROM {$wpdb->prefix}cmplz_services WHERE ID = %s", 
+						$this->isTranslationFrom 
+					) );
+					if ( $parent_data ) {
+						if ( empty($this->serviceType) ) $this->serviceType = html_entity_decode($parent_data->serviceType, ENT_QUOTES);
+						if ( empty($this->privacyStatementURL) ) $this->privacyStatementURL = $parent_data->privacyStatementURL;
+						if ( empty($this->sharesData) ) $this->sharesData = $parent_data->thirdParty;
+						if ( empty($this->secondParty) ) $this->secondParty = $parent_data->secondParty;
+					}
+				}
 			}
 
 		}
@@ -185,6 +207,26 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 			}
 
 			if ( $updateAllLanguages ) {
+				// Create missing translation rows if they don't exist
+				$languages = COMPLIANZ::$banner_loader->get_supported_languages();
+				foreach ( $languages as $language ) {
+					if ( $language === $this->language ) {
+						continue; // Skip parent language
+					}
+					// Check if translation exists
+					$translation = new CMPLZ_SERVICE( $this->name, $language );
+						// Create translation row
+						$translation->name              = $this->name;
+						$translation->language          = $language;
+						$translation->isTranslationFrom = $this->ID;
+						$translation->sync              = $this->sync;
+						$translation->serviceType       = $this->serviceType;
+						$translation->privacyStatementURL = $this->privacyStatementURL;
+						$translation->sharesData        = $this->sharesData;
+						$translation->secondParty       = $this->secondParty;
+						$translation->category          = $this->category;
+						$translation->save(false, false);
+				}
 				//keep all translations in sync
 				$translationIDS = $this->get_translations();
 				foreach ( $translationIDS as $translationID ) {
@@ -195,8 +237,9 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 					$translation->name         = $this->name;
 					$translation->sync         = $this->sync;
 					$translation->serviceType  = $this->serviceType;
+					$translation->privacyStatementURL = $this->privacyStatementURL;
 					$translation->sharesData   = $this->sharesData;
-					$translation->showOnPolicy = $this->showOnPolicy;
+					$translation->secondParty  = $this->secondParty;
 					$translation->lastUpdatedDate = $this->lastUpdatedDate;
 					$translation->save(false, false);
 				}
@@ -390,6 +433,11 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 				}
 				$translated_service->category          = $category;
 				$translated_service->isTranslationFrom = $parent_ID;
+				// Copy field values from parent to translation
+				$translated_service->serviceType         = $this->serviceType;
+				$translated_service->privacyStatementURL = $this->privacyStatementURL;
+				$translated_service->sharesData          = $this->sharesData;
+				$translated_service->secondParty         = $this->secondParty;
 				$translated_service->save(false, false);
 
 				if ( $return_language && $language == $return_language ) {

@@ -15,6 +15,7 @@ function cmplz_wp_google_map_plugin_script( $tags ) {
 		'placeholder'        => 'google-maps',
 		'urls'               => array(
 			'maps.js',
+			'maps.min.js',
 			'maps.googleapis.com',
 			'maps.google.com',
 			'wpgmp_frontend.min.js',
@@ -24,7 +25,7 @@ function cmplz_wp_google_map_plugin_script( $tags ) {
 		'enable_dependency'  => '1',
 		'dependency'         => array(
 			// 'wait-for-this-script' => 'script-that-should-wait'.
-			'maps.min.js' => '/maps/api/js',
+			'maps.js' => '/maps/api/js',
 		),
 	);
 

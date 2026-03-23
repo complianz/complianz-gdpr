@@ -33,6 +33,15 @@
   --cmplz_slider_inactive_color: #ccc;
   --cmplz_slider_bullet_color: white;
 }
+/* Focus trap styles - only when soft cookie wall is active */
+body.cmplz-banner-active *:not(.cmplz-cookiebanner):not(.cmplz-cookiebanner *) {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.cmplz-cookiebanner * {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
 #cmplz-manage-consent .cmplz-manage-consent {
   margin: unset;
   z-index: 9998;

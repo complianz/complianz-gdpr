@@ -14,7 +14,7 @@ function cmplz_abtesting_fields($fields){
 			'menu_id'                 => 'ab-testing',
 			'group_id'                => 'statistics-settings',
 			'premium'          => [
-				'url'     => 'https://complianz.io/pricing',
+				'url'     => 'https://complianz.io/pricing/',
 			],
 			'type'     => 'checkbox',
 			'label'    => __( "Enable consent statistics", 'complianz-gdpr' ),
@@ -30,7 +30,7 @@ function cmplz_abtesting_fields($fields){
 			'type'     => 'checkbox',
 			'label'    => __( "Enable A/B testing", 'complianz-gdpr' ),
 			'premium'          => [
-				'url'     => 'https://complianz.io/pricing',
+				'url'     => 'https://complianz.io/pricing/',
 				'disabled' => false,
 			],
 			'comment'  => __( 'If enabled, the plugin will track which consent banner has the best conversion rate.', 'complianz-gdpr' ),
