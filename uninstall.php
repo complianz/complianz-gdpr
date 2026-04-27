@@ -99,6 +99,7 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_synced_cookiedatabase_once',
         'cmplz_sync_services_complete',
         'cmplz_tcf_mail_sent',
+		'cmplz_tcf_license_active',
         'cmplz_tracking_ab_started',
         'cmplz_transients',
         'cmplz_upgraded_to_five',

@@ -1,12 +1,12 @@
 === Complianz - GDPR/CCPA Cookie Consent ===
-Contributors: RogierLankhorst, aahulsebos, leonwimmenhoeve, paapst, markwolters, tomeijkelenkamp, hesseldejong, mujuonly, xantek, pierrotevrard, jarnovos
+Contributors: RogierLankhorst, aahulsebos, leonwimmenhoeve, paapst, markwolters, tomeijkelenkamp, hesseldejong, mujuonly, xantek, pierrotevrard, jarnovos, gdom3
 Donate link: https://paypal.me/complianz
 Tags: GDPR, Cookie, Cookie Notice, Consent, Privacy
 Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
-Tested up to: 6.9
-Stable tag: 7.4.5
+Tested up to: 7.0
+Stable tag: 7.4.6
 
 Configure your Cookie Banner, Cookie Consent and Cookie Policy with our Wizard and Cookies Scan.
 
@@ -198,6 +198,13 @@ The Brazilian General Data Protection Law is similar to the GDPR, the UK-GDPR it
 With some custom CSS this is possible, but we do not consider a cookie wall to be GDPR compliant, so it's not actively supported. We do, however, have the option to create a Soft Cookie Wall. Which blocks interaction with the website, but dismissing remains a possibility.
 
 == Changelog ==
+= 7.4.6 =
+* April 13th, 2026
+* Fix: Prevent PHP warnings when cookiedatabase.org returns a malformed or unexpected response during sync.
+* Security: Fixed unauthorized access to post content via REST API endpoint.
+* Enhancement: Updated Gutenberg blocks to API version 3.
+* Fix: Resolved infinite page reload loop triggered by auto-dismiss on scroll or timeout.
+
 = 7.4.5 =
 * March 16th, 2026
 * Feature: Added WCAG color contrast calculator to color picker.

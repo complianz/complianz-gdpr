@@ -146,13 +146,17 @@ const selectDocument = ({ className, isSelected, attributes, setAttributes }) =>
 							<SelectControl onChange={ (e) => onChangeSelectDocument(e) }
 										   value={ selectedDocument }
 										   label={__('Select a document', 'complianz-gdpr')}
-										   options={options}/>
+										   options={options}
+										   __next40pxDefaultSize
+										   __nextHasNoMarginBottom/>
 						</PanelRow>
 						<PanelRow key="2">
 							<SelectControl onChange={(e) => onChangeSelectDocumentSyncStatus(e) }
 										   value={documentSyncStatus}
 										   label={__('Document sync status', 'complianz-gdpr')}
-										   options={document_status_options}/>
+										   options={document_status_options}
+										   __next40pxDefaultSize
+										   __nextHasNoMarginBottom/>
 						</PanelRow>
 					</PanelBody>
 				</InspectorControls>
@@ -172,14 +176,18 @@ const selectDocument = ({ className, isSelected, attributes, setAttributes }) =>
 							<SelectControl onChange={(e) => onChangeSelectDocument(e) }
 										   value={attributes.selectedDocument}
 										   label={__('Select a document', 'complianz-gdpr')}
-										   options={options}/>
+										   options={options}
+										   __next40pxDefaultSize
+										   __nextHasNoMarginBottom/>
 						</PanelRow>
 						<PanelRow>
 
 							<SelectControl onChange={ (e) => onChangeSelectDocumentSyncStatus(e) }
 										   value={documentSyncStatus}
 										   label={__('Document sync status', 'complianz-gdpr')}
-										   options={document_status_options}/>
+										   options={document_status_options}
+										   __next40pxDefaultSize
+										   __nextHasNoMarginBottom/>
 						</PanelRow>
 					</PanelBody>
 				</InspectorControls>
@@ -213,6 +221,7 @@ const selectDocument = ({ className, isSelected, attributes, setAttributes }) =>
 
 
 registerBlockType('complianz/document', {
+	apiVersion: 3,
 	title: __('Legal document - Complianz', 'complianz-gdpr'), // Block title.
 	icon: iconEl, // Block icon from Dashicons → https://developer.wordpress.org/resource/dashicons/.
 	category: 'widgets',
@@ -242,7 +251,7 @@ registerBlockType('complianz/document', {
 		},
 		content: {
 			type: 'string',
-			source: 'children',
+			source: 'html',
 			selector: 'p',
 		},
 		selectedDocument: {
@@ -287,6 +296,7 @@ registerBlockType('complianz/document', {
 });
 
 registerBlockType( 'complianz/consent-area', {
+	apiVersion: 3,
 	title: __( 'Consent Area Block' ),
 	icon: iconEl,
 	category: 'widgets',
@@ -358,6 +368,8 @@ registerBlockType( 'complianz/consent-area', {
 									{ label: __( 'Marketing','complianz-gdpr' ), value: 'marketing' },
 								] }
 								onChange={ ( value ) => setAttributes( { category: value } ) }
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
 							/>
 						</PanelRow>
 						<PanelRow key="2">
@@ -378,6 +390,8 @@ registerBlockType( 'complianz/consent-area', {
 									{ label: __( 'Default','complianz-gdpr' ), value: 'consented' },
 								] }
 								onChange={ (value )=>onViewChange(value) }
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
 							/>
 						</PanelRow>
 					</PanelBody>

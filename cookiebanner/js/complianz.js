@@ -1842,9 +1842,9 @@ function cmplz_set_up_auto_dismiss() {
 		return;
 	}
 
-	// Handle dismiss on scroll
-	if ( complianz.dismiss_on_scroll == 1 ) {
-		const onWindowScroll = function() {
+	// Handle dismiss on scroll – opt-out only
+	if ( complianz.consenttype === 'optout' && complianz.dismiss_on_scroll == 1 ) {
+		const onWindowScroll = function () {
 			if ( window.pageYOffset > Math.floor( 400 ) ) {
 				window.removeEventListener( 'scroll', onWindowScroll );
 				this.onWindowScroll = null;
@@ -1852,17 +1852,9 @@ function cmplz_set_up_auto_dismiss() {
 				if ( cmplz_get_banner_status() === 'dismissed' ) {
 					return;
 				}
-				// Set dismissed before cmplz_deny_all() to ensure the cookie is written
-				// before the page reload it triggers, preventing an infinite loop.
 				cmplz_set_banner_status( 'dismissed' );
-				if ( complianz.consenttype === 'optout' ) {
-					// Opt-out: dismissal allows cookies (do nothing, they're already active)
-					cmplz_fire_categories_event();
-					cmplz_track_status();
-				} else {
-					// Opt-in: dismissal denies all cookies
-					cmplz_deny_all();
-				}
+				cmplz_fire_categories_event();
+				cmplz_track_status();
 			}
 		};
 		window.addEventListener( 'scroll', onWindowScroll );
@@ -1870,23 +1862,15 @@ function cmplz_set_up_auto_dismiss() {
 
 	// Handle dismiss on timeout
 	const delay = parseInt( complianz.dismiss_timeout );
-	if ( delay > 0 ) {
-		window.setTimeout( function() {
+	if ( complianz.consenttype === 'optout' && delay > 0 ) {
+		window.setTimeout( function () {
 			// User may have explicitly accepted/denied before the timeout fired.
 			if ( cmplz_get_banner_status() === 'dismissed' ) {
 				return;
 			}
-			// Set dismissed before cmplz_deny_all() to ensure the cookie is written
-			// before the page reload it triggers, preventing an infinite loop.
 			cmplz_set_banner_status( 'dismissed' );
-			if ( complianz.consenttype === 'optout' ) {
-				// Opt-out: dismissal allows cookies (do nothing, they're already active)
-				cmplz_fire_categories_event();
-				cmplz_track_status();
-			} else {
-				// Opt-in: dismissal denies all cookies
-				cmplz_deny_all();
-			}
+			cmplz_fire_categories_event();
+			cmplz_track_status();
 		}, Math.floor( delay ) );
 	}
 }
