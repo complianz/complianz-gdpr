@@ -129,6 +129,7 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_wsc_onboarding_status',
         'cmplz_wsc_onboarding_start',
         'cmplz_wsc_onboarding_complete',
+		'cmplz_wsc_dismissed',
 		'cmplz_wsc_onboarding_dismissed',
 		'cmplz_wsc_websitescan_dismissed',
 		'cmplz_wsc_scan_id',

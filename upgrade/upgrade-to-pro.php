@@ -170,12 +170,12 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 				$suggestion = [
 						'icon_url' => $dir_url.'really-simple-ssl.png',
 						'constant' => 'rsssl_version',
-						'title' => 'Really Simple SSL & Security',
+						'title' => 'Really Simple Security',
 						'description_short' => __('SSL & Security', "complianz-gdpr"),
 						'disabled' => '',
 						'button_text' => __("Install", "complianz-gdpr"),
 						'slug' => 'really-simple-ssl',
-						'description' => __('Really Simple SSL & Security - Lightweight plugin, heavyweight features.', "complianz-gdpr"),
+						'description' => __('Really Simple Security - Lightweight plugin, heavyweight features.', "complianz-gdpr"),
 						'install_url' => 'ssl%20really%20simple%20plugins%20complianz+HSTS&tab=search&type=term',
 				];
 				if ( $current_plugin==='really-simple-ssl' ) {

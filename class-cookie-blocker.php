@@ -141,7 +141,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 		public function get_cookies( $cookie_list, $category) {
 			if (is_array($cookie_list)) {
 				foreach ( $cookie_list as $cookie ) {
-					if ( stripos( $cookie->purpose, $category ) !== false ) {
+					if ( stripos( (string) $cookie->purpose, $category ) !== false ) {
 						$this->cookie_list[ $category ][ $this->sanitize_service_name( $cookie->service ) ][] = str_replace( '*', '', $cookie->name );
 					}
 				}

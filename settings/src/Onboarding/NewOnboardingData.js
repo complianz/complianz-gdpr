@@ -41,6 +41,14 @@ const steps = {
 	}
 }
 
+const stepDismissOnPrev = {
+	welcome:    'websitescan',
+	terms:      'websitescan',
+	newsletter: 'newsletter',
+	plugins:    null,
+	thankYou:   null,
+};
+
 const suggestedPlugins = [
 	{
 		'slug': 'complianz-terms-conditions',
@@ -212,15 +220,12 @@ const useNewOnboardingData = create((set, get) => ({
 	//
 	// buttons actions
 	goToPrevStep: () => set((state) => { // prev step or skip
-		const newStep = state.currentStep === 'welcome' ? 'newsletter' : steps[state.currentStep].prevButtonGoTo;
+		const newStep = steps[state.currentStep]?.prevButtonGoTo ?? null;
+		if (!newStep) return state;
 
-		if (newStep === 'newsletter' || newStep === 'plugins') {
-			const step = newStep === 'newsletter' ? 'websitescan' : 'newsletter';
-			get().skipStep(step);
-		}
+		const dismissStep = stepDismissOnPrev[state.currentStep];
+		if (dismissStep) get().skipStep(dismissStep);
 
-		// const enableWsc = state.currentStep === 'welcome' && newStep !== 'newsletter';
-		// return { ...state, currentStep: newStep, stepProcessing: false, enableWsc };
 		return { ...state, currentStep: newStep, stepProcessing: false };
 	}),
 	goToNextStep: () => set(async (state) => {

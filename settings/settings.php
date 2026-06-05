@@ -251,7 +251,8 @@ function cmplz_plugin_admin_scripts() {
 						'user_id'           => get_current_user_id(),
                         'is_multisite'      => is_multisite(),
                         'is_multisite_plugin'=> defined('cmplz_premium_multisite'),
-						'onboarding_complete' => COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
+						'onboarding_complete' => cmplz_wsc_auth::wsc_is_authenticated() || COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
+						'wsc_is_authenticated' => cmplz_wsc_auth::wsc_is_authenticated(),
 						'referral'          => [
 							'source'      => cmplz_get_source(),
 							'ref_id'      => cmplz_get_ref(),

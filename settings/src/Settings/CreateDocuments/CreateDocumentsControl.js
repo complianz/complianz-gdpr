@@ -12,7 +12,7 @@ import {memo, useState} from "@wordpress/element";
  */
 const CreateDocumentsControl = () => {
 	const {saveDocuments, saving, documentsChanged, documentsDataLoaded, hasMissingPages, fetchDocumentsData, requiredPages } = UseDocumentsData();
-	const {fields, fieldsLoaded, changedFields, addHelpNotice, removeHelpNotice, showSavedSettingsNotice, setDocumentSettingsChanged} = useFields();
+	const {fieldsLoaded, changedFields, addHelpNotice, removeHelpNotice, showSavedSettingsNotice, setDocumentSettingsChanged} = useFields();
 	const [hasNoDocumentsNotice, setHasNoDocumentsNotice] = useState(false);
 
 	useEffect (  () => {
@@ -22,7 +22,7 @@ const CreateDocumentsControl = () => {
 			return;
 		}
 		fetchDocumentsData();
-	}, [ fields, changedFields ])
+	}, [ fieldsLoaded, changedFields ])
 
 	useEffect (  () => {
 		if (!documentsDataLoaded) return;

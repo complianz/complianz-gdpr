@@ -295,7 +295,8 @@ function cmplz_menu() {
 									__( 'we recommend using our <a href="%s" target="_blank" rel="noopener noreferrer" aria-label="%s">online support form</a> instead.', 'complianz-gdpr' ),
 									'https://complianz.io/support',
 									esc_attr__( 'Online support form (opens in new tab)', 'complianz-gdpr' )
-								),
+								) . '<br><br>' .
+								'<strong>' . __( 'Please note:', 'complianz-gdpr' ) . '</strong> ' . __( 'Your support request may be processed by Emma, an automated AI assistant. The information you provide will be used solely for the purpose of handling and resolving your support inquiry.', 'complianz-gdpr' ),
 							'premium'      => true,
 							'upgrade'      => 'https://complianz.io/pricing/',
 							'premium_text' => __( 'Get premium support with %sComplianz GDPR Premium%s', 'complianz-gdpr' ),

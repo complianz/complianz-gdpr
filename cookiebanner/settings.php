@@ -21,7 +21,7 @@ function cmplz_banner_color_schemes() {
 			),
 			'colorpalette_text'            => array(
 				'color'     => '#222222',
-				'hyperlink' => '#1E73BE',
+				'hyperlink' => '#3B29FF',
 			),
 			'colorpalette_toggles'         => array(
 				'background' => '#61CE71',
@@ -521,7 +521,7 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'label'       => __( 'Text', 'complianz-gdpr' ),
 				'default'     => array(
 					'color'     => '#222222',
-					'hyperlink' => '#1E73BE',
+					'hyperlink' => '#3B29FF',
 				),
 				'fields'      => array(
 					array(
@@ -570,9 +570,9 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'type'             => 'colorpicker',
 				'label'            => __( 'Toggles', 'complianz-gdpr' ),
 				'default'          => array(
-					'background' => '#1e73be',
+					'background' => '#3B29FF',
 					'bullet'     => '#ffffff',
-					'inactive'   => '#F56E28',
+					'inactive'   => '#555',
 				),
 				'fields'           => array(
 					array(
@@ -631,8 +631,8 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'type'        => 'colorpicker',
 				'label'       => __( 'Accept', 'complianz-gdpr' ),
 				'default'     => array(
-					'background' => '#1E73BE',
-					'border'     => '#1E73BE',
+					'background' => '#3B29FF',
+					'border'     => '#3B29FF',
 					'text'       => '#ffffff',
 				),
 				'fields'      => array(

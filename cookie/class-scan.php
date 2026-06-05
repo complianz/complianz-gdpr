@@ -771,52 +771,69 @@ if ( ! class_exists( "cmplz_scan" ) ) {
 		 */
 
 		public function get_scan_progress( array $data, string $action, WP_REST_Request $request): array {
-			if (!cmplz_user_can_manage()) {
+			if ( !cmplz_user_can_manage() ) {
 				return [];
 			}
 
-			if ( $action === 'get_scan_progress' ) {
-				$timezone_offset = get_option( 'gmt_offset' );
-				$time            = time() + ( 60 * 60 * $timezone_offset );
-				update_option( 'cmplz_last_cookie_scan', $time );
+			if ( 'get_scan_progress' !== $action ) {
+				return $data;
+			}
 
-				$next_url = $this->get_next_page_url();
-				if ( 'remote' === $next_url ) {
-					do_action('cmplz_remote_cookie_scan');
-					//only proceed to next page if remote scan is complete
-					if ( COMPLIANZ::$wsc_scanner->wsc_scan_completed() ) {
-						$next_url = $this->get_next_page_url();
-					} else {
-						// Don't return 'remote' to React app - it will create iframe with src="remote".
-						// Return a data URL that won't cause network requests or 404 errors.
-						$next_url = 'data:text/html,<html><body>WSC scan in progress...</body></html>';
+			$data = array(
+				'progress'  => 0,
+				'next_page' => false,
+				'cookies'   => array(),
+				'token'     => '',
+			);
 
-						// Mark 'remote' as processed so we can move to next page, but only when NOT in cron context - although it might not be necessary.
-						if ( ! wp_doing_cron() ) {
-							$this->set_page_as_processed( 'remote' );
-						}
-					}
-				} else if ( false !== strpos( $next_url, 'complianz_id' ) ) {
-					$response = wp_remote_get( $next_url );
-					if ( ! is_wp_error( $response ) ) {
-						$html = $response['body'];
-						$this->parse_html($html);
+			if ( !cmplz_wsc_auth::wsc_is_authenticated() ) {
+				return $data;
+			}
+
+			$timezone_offset = get_option( 'gmt_offset' );
+			$time            = time() + ( 60 * 60 * $timezone_offset );
+
+			update_option( 'cmplz_last_cookie_scan', $time );
+
+			$next_url = $this->get_next_page_url();
+
+			if ( 'remote' === $next_url ) {
+				do_action('cmplz_remote_cookie_scan');
+				//only proceed to next page if remote scan is complete
+				if ( COMPLIANZ::$wsc_scanner->wsc_scan_completed() ) {
+					$next_url = $this->get_next_page_url();
+				} else {
+					// Don't return 'remote' to React app - it will create iframe with src="remote".
+					// Return a data URL that won't cause network requests or 404 errors.
+					$next_url = 'data:text/html,<html><body>WSC scan in progress...</body></html>';
+
+					// Mark 'remote' as processed so we can move to next page, but only when NOT in cron context - although it might not be necessary.
+					if ( ! wp_doing_cron() ) {
+						$this->set_page_as_processed( 'remote' );
 					}
 				}
-				$this->clear_double_cookienames();
-				$cookies  = COMPLIANZ::$banner_loader->get_cookies();
-				$progress = $this->get_progress_count();
-				$total = count($cookies);
-				$current = (int) ( $progress / 100 * $total );
-				$cookies = array_slice( $cookies, 0, $current);
-				$cookies = count($cookies) > 0 ? wp_list_pluck( $cookies, 'name' ) : [];
-				$data = [
-						"progress"  => $progress,
-						"next_page" => $next_url,
-						'cookies' => $cookies,
-						'token' => wp_create_nonce( 'complianz_scan_token' ),
-				];
+			} else if ( false !== strpos( $next_url, 'complianz_id' ) ) {
+				$response = wp_remote_get( $next_url );
+				if ( ! is_wp_error( $response ) ) {
+					$html = $response['body'];
+					$this->parse_html($html);
+				}
 			}
+
+			$this->clear_double_cookienames();
+
+			$cookies  = COMPLIANZ::$banner_loader->get_cookies();
+			$progress = $this->get_progress_count();
+			$total    = count( $cookies );
+			$current  = (int) ( $progress / 100 * $total );
+			$cookies  = array_slice( $cookies, 0, $current );
+			$cookies  = count( $cookies ) > 0 ? wp_list_pluck( $cookies, 'name' ) : [];
+
+			$data['progress'] = $progress;
+			$data['next_page'] = $next_url;
+			$data['cookies']   = $cookies;
+			$data['token']     = wp_create_nonce( 'complianz_scan_token' );
+
 			return $data;
 		}
 

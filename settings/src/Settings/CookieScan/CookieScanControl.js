@@ -17,7 +17,7 @@ const CookieScanControl = () => {
 	const {addHelpNotice, fieldsLoaded} = useFields();
 	const {selectedSubMenuItem } = useMenu();
 	const {setProgressLoaded} = useProgress();
-	const [wscLocked, setWscLocked] = useState(false);
+	const wscLocked = !cmplz_settings.wsc_is_authenticated;
 
 	useEffect ( () => {
 		if (lastLoadedIframe === nextPage) return;
@@ -27,11 +27,11 @@ const CookieScanControl = () => {
 	}, [nextPage, lastLoadedIframe, iframeLoading]);
 
 	useEffect (  () => {
+		if ( wscLocked ) return;
 		if ( !iframeLoading && !loading && progress <100 ) {
 			fetchProgress();
-		} else if ( !iframeLoading && !loading && progress === 100 ) {
 		}
-	}, [iframeLoading, loading, progress]);
+	}, [iframeLoading, loading, progress, wscLocked]);
 
 	useEffect (  () => {
 		if (!fieldsLoaded) return;
@@ -50,18 +50,6 @@ const CookieScanControl = () => {
 			);
 		}
 	},[fieldsLoaded]);
-
-	useEffect(() => {
-		const checkWscLock = async () => {
-			try {
-				const response = await cmplz_api.doAction('get_wsc_status', {});
-				setWscLocked(response.wsc_lock);
-			} catch (error) {
-				console.error('Error activating Website Scan:', error);
-			}
-		};
-		checkWscLock();
-	}, []);
 
 	const doNotTrack = () => {
 		let dnt = 'doNotTrack' in navigator && navigator.doNotTrack === '1';
@@ -169,7 +157,7 @@ const CookieScanControl = () => {
 				<div className="cmplz-wscscan-alert">
 					<Icon name={'warning'} color={'orange'} size={48}/>
 					<div className="cmplz-wscscan-alert-group">
-						<div className="cmplz-wscscan-alert-group-title">{__("Advanced Scan Unavailable", "complianz-gdpr")}</div>
+						<div className="cmplz-wscscan-alert-group-title">{__("Cookie Scan Unavailable", "complianz-gdpr")}</div>
 						<div className="cmplz-wscscan-alert-group-desc">{__("We need to authenticate this domain.", "complianz-gpdr")}</div>
 					</div>
 
@@ -191,11 +179,11 @@ const CookieScanControl = () => {
 			<div id="cmplz-scan-progress">
 				<div className='cmplz-progress-bar' style={getStyles()}></div>
 			</div>
-			<div>
+			{!wscLocked && (
 				<div className="cmplz-panel__list">
 					<Panel summary={description} details={Details(initialLoadCompleted, cookies)}/>
 				</div>
-			</div>
+			)}
 		</>
 	);
 }
