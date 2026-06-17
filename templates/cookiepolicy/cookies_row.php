@@ -1,12 +1,12 @@
 <div class="name-header">
-	<strong><?php esc_html_e(__( 'Name', 'complianz-gdpr' )) ?></strong>
+	<h5><?php esc_html_e( 'Name', 'complianz-gdpr' ) ?></h5>
 </div>
 <div class="name">{link_open}{name}{link_close}</div>
 <div class="retention-header">
-	<strong><?php esc_html_e(__( 'Expiration', 'complianz-gdpr' )) ?></strong>
+	<h5><?php esc_html_e( 'Expiration', 'complianz-gdpr' ) ?></h5>
 </div>
 <div class="retention">{retention}</div>
 <div class="function-header">
-	<strong><?php esc_html_e(__( 'Function', 'complianz-gdpr' )) ?></strong>
+	<h5><?php esc_html_e( 'Function', 'complianz-gdpr' ) ?></h5>
 </div>
 <div class="function">{cookieFunction}</div>

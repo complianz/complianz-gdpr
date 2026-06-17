@@ -59,6 +59,12 @@ const useRecordsOfConsentData = create(( set, get ) => ({
 			fetching:false,
 		}));
 	},
+	downloadRecordProof: async (id) => {
+		const response = await cmplz_api.doAction('get_record_of_consent_pdf_url', { id }).catch((error) => {
+			console.error(error);
+		});
+		return response?.url || '';
+	},
 	startExport: async () => {
 		set({
 			generating: true,

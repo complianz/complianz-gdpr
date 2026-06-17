@@ -11,9 +11,38 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 			add_action( 'cmplz_do_action', array( $this, 'handle_wsc_settings_action' ), 10, 3 );
 			add_filter( 'cmplz_menu', array( $this, 'add_website_scan_menu' ) );
 			add_filter( 'cmplz_fields', array( $this, 'add_website_scan_fields' ), 80 );
+			add_filter( 'cmplz_field', array( $this, 'maybe_disable_batch_scan_field' ), 10, 2 );
 			add_action( 'cmplz_before_save_option', array( $this, 'cmplz_before_save_option' ), 100, 4 );
 			add_action( 'cmplz_every_day_hook', array( $this, 'check_failed_user_deletion' ) );
 			add_action( 'cmplz_store_newsletter_onboarding_consent', array( $this, 'cmplz_store_newsletter_onboarding_consent_handler' ), 10, 2 );
+		}
+
+		/**
+		 * Lock the background scan checkbox while the Website Scan is not enabled.
+		 *
+		 * In premium, the field is normally toggleable. When WSC is off (no auth, or
+		 * disabled by the admin), toggling the opt-in has no effect — batch_dispatch()
+		 * bails out at the wsc_scan_enabled() gate. Disabling the field here and
+		 * surfacing a tooltip explains why.
+		 *
+		 * Free is unaffected (it ships with disabled=true as the upsell showcase).
+		 *
+		 * @param array  $field    Field definition.
+		 * @param string $field_id Field id being filtered.
+		 * @return array
+		 */
+		public function maybe_disable_batch_scan_field( $field, $field_id ) {
+			if ( 'wsc_batch_scan_enabled' !== $field_id ) {
+				return $field;
+			}
+			if ( ! defined( 'cmplz_premium' ) ) {
+				return $field;
+			}
+			if ( ! cmplz_wsc_is_enabled() ) {
+				$field['disabled'] = true;
+				$field['tooltip']  = __( 'Activate the Website Scan first to use background scanning.', 'complianz-gdpr' );
+			}
+			return $field;
 		}
 
 
@@ -104,13 +133,15 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 			$updated_wsc_status = get_option( 'cmplz_wsc_status' ); // Website Scan status
 			$wsc_signup_date    = get_option( 'cmplz_wsc_signup_date' ) ? get_option( 'cmplz_wsc_signup_date' ) : false;
 
-			return array(
-				'token_status'    => $token_status, // token status
-				'wsc_status'      => $updated_wsc_status,
-				'wsc_signup_date' => $wsc_signup_date,
+			return apply_filters(
+				'cmplz_wsc_actions_response',
+				array(
+					'token_status'    => $token_status,
+					'wsc_status'      => $updated_wsc_status,
+					'wsc_signup_date' => $wsc_signup_date,
+				)
 			);
 		}
-
 
 		/**
 		 * Retrieves the token status.
@@ -242,6 +273,22 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 						'default'  => '',
 					),
 					array(
+						'id'       => 'wsc_batch_scan_enabled',
+						'menu_id'  => 'settings-cd',
+						'group_id' => 'settings-websitescan',
+						'type'     => 'checkbox',
+						'default'  => false,
+						'disabled' => true,
+						'required' => false,
+						'label'    => __( 'Background scanning', 'complianz-gdpr' ),
+						'tooltip'  => __( 'When enabled, the Website Scan periodically processes all selected post types in the background to detect newly added cookies.', 'complianz-gdpr' ),
+						'comment'  => __( 'When enabled, the Website Scan processes one page every few minutes until every selected post type has been covered, detecting new cookies on your site as third-party scripts change over time.', 'complianz-gdpr' ),
+						'premium'  => array(
+							'disabled' => false,
+							'url'      => 'https://complianz.io/pricing-subpages/',
+						),
+					),
+					array(
 						'id'       => 'websitescan_actions',
 						'menu_id'  => 'settings-cd',
 						'group_id' => 'settings-websitescan',
@@ -249,8 +296,45 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 						'required' => false,
 						'default'  => '',
 					),
+					array(
+						'id'       => 'wsc_scan_post_types',
+						'menu_id'  => 'cookie-scan',
+						'group_id' => 'cookie-scan',
+						'type'     => 'multicheckbox',
+						'options'  => $this->scan_post_type_options(),
+						// Free baseline: posts and pages only, field locked (upsell showcase).
+						'default'  => array( 'post', 'page' ),
+						'disabled' => true,
+						'required' => false,
+						'label'    => __( 'Post types to scan', 'complianz-gdpr' ),
+						'tooltip'  => __( 'Pages of the selected post types are included in the Website Scan and show the scan column in the post overview.', 'complianz-gdpr' ),
+						'comment'  => __( 'The free scan covers posts and pages. Upgrade to Premium to include custom post types.', 'complianz-gdpr' ),
+						'premium'  => array(
+							// Premium: all post types freely selectable; custom post types opt-in.
+							'disabled' => false,
+							'url'      => 'https://complianz.io/pricing-subpages/',
+							'comment'  => __( 'Posts and pages are scanned by default. Select the custom post types you want to include.', 'complianz-gdpr' ),
+						),
+					),
 				)
 			);
+		}
+
+		/**
+		 * Build the multicheckbox options for the scannable post types field.
+		 *
+		 * Delegates to the scan class universe helper so the exclusion list
+		 * lives in one place. The scan class is loaded in every context where
+		 * fields are built (admin / authenticated REST); the empty fallback
+		 * only guards unexpected contexts.
+		 *
+		 * @return array<string,string> post type slug => plural label.
+		 */
+		private function scan_post_type_options(): array {
+			if ( isset( COMPLIANZ::$scan ) && COMPLIANZ::$scan ) {
+				return COMPLIANZ::$scan->get_public_scannable_post_types( true );
+			}
+			return array();
 		}
 
 		/**
@@ -314,12 +398,6 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 
 				case 'send_notifications_email': // switch true / false
 					$is_enabled = $field_value;
-
-					// if ($is_enabled) {
-					// error_log('enable newsletter'); // wait for api
-					// } else {
-					// error_log('disable newsletter'); // wait for api
-					// }
 					break;
 
 				case 'notifications_email_address':
@@ -476,9 +554,6 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 			} catch ( Exception $e ) {
 				$error = 'Exception during API request: ' . $e->getMessage();
 				$this->log_user_deletion_error( 'cmplz_wsc_user_deletion_error', $error );
-				if ( WP_DEBUG ) {
-					error_log( $error );
-				}
 				return false;
 			}
 		}
@@ -561,9 +636,7 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 			update_option( $option, true, false );
 			update_option( $option . '_message', $message, false );
 			update_option( $option . '_timestamp', time(), false );
-			if ( WP_DEBUG ) {
-				error_log( $message );
-			}
+			cmplz_wsc_logger::log_errors( 'user_deletion', $message );
 		}
 
 		/**

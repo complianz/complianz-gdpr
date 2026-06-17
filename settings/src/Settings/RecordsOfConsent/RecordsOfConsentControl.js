@@ -18,7 +18,7 @@ const RecordsOfConsentControl = () => {
 		order,
 		setOrder,
 		searchValue, setSearchValue,
-		records, downloadUrl, deleteRecords, recordsLoaded, fetchData} = useRecordsOfConsentData();
+		records, downloadUrl, deleteRecords, recordsLoaded, fetchData, downloadRecordProof} = useRecordsOfConsentData();
 	const [ btnDisabled, setBtnDisabled ] = useState( '' );
 	const [ selectedRecords, setSelectedRecords ] = useState( [] );
 	const disabled = !cmplz_settings.is_premium;
@@ -72,42 +72,24 @@ const RecordsOfConsentControl = () => {
 	}
 
 	const downloadRecords = async () => {
-		let selectedRecordsCopy = records.filter((record) => {return selectedRecords.includes(record.id) && record.poc_url!== '' });
+		let selectedRecordsCopy = records.filter((record) => selectedRecords.includes(record.id));
 		setSelectedRecords([]);
-		const downloadNext = async () => {
-			if (selectedRecordsCopy.length > 0) {
-				const record = selectedRecordsCopy.shift();
-				const url = downloadUrl + '/' + record.poc_url;;
-				setBtnDisabled(true);
-				try {
-					let request = new XMLHttpRequest();
-					request.responseType = 'blob';
-					request.open('get', url, true);
-					request.send();
-					request.onreadystatechange = function() {
-						if (this.readyState === 4 && this.status === 200) {
-							let obj = window.URL.createObjectURL(this.response);
-							let element = window.document.createElement('a');
-							element.setAttribute('href',obj);
-							element.setAttribute('download', record.filename);
-							window.document.body.appendChild(element);
-							//onClick property
-							element.click();
-							setTimeout(function() {
-								window.URL.revokeObjectURL(obj);
-							}, 60 * 1000);
-						}
-					};
-
-					await downloadNext();
-				} catch (error) {
-					console.error(error);
-					setBtnDisabled(false);
+		setBtnDisabled(true);
+		for (const record of selectedRecordsCopy) {
+			try {
+				const url = await downloadRecordProof(record.id);
+				if (url) {
+					const element = window.document.createElement('a');
+					element.setAttribute('href', url);
+					element.setAttribute('download', 'proof-of-consent-' + record.id + '.pdf');
+					window.document.body.appendChild(element);
+					element.click();
+					window.document.body.removeChild(element);
 				}
+			} catch (error) {
+				console.error(error);
 			}
-		};
-
-		await downloadNext();
+		}
 		setBtnDisabled(false);
 	};
 
@@ -183,7 +165,7 @@ const RecordsOfConsentControl = () => {
 
 		//filter the plugins by search value
 		records = records.filter(document => {
-			return document.ip.toLowerCase().includes(searchValue.toLowerCase()) || document.services.toLowerCase().includes(searchValue.toLowerCase()) || document.id.toLowerCase().includes(searchValue.toLowerCase());
+			return document.ip.toLowerCase().includes(searchValue.toLowerCase()) || document.services.toLowerCase().includes(searchValue.toLowerCase()) || String(document.id).includes(searchValue);
 		})
 		return records;
 	}
@@ -234,13 +216,25 @@ const RecordsOfConsentControl = () => {
 			grow: 2,
 		},
 		{
+			name: __('Consent Type',"complianz-gdpr"),
+			selector: row => consentLabels[row.consenttype] || row.consenttype,
+			sortable: true,
+			grow: 3,
+		},
+		{
 			name: __('Categories',"complianz-gdpr"),
 			selector: row => getCategories(row),
 			sortable: true,
 			grow: 9,
 		},
 		{
-			name: __('Date',"complianz-gdpr"),
+			name: __('Banner Version',"complianz-gdpr"),
+			selector: row => row.banner_version != null ? row.banner_version : '-',
+			sortable: true,
+			grow: 3,
+		},
+		{
+			name: __('Date & Time',"complianz-gdpr"),
 			selector: row => row.time,
 			sortable: true,
 			grow: 6,
@@ -277,7 +271,7 @@ const RecordsOfConsentControl = () => {
 					{selectedRecords.length>1 && __("%s items selected", "complianz-gdpr").replace("%s", selectedRecords.length)}
 					{selectedRecords.length===1 && __("1 item selected", "complianz-gdpr")}
 					<div className="cmplz-selected-document-controls">
-						{records.filter((record) => {return selectedRecords.includes(record.id) && record.poc_url!== '' }).length>0 && <button disabled={btnDisabled} className="button button-default cmplz-btn-reset" onClick={() => downloadRecords()}>{__("Download Proof of Consent", "complianz-gdpr")}</button> }
+						{selectedRecords.length > 0 && <button disabled={btnDisabled} className="button button-default cmplz-btn-reset" onClick={() => downloadRecords()}>{__("Download Proof of Consent", "complianz-gdpr")}</button>}
 						<button className="button button-default cmplz-reset-button" onClick={() => onDeleteRecords(selectedRecords)}>{__("Delete", "complianz-gdpr")}</button>
 					</div>
 				</div>

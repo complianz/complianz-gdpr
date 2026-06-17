@@ -162,12 +162,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
 			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: cannot send email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					if ( $error_message ) {
-						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
-				}
+				cmplz_wsc_logger::log_errors( 'send_signup_email', 'cannot send email, request failed' . ( $error_message ? ': ' . $error_message : '' ) );
 				update_option( 'cmplz_wsc_error_email_not_sent', true, false );
 			} else {
 				$response_code = wp_remote_retrieve_response_code( $request );
@@ -180,12 +175,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					delete_option( 'cmplz_wsc_onboarding_start' );
 				} else {
 					$response_message = wp_remote_retrieve_response_message( $request );
-					if ( WP_DEBUG ) {
-						error_log( 'COMPLIANZ: cannot send email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-						if ( $response_message ) {
-							error_log( 'COMPLIANZ: ' . $response_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-						}
-					}
+					cmplz_wsc_logger::log_errors( 'send_signup_email', 'cannot send email, request failed' . ( $response_message ? ': ' . $response_message : '' ) );
 					update_option( 'cmplz_wsc_error_email_not_sent', true, false );
 				}
 			}
@@ -220,16 +210,12 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
 			if ( ! isset( $_GET['email'] ) || $_GET['email'] !== $stored_email ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				update_option( 'cmplz_wsc_error_email_mismatch', true, false );
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: email does not match the stored email' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				}
+				cmplz_wsc_logger::log_errors( 'confirm_email_auth', 'email does not match the stored email' );
 				return;
 			}
 			if ( ! isset( $_GET['token'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				update_option( 'cmplz_wsc_error_missing_token', true, false );
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: token not found in the authentication url' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				}
+				cmplz_wsc_logger::log_errors( 'confirm_email_auth', 'token not found in the authentication url' );
 				return;
 			}
 
@@ -254,12 +240,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
 			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: cannot confirm email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					if ( $error_message ) {
-						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
-				}
+				cmplz_wsc_logger::log_errors( 'confirm_email_auth', 'cannot confirm email, request failed' . ( $error_message ? ': ' . $error_message : '' ) );
 				update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 			} else {
 				$response_code = wp_remote_retrieve_response_code( $request );
@@ -279,15 +260,11 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 						// Since client_id and client_secret are stored, we can trigger the site creation.
 						do_action( 'cmplz_maybe_sync_wsc_site_id' );
 					} else {
-						if ( WP_DEBUG ) {
-							error_log( 'COMPLIANZ: cannot confirm email, client id or secret not found in response' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-						}
+						cmplz_wsc_logger::log_errors( 'confirm_email_auth', 'cannot confirm email, client id or secret not found in response' );
 						update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 					}
 				} else {
-					if ( WP_DEBUG ) {
-						error_log( 'COMPLIANZ: cannot confirm email, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
+					cmplz_wsc_logger::log_errors( 'confirm_email_auth', 'cannot confirm email, request failed' );
 					update_option( 'cmplz_wsc_error_email_auth_failed', true, false );
 				}
 			}
@@ -346,9 +323,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				$client_id     = $client_credentials['client_id'];
 				$client_secret = $client_credentials['client_secret'];
 			} elseif ( '' === $email || '' === $client_id || '' === $client_secret ) {
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: cannot retrieve token, email or client id or secret not found' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				}
+				cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token, email or client id or secret not found' );
 				return false;
 			}
 
@@ -394,9 +369,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					}
 
 					update_option( 'cmplz_wsc_error_token_api', true, false );
-					if ( WP_DEBUG && $request->error ) {
-						error_log( 'COMPLIANZ: cannot retrieve token, token not found in response' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
+					cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token, token not found in response' );
 					return false;
 				}
 			} else {
@@ -404,12 +377,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					update_option( 'cmplz_wsc_error_token_api', true, false );
 				}
 				$error_message = $request->get_error_message();
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: cannot retrieve token, request failed' ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					if ( $error_message ) {
-						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
-				}
+				cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token, request failed' . ( $error_message ? ': ' . $error_message : '' ) );
 				return false;
 			}
 		}
@@ -513,12 +481,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
 			if ( is_wp_error( $request ) ) {
 				$error_message = $request->get_error_message();
-				if ( WP_DEBUG ) {
-					error_log( 'COMPLIANZ: cannot store consent, request failed for identifier: ' . $type ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					if ( $error_message ) {
-						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
-				}
+				cmplz_wsc_logger::log_errors( 'store_consent', 'cannot store consent, request failed for identifier: ' . $type . ( $error_message ? ': ' . $error_message : '' ) );
 				// define an error into the options.
 				update_option( 'cmplz_consent_error_timestamp_' . $type, time() );
 				// store the consent for the time we can resend the request.
@@ -536,12 +499,7 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					update_option( 'cmplz_consent_' . $type, $body );
 				} else {
 					$response_message = wp_remote_retrieve_response_message( $request );
-					if ( WP_DEBUG ) {
-						error_log( 'COMPLIANZ: cannot store consent, request failed for identifier: ' . $type ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-						if ( $response_message ) {
-							error_log( 'COMPLIANZ: ' . $response_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-						}
-					}
+					cmplz_wsc_logger::log_errors( 'store_consent', 'cannot store consent, request failed for identifier: ' . $type . ( $response_message ? ': ' . $response_message : '' ) );
 					// define an error into the options.
 					update_option( 'cmplz_consent_error_timestamp_' . $type, time() );
 					// store the consent for the time we can resend the request.
@@ -586,12 +544,8 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				update_option( 'cmplz_newsletter_signup_error_email', $email, false );
 				update_option( 'cmplz_newsletter_signup_error', true, false );
 				update_option( 'cmplz_newsletter_signup_error_timestamp', time(), false );
-				if ( WP_DEBUG ) {
-					$error_message = $request->get_error_message();
-					if ( $error_message ) {
-						error_log( 'COMPLIANZ: ' . $error_message ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-					}
-				}
+				$error_message = $request->get_error_message();
+				cmplz_wsc_logger::log_errors( 'newsletter_sign_up', $error_message );
 			} else {
 				$response_code = wp_remote_retrieve_response_code( $request );
 				if ( 200 === $response_code ) {
@@ -639,6 +593,8 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 			$service_key   = sprintf( '%s_enabled', $service );
 			$response_body = json_decode( wp_remote_retrieve_body( $request ) );
 			$is_open       = isset( $response_body->$service_key ) && 'true' === $response_body->$service_key;
+
+			do_action( 'cmplz_wsc_api_open_response', $response_body, $service );
 
 			set_transient( $transient_key, (int) $is_open, 10 * MINUTE_IN_SECONDS );
 			return $is_open;

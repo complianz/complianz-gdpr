@@ -258,8 +258,8 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'group_id'    => 'banner-general',
 				'data_target' => 'banner',
 				'type'        => 'checkbox',
-				'label'       => __( 'Dismiss on time out', 'complianz-gdpr' ),
-				'tooltip'     => __( 'When dismiss on time out is enabled, the consent banner will be dismissed after 10 seconds, or the time you choose below. In opt-in regions (ex.: GDPR), this denies all cookies. In opt-out regions (ex.: CCPA), this allows cookies.', 'complianz-gdpr' ),
+				'label'       => __( 'Dismiss on timeout', 'complianz-gdpr' ),
+				'tooltip'     => __( 'When dismiss on timeout is enabled, the consent banner will be dismissed after 10 seconds, or the time you choose below. Note: this only applies to opt-out regions (e.g. CCPA). In opt-in regions (e.g. GDPR), the banner will remain visible until the user takes an action, regardless of this setting.', 'complianz-gdpr' ),
 				'default'     => false,
 			),
 			array(
