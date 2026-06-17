@@ -381,6 +381,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 						$temp_banner_html         = str_replace( '{' . $fieldname . '}', $value, $temp_banner_html );
 						$temp_manage_consent_html = str_replace( '{' . $fieldname . '}', $value, $temp_manage_consent_html );
 					}
+					$temp_manage_consent_html = str_replace( '{consent_type}', $consent_type, $temp_manage_consent_html );
 					$banner_html         .= $temp_banner_html;
 					$manage_consent_html .= $temp_manage_consent_html;
 				}

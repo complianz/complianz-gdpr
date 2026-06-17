@@ -679,7 +679,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 					//placeholder class can be comma separated list e.g. facebook service integration
 					$classes = array_map('trim', explode(',',$placeholder['placeholder_class']) );
 					foreach ( $classes as $placeholder_class ) {
-						$placeholder_pattern = '/<(a|section|div|blockquote|twitter-widget)*[^>]*(id|class)=[\'" ]*[^>]*(' . $placeholder_class . ')[\'" ].*?>/is';
+						$placeholder_pattern = '/<([a-zA-Z][a-zA-Z0-9-]*)[^>]*(id|class)=[\'" ]*[^>]*(' . $placeholder_class . ')[\'" ].*?>/is';
 						if ( preg_match_all( $placeholder_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 							foreach ( $matches[0] as $key => $html_match ) {
 								$el = $matches[1][ $key ];
@@ -893,12 +893,12 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 
 		public function add_class( $html, $el, $class ) {
 			$classes = array_filter( explode(' ', $class) );
-			preg_match( '/<' . $el . '[^\>]*[^\>\S]+\K(class=")(.*)"/i', $html, $matches );
+			preg_match( '/<' . preg_quote( $el, '/' ) . '[^\>]*[^\>\S]+\K(class=")(.*)"/i', $html, $matches );
 			if ( $matches ) {
 				foreach ($classes as $class){
 					//check if class is already added
 					if (strpos($matches[2], $class) === false && strlen(trim($class))>0) {
-						$html = preg_replace( '/<' . $el . '[^\>]*[^\>\S]+\K(class=")/i', 'class="' . esc_attr($class) . ' ', $html, 1 );
+						$html = preg_replace( '/<' . preg_quote( $el, '/' ) . '[^\>]*[^\>\S]+\K(class=")/i', 'class="' . esc_attr($class) . ' ', $html, 1 );
 					}
 				}
 
@@ -928,7 +928,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 		public function add_data( $html, $el, $id, $content ) {
 			$content = esc_attr( $content );
 			$id      = esc_attr( $id );
-			$pattern = '/<'.$el.'[^>].*?\K(data-'.preg_quote($id, '/').'=[\'|\"]'.preg_quote($content, '/').'[\'|\"])(?=.*>)/i';
+			$pattern = '/<'.preg_quote($el, '/').'[^>].*?\K(data-'.preg_quote($id, '/').'=[\'|\"]'.preg_quote($content, '/').'[\'|\"])(?=.*>)/i';
 			preg_match( $pattern, $html, $matches );
 			if ( !$matches ) {
 				$pos = strpos( $html, "<$el" );

@@ -6,7 +6,8 @@ import useFields from "../../Settings/Fields/FieldsData";
 import {memo} from "@wordpress/element";
 import CheckboxGroup from "../Inputs/CheckboxGroup";
 import { memoize } from 'lodash';
-import Icon from "../../utils/Icon";
+import Alert from "../../utils/Alert";
+import { startWscOnboarding, getScanUpsellAlertProps } from "../../utils/wsc";
 
 const CookieDatabaseSyncControl = () => {
 	const { filterAndSort, showDeletedCookies, setShowDeletedCookies, syncDataLoaded, loadingSyncData, language, setLanguage, languages, fCookies, cookieCount, addCookie, addService, fServices, syncProgress, curlExists, hasSyncableData, setSyncProgress, restart, fetchSyncProgressData, errorMessage} = UseSyncData();
@@ -15,14 +16,6 @@ const CookieDatabaseSyncControl = () => {
 	const [disabled, setDisabled] = useState(false);
 	const [noCookieNoticeShown, setNoCookieNoticeShown] = useState(false);
 	const [servicesAndCookies, setServicesAndCookies] = useState([]);
-
-	const startOnboardingFromWscAlert = () => {
-		const url = new URL(cmplz_settings.dashboard_url);
-		url.searchParams.set('websitescan', '');
-		setTimeout(() => {
-			window.location.href = url.href;
-		}, 500);
-	}
 
 	useEffect ( () => {
 		if ( !loadingSyncData && syncProgress <100 ) {
@@ -126,24 +119,21 @@ const CookieDatabaseSyncControl = () => {
 		restart();
 	}
 
+	const upsellProps = getScanUpsellAlertProps();
+
 	return (
 		<>
 			{wscLocked &&
-				<div className="cmplz-wscscan-alert">
-					<Icon name={'warning'} color={'orange'} size={48}/>
-					<div className="cmplz-wscscan-alert-group">
-						<div className="cmplz-wscscan-alert-group-title">{__("Cookiedatabase Sync Unavailable", "complianz-gdpr")}</div>
-						<div className="cmplz-wscscan-alert-group-desc">{__("We need to authenticate this domain.", "complianz-gdpr")}</div>
-					</div>
-					<div className="cmplz-wscscan-alert-desc-long">
-						{__("The cookiedatabase.org sync requires WSC authentication. It only takes a second!", "complianz-gdpr")}
-					</div>
-					<div>
-						<button type="button" onClick={startOnboardingFromWscAlert} className="cmplz-wscscan-alert button-secondary">
-							{__("Start", "complianz-gdpr")}
-						</button>
-					</div>
-				</div>
+				<Alert
+					title={__("Cookiedatabase Sync Unavailable", "complianz-gdpr")}
+					subtitle={__("We need to authenticate this domain.", "complianz-gdpr")}
+					body={__("The cookiedatabase.org sync requires Website Scan authentication. It only takes a second!", "complianz-gdpr")}
+					ctaLabel={__("Start", "complianz-gdpr")}
+					onCtaClick={startWscOnboarding}
+				/>
+			}
+			{!wscLocked && upsellProps &&
+				<Alert {...upsellProps} />
 			}
 			<div className="cmplz-cookiedatabase-controls">
 				<button disabled={disabled || loadingSyncData} className="button button-default" onClick={ (e) => Start(e) }>{__("Sync","complianz-gdpr")}</button>

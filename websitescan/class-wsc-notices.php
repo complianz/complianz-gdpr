@@ -99,6 +99,17 @@ if (!class_exists("cmplz_wsc_notices")) {
 					'url' => 'https://complianz.io/about-the-website-scan#pending'
 				];
 			}
+
+			if ( cmplz_wsc_auth::wsc_is_authenticated() && ! COMPLIANZ::$wsc_scanner->wsc_rest_api_accessible() ) {
+				$notices[] = [
+					'field_id' => 'websitescan_status',
+					'label'    => 'warning',
+					'title'    => __( 'REST API not accessible', 'complianz-gdpr' ),
+					'text'     => __( 'The Website Scan requires the WordPress REST API to be publicly accessible. It appears to be blocked, possibly by a security plugin. The batch scan will not work until this is resolved.', 'complianz-gdpr' ),
+					'url'      => 'https://complianz.io/rest-api-required',
+				];
+			}
+
 			return $notices;
 		}
 

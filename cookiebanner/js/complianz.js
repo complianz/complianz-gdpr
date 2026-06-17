@@ -1827,14 +1827,31 @@ cmplz_add_event( 'click', '.cmplz-view-preferences', function( e ) {
 		cmplz_banner.querySelector( '.cmplz-view-preferences' ).style.display = 'none';
 		cmplz_banner.querySelector( '.cmplz-save-preferences' ).style.display = 'block';
 
-		// Set focus to the first category when preferences are shown
+		// Set focus to the first category toggle when preferences are shown
 		const firstCategory = cmplz_banner.querySelector( '.cmplz-categories .cmplz-category' );
 		if ( firstCategory ) {
-			const summary = firstCategory.querySelector( 'summary' );
-			if ( summary ) {
-				summary.setAttribute( 'tabindex', '0' );
-				summary.focus();
+			const toggleBtn = firstCategory.querySelector( '.cmplz-category-toggle' );
+			if ( toggleBtn ) {
+				toggleBtn.focus();
 			}
+		}
+	}
+} );
+/*
+ * Toggle category description visibility via the expand/collapse button
+ */
+cmplz_add_event( 'click', '.cmplz-category-toggle', function( e ) {
+	const btn = e.target.closest( '.cmplz-category-toggle' );
+	if ( ! btn ) {
+		return;
+	}
+	const isExpanded = btn.getAttribute( 'aria-expanded' ) === 'true';
+	btn.setAttribute( 'aria-expanded', String( ! isExpanded ) );
+	const category = btn.closest( '.cmplz-category' );
+	if ( category ) {
+		const desc = category.querySelector( '.cmplz-description' );
+		if ( desc ) {
+			desc.hidden = isExpanded;
 		}
 	}
 } );

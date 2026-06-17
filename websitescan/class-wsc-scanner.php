@@ -1,6 +1,9 @@
 <?php
 defined('ABSPATH') or die();
 
+require_once __DIR__ . '/class-wsc-logger.php';
+require_once __DIR__ . '/class-wsc-auth.php';
+
 
 if (!class_exists("cmplz_wsc_scanner")) {
 
@@ -52,6 +55,7 @@ if (!class_exists("cmplz_wsc_scanner")) {
 			add_action('cmplz_remote_cookie_scan', array($this, 'wsc_scan_process'));
 			add_action('admin_init', array($this, 'wsc_scan_init'));
 			add_action( 'cmplz_wsc_checks_retrieve_results', array( $this, 'wsc_checks_retrieve' ) );
+			add_action( 'deactivated_plugin', array( $this, 'clear_rest_accessible_cache' ) );
 		}
 
 
@@ -98,7 +102,63 @@ if (!class_exists("cmplz_wsc_scanner")) {
 				return false;
 			}
 
+			// if the REST API is not publicly reachable, webhooks cannot be delivered
+			if ( ! $this->wsc_rest_api_accessible() ) {
+				return false;
+			}
+
 			return true;
+		}
+
+
+		/**
+		 * Check whether the REST API webhook endpoint is publicly reachable.
+		 *
+		 * Performs a loopback POST to /complianz/v1/wsc-scan with an empty body.
+		 * An intentionally invalid body triggers a 400 from our own validation,
+		 * confirming the endpoint is live. A WP_Error or 401/403 means the REST
+		 * API is blocked (network failure, or a security plugin requiring auth).
+		 *
+		 * Result cached in transient for 1 hour. Cache cleared on plugin deactivation
+		 * so the notice disappears promptly when a blocking plugin is removed.
+		 *
+		 * @return bool True if the endpoint is reachable by unauthenticated callers.
+		 */
+		public function wsc_rest_api_accessible(): bool {
+			$cached = get_transient( 'cmplz_wsc_rest_accessible' );
+			if ( $cached !== false ) {
+				return $cached === '1';
+			}
+
+			$response  = wp_remote_post(
+				rest_url( self::WSC_SCANNER_WEBHOOK_PATH ),
+				array(
+					'timeout'   => 5,
+					'blocking'  => true,
+					'body'      => '{}',
+					'headers'   => array( 'Content-Type' => 'application/json' ),
+					'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+				)
+			);
+
+			$accessible = ! is_wp_error( $response )
+				&& ! in_array( wp_remote_retrieve_response_code( $response ), array( 401, 403 ), true );
+
+			set_transient( 'cmplz_wsc_rest_accessible', $accessible ? '1' : '0', HOUR_IN_SECONDS );
+			return $accessible;
+		}
+
+
+		/**
+		 * Clear the REST API accessibility cache.
+		 *
+		 * Hooked on deactivated_plugin so the notice disappears promptly when a
+		 * blocking security plugin is removed, without waiting for the 1-hour TTL.
+		 *
+		 * @return void
+		 */
+		public function clear_rest_accessible_cache(): void {
+			delete_transient( 'cmplz_wsc_rest_accessible' );
 		}
 
 
@@ -124,32 +184,33 @@ if (!class_exists("cmplz_wsc_scanner")) {
 		/**
 		 * Start the WSC scan.
 		 *
-		 * This function initiates the WSC scan process by sending a request to the WSC API.
-		 * It retrieves the scan URL, depth, visit, source, and token from the options and sends them in the request body.
-		 * If the request is successful, it stores the scan ID, created at, and status in the wp options.
+		 * When called with no arguments (site-level cron path): scans site_url(),
+		 * writes cmplz_wsc_scan_id / cmplz_wsc_scan_createdAt / cmplz_wsc_scan_status,
+		 * and returns the scan ID.
 		 *
-		 * @return void
+		 * When called with a URL (pro per-post path): scans that URL only,
+		 * does NOT write any options — caller is responsible for storing the scan ID.
+		 *
+		 * @param string $url URL to scan. Empty string = use site_url() (site-level).
+		 * @return string|null Scan ID on success, null on failure.
 		 */
-		private function wsc_scan_start(): void
-		{
-			// retrieve the token
-			$token = cmplz_wsc_auth::get_token(true); // get a new token
+		public function wsc_scan_start( string $url = '' ): ?string {
+			$token = cmplz_wsc_auth::get_token( true );
 
-			if (!$token) {
-				cmplz_wsc_logger::log_errors('wsc_scan_start', 'COMPLIANZ: no token');
-				return;
+			if ( ! $token ) {
+				cmplz_wsc_logger::log_errors( 'wsc_scan_start', 'COMPLIANZ: no token' );
+				return null;
 			}
 
-			$url = esc_url_raw($this->wsc_scan_get_site_url());
+			$scan_url = $url !== '' ? esc_url_raw( $url ) : esc_url_raw( $this->wsc_scan_get_site_url() );
+			$source   = $this->wsc_get_scanner_source();
 
-			$source = $this->wsc_get_scanner_source();
-
-			if (!$source) {
-				return;
+			if ( ! $source ) {
+				return null;
 			}
 
 			$body = array(
-				'url'                     => $url,
+				'url'                     => $scan_url,
 				'acceptBanner'            => 'true',
 				'getTrackers'             => 'true',
 				'source'                  => $source,
@@ -160,7 +221,6 @@ if (!class_exists("cmplz_wsc_scanner")) {
 				'detectLegalDocuments'    => 'false',
 			);
 
-			// use the webhook only with ssl
 			$webhook_endpoint = esc_url_raw( get_rest_url( null, self::WSC_SCANNER_WEBHOOK_PATH ) );
 
 			if ( $this->wsc_use_webhook( $webhook_endpoint ) !== '' ) {
@@ -169,22 +229,26 @@ if (!class_exists("cmplz_wsc_scanner")) {
 
 			$request = $this->wsc_scan_request( $token, $body );
 
-			if (is_wp_error( $request )) {
-				cmplz_wsc_logger::log_errors('wsc_scan_start', 'COMPLIANZ: scan request failed, error: ' . $request->get_error_message());
-				return;
+			if ( is_wp_error( $request ) ) {
+				cmplz_wsc_logger::log_errors( 'wsc_scan_start', 'COMPLIANZ: scan request failed, error: ' . $request->get_error_message() );
+				return null;
 			}
 
-			$response = json_decode(wp_remote_retrieve_body($request));
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
 
-			if (!isset($response->id)) {
-				cmplz_wsc_logger::log_errors('wsc_scan_start', 'COMPLIANZ: no id in response');
-				return;
+			if ( ! isset( $response->id ) ) {
+				cmplz_wsc_logger::log_errors( 'wsc_scan_start', 'COMPLIANZ: no id in response' );
+				return null;
 			}
 
-			// use these options for the webhooks
-			update_option('cmplz_wsc_scan_id', $response->id, false);
-			update_option('cmplz_wsc_scan_createdAt', $response->createdAt, false);
-			update_option('cmplz_wsc_scan_status', 'progress', false);
+			if ( $url === '' ) {
+				// Site-level only — write options used by the polling loop.
+				update_option( 'cmplz_wsc_scan_id', $response->id, false );
+				update_option( 'cmplz_wsc_scan_createdAt', $response->createdAt, false );
+				update_option( 'cmplz_wsc_scan_status', 'progress', false );
+			}
+
+			return $response->id;
 		}
 
 		/**
@@ -507,7 +571,7 @@ if (!class_exists("cmplz_wsc_scanner")) {
 		 * @param string $scan_id The id of the scan.
 		 * @return array|WP_Error The response from the WSC API.
 		 */
-		private function wsc_scan_retrieve_scan( string $scan_id ) {
+		public function wsc_scan_retrieve_scan( string $scan_id ) {
 			$id = sanitize_text_field( $scan_id );
 
 			$endpoint = self::WSC_SCANNER_ENDPOINT . '/api/v1/scans/' . $id;

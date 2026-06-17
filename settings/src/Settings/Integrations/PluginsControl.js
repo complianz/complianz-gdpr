@@ -5,6 +5,8 @@ import useFields from "../Fields/FieldsData";
 import readMore from "../../utils/readMore";
 import {memo} from "@wordpress/element";
 import SwitchInput from '../Inputs/SwitchInput';
+import Alert from "../../utils/Alert";
+import { getScanUpsellAlertProps } from "../../utils/wsc";
 
 const PluginsControl = () => {
 	const {updatePlaceholderStatus, fetching, updatePluginStatus, integrationsLoaded, plugins, fetchIntegrationsData} = useIntegrations();
@@ -158,6 +160,7 @@ const PluginsControl = () => {
 				'complianz-gdpr' )}
 				{readMore( "https://complianz.io/blocking-recaptcha-manually/" )}
 			</p>
+			{ cmplz_settings.scan_upsell?.code === 'webshop' && <div className="cmplz-table-header"><Alert { ...getScanUpsellAlertProps() } /></div> }
 			<div className="cmplz-table-header">
 				{plugins.length>5 && <input type="text" placeholder={__("Search", "complianz-gdpr")} value={searchValue} onChange={ ( e ) => setSearchValue(e.target.value) } /> }
 			</div>

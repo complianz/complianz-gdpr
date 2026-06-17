@@ -7,6 +7,7 @@ const defaultState = {
 	tokenStatus: '',
 	wscStatus: '',
 	wscSignupDate: '',
+	batchStats: null,
 	syncing: false,
 }
 
@@ -25,13 +26,14 @@ const UseWebSiteScanData = create((set, get) => ({
 
 		try {
 			let data = {};
-			const { wsc_status, token_status, wsc_signup_date } = await cmplz_api.doAction('get_wsc_status', data).then((response) => {
+			const { wsc_status, token_status, wsc_signup_date, batch_stats } = await cmplz_api.doAction('get_wsc_status', data).then((response) => {
 				return response
 			});
 			set({
 				tokenStatus: token_status,
 				wscStatus: wsc_status,
 				wscSignupDate: wsc_signup_date,
+				batchStats: batch_stats ?? null,
 				loaded: true,
 			});
 		} catch (error) {

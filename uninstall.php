@@ -148,7 +148,9 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_wsc_logs',
         'cmplz_wsc_newsletter_dismissed',
         'cmplz_translation_cron_interval',
-        'cmplz_translation_errors'
+        'cmplz_translation_errors',
+        'cmplz_wsc_scan_registry',
+        'cmplz_wsc_batch_map',
     ];
 
 
@@ -202,6 +204,21 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
             $wpdb->prepare(
                 "DELETE FROM $wpdb->options WHERE option_name LIKE %s",
                 $transient
+            )
+        );
+    }
+
+
+    // cmplz post meta
+    $post_meta_keys = [
+        '_cmplz_scanned_post',
+        '_cmplz_wsc_scanned_post',
+    ];
+    foreach ( $post_meta_keys as $meta_key ) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM $wpdb->postmeta WHERE meta_key = %s",
+                $meta_key
             )
         );
     }

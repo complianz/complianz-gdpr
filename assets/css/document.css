@@ -158,16 +158,6 @@
     background-color: rgba(239, 239, 239, 0.25);
 }
 
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category summary::marker {
-    display: none;
-    content: "";
-}
-
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category summary::-webkit-details-marker {
-    display: none;
-    content: "";
-}
-
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-description {
     padding: 10px;
 }
@@ -224,14 +214,25 @@
     padding: initial;
 }
 
+#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-category-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    grid-column-start: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-icon.cmplz-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    grid-column-start: 3;
     cursor: pointer;
     content: "";
-    background: var(--cmplz_category_open_icon_url) no-repeat;
     transform: rotate(0deg);
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
@@ -242,11 +243,7 @@
     width: 25px;
 }
 
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] {
-    padding-bottom: 1px;
-}
-
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] summary .cmplz-category-header:after, #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] summary .cmplz-icon.cmplz-open {
+#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-toggle[aria-expanded=true] .cmplz-icon.cmplz-open {
     transform: rotate(180deg);
 }
 
