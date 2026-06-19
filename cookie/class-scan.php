@@ -704,63 +704,22 @@ if ( ! class_exists( 'cmplz_scan' ) ) {
 			}
 			$posts = get_transient( 'cmplz_pages_list' );
 			if ( ! $posts ) {
-				$posts           = $this->get_fixed_pages();
-				$post_types      = $this->get_scannable_post_types();
-				$not_in          = $this->get_webshop_page_ids();
-				$representatives = array();
-				$batch_size      = apply_filters( 'cmplz_scan_batch_size', 5 );
-
-				// One post per type first — fast representative sample.
+				$posts = ['home', 'remote'];
+				$post_types = $this->get_scannable_post_types();
 				foreach ( $post_types as $post_type ) {
-					$args            = array(
-						'post__not_in'   => $not_in,
-						'post_type'      => $post_type,
-						'posts_per_page' => 1,
-						'fields'         => 'ids',
-						'meta_query'     => array(
+					$args      = array(
+						'post_type'       => $post_type,
+						'posts_per_page'  => 5,
+						'fields'          => 'ids',
+						'meta_query'      => array(
 							array(
 								'key'     => '_cmplz_scanned_post',
-								'compare' => 'NOT EXISTS',
+								'compare' => 'NOT EXISTS'
 							),
-						),
+						)
 					);
-					$new_posts       = get_posts( $args );
-					$representatives = array_merge( $representatives, $new_posts );
-					$not_in          = array_merge( $not_in, $new_posts );
-				}
-
-				$posts = array_merge( $posts, $representatives );
-
-				// Bulk batch per type, skipping the representative posts.
-				foreach ( $post_types as $post_type ) {
-					$args = apply_filters(
-						'cmplz_scan_post_args',
-						array(
-							'post__not_in'   => $not_in,
-							'post_type'      => $post_type,
-							'posts_per_page' => $batch_size,
-							'fields'         => 'ids',
-							'meta_query'     => array(
-								array(
-									'key'     => '_cmplz_scanned_post',
-									'compare' => 'NOT EXISTS',
-								),
-							),
-						),
-						$post_type
-					);
-					// Non-overridable structural constraints — re-enforced after filter.
-					$args['fields']       = 'ids';
-					$args['post_type']    = $post_type;
-					$args['post__not_in'] = $not_in;
-					$args['meta_query']   = array(
-						array(
-							'key'     => '_cmplz_scanned_post',
-							'compare' => 'NOT EXISTS',
-						),
-					);
-					$new_posts            = get_posts( $args );
-					$posts                = array_merge( $posts, $new_posts );
+					$new_posts = get_posts( $args );
+					$posts     = array_merge( $posts, $new_posts );
 				}
 
 				if ( count( $posts ) === 0 && ! $this->automatic_cookiescan_disabled() ) {
