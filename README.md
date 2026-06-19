@@ -4,11 +4,11 @@
 
 ## The Privacy Suite for WordPress
 
-At Complianz we are working towards a full-featured privacy suite for all WordPress users to comply with the privacy guideliness for their targeted regions. And we try to make it as easy as possible, while respecting the different guidelines and variability. As privacy is not an easy subject we highly appreciate any feedback, pull requests and issues to further simplify this subject and improve our product, and therefore privacy-friendly websites world-wide and happy users.
+At Complianz we are working towards a full-featured privacy suite for all WordPress users to comply with the privacy guidelines for their targeted regions. And we try to make it as easy as possible, while respecting the different guidelines and variability. As privacy is not an easy subject we highly appreciate any feedback, pull requests and issues to further simplify this subject and improve our product, and therefore privacy-friendly websites world-wide and happy users.
 
 ### Developers Guide and Contributions
 
-If you're a developer and want to help out, please feel free to contribute anyway you can. We respond to any pull request or issue on Github. Start with reading the [developers guide](https://complianz.io/developers-guide-for-third-party-integrations/) to get a head start.
+If you're a developer and want to help out, please feel free to contribute anyway you can. We respond to any pull request or issue on GitHub. Start with reading the [developers guide](https://complianz.io/developers-guide-for-third-party-integrations/) to get a head start.
 
 **Bug report:** Please start an issue, and if you have a fix a pull request. Please explain your issue clearly, and use comments when adding a pull request. Your contribution will be acknowledges on WordPress.org.
 
@@ -18,7 +18,7 @@ If you're a developer and want to help out, please feel free to contribute anywa
 
 ### Support
 
-For support we kindly ask you to start at our [support forum](https://wordpress.org/support/plugin/complianz-gdpr/) and our documentation at [complianz.io/docs/](https://complianz.io/docs). If you can't find a solution, do not hesitate to ask either on the forum or log a suppor ticket.
+For support, we kindly ask you to start at our [support forum](https://wordpress.org/support/plugin/complianz-gdpr/) and our documentation at [complianz.io/docs/](https://complianz.io/docs). If you can't find a solution, do not hesitate to ask either on the forum or log a support ticket.
 
 If you like Complianz - Please [rate us](https://wordpress.org/support/plugin/complianz-gdpr/reviews/) on WordPress.org
 

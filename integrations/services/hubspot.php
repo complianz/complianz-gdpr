@@ -10,7 +10,7 @@ function cmplz_hs_tracking_script( $tags ) {
 }
 
 /**
- * Sync the Complianz banner with the hubspot banner by clicking on the apropriate buttonn when consent is given.
+ * Sync the Complianz banner with the hubspot banner by clicking on the appropriate button when consent is given.
  */
 
 function cmplz_hubspot_clicker() {

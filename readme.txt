@@ -1,19 +1,19 @@
 === Complianz - GDPR/CCPA Cookie Consent ===
-Contributors: RogierLankhorst, aahulsebos, leonwimmenhoeve, paapst, markwolters, tomeijkelenkamp, hesseldejong, mujuonly, xantek, pierrotevrard, jarnovos
+Contributors: RogierLankhorst, aahulsebos, leonwimmenhoeve, paapst, markwolters, tomeijkelenkamp, hesseldejong, mujuonly, xantek, pierrotevrard, jarnovos, gdom3
 Donate link: https://paypal.me/complianz
 Tags: GDPR, Cookie, Cookie Notice, Consent, Privacy
 Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
-Tested up to: 6.8
-Stable tag: 7.4.2
+Tested up to: 7.0
+Stable tag: 7.5.0
 
 Configure your Cookie Banner, Cookie Consent and Cookie Policy with our Wizard and Cookies Scan.
 
 == Description ==
 Complianz is a GDPR/CCPA Cookie Banner plugin that supports GDPR, ePrivacy, DSGVO, TTDSG, LGPD, POPIA, APA, RGPD, CCPA/CPRA and PIPEDA with a conditional Cookie Consent Banner and customized Cookie Policy based on the results of the built-in Cookie Scan.
 
-https://www.youtube.com/watch?v=JJzOzNAd5Bw&ab_channel=ReallySimplePlugins
+https://vimeo.com/1138872149
 
 == Features ==
 
@@ -71,8 +71,8 @@ Complianz offers full support on the WordPress.org [Forum](https://wordpress.org
 == Useful Links ==
 
 * [Support Forum](https://wordpress.org/support/plugin/complianz-gdpr/)
-* [Github](https://github.com/Really-Simple-Plugins/complianz-gdpr/)
-* [MU Plugins](https://github.com/Really-Simple-Plugins/complianz-integrations)
+* [Github](https://github.com/complianz/complianz-gdpr/)
+* [MU Plugins](https://github.com/complianz/complianz-integrations)
 * [Documentation](https://complianz.io/docs/)
 * [Developer's Guide](https://complianz.io/developers-guide-for-third-party-integrations/)
 * [Legal Definitions](https://complianz.io/definitions/)
@@ -101,7 +101,7 @@ Complianz offers a Full Privacy Suite for WordPress on [Complianz.io](https://co
 Simultaneously select USA, Canada, United Kingdom, Australia, South Africa, Brazil and the EU as targeted regions with conditional Consent and dedicated Cookie Banners.
 
 * Support for GDPR / ePrivacy - European Union with Extension for Switzerland.
-* Support for USA / CCPA/CPRA/CPA/CTDPA/NRS 603A/UCPA/CDPA
+* Support for USA / CCPA/CPRA/CPA/CTDPA/NRS 603A/UCPA/VCDPA
 * Support for UK-GDPR / PECR and ICO Guidelines - United Kingdom.
 * Support for PIPEDA and CASL - Canada.
 * Support for Privacy Act 1988 & Australian Privacy Principles
@@ -128,9 +128,9 @@ Simultaneously select USA, Canada, United Kingdom, Australia, South Africa, Braz
 
 == About Complianz ==
 
-Check out other plugins developed by Really Simple Plugins as well: [Really Simple SSL](https://wordpress.org/plugins/really-simple-ssl/)
+Check out other plugins developed by Really Simple Security as well: [Really Simple Security](https://wordpress.org/plugins/really-simple-ssl/)
 
-Complianz is on [GitHub](https://github.com/Really-Simple-Plugins/complianz-gdpr) as well!
+Complianz is on [GitHub](https://github.com/complianz/complianz-gdpr) as well!
 
 IMPORTANT! Complianz | GDPR/CCPA Cookie Consent can help you meet compliance requirements, but the user must ensure that all requirements are met.
 
@@ -198,6 +198,92 @@ The Brazilian General Data Protection Law is similar to the GDPR, the UK-GDPR it
 With some custom CSS this is possible, but we do not consider a cookie wall to be GDPR compliant, so it's not actively supported. We do, however, have the option to create a Soft Cookie Wall. Which blocks interaction with the website, but dismissing remains a possibility.
 
 == Changelog ==
+= 7.5.0 =
+* June 17th, 2026
+* Feature: New Website Scan column in the post overview showing the scan status of each post.
+* Enhancement: Notices when webshop pages, custom post types or a high post volume require the advanced Website Scan.
+* Enhancement: The cookie scan focuses on posts and pages for faster, more relevant results.
+* Enhancement: Website Scan errors are now visible in the plugin log.
+* Enhancement: Daily background website scan and cookie change check run via WP-Cron without requiring an admin session.
+* Enhancement: Added wpml-config.xml to improve WPML compatibility for plugin strings.
+* Enhancement: Daily cleanup of expired transients and obsolete placeholder images.
+* Accessibility: Improved screen reader support for cookie banner and manage consent button.
+* Accessibility: Fixed cookie banner reflow at high zoom levels (400%+).
+* Accessibility: Fixed interactive consent category controls in cookie banner and cookie policy.
+* Fix: Scan progress could keep polling indefinitely when the scan found no cookies.
+* Fix: Updated "Dismiss on Timeout" tooltip and GEO IP setup error message.
+* Fix: Support web components in cookie blocker placeholder regex.
+* Fix: Remove unnecessary jQuery dependency from DNSMPD script.
+* Fix: Consent area block content not served when block is nested.
+
+= 7.4.7 =
+* June 1st, 2026
+* Security: Fixed DOM-based Cross-Site Scripting (XSS) vulnerability.
+* Security: Cookie scanner and Cookiedatabase sync now require WSC authentication. Unauthenticated installs see a locked state with onboarding prompt.
+* Enhancement: Improved WSC onboarding modal — simplified dismiss logic, single-option state with automatic migration from legacy options.
+* Enhancement: Added integration notice for FunnelKit.
+* Enhancement: Updated default cookie banner color scheme to improve accessibility contrast.
+* Accessibility: Fixed heading hierarchy in cookie policy page.
+* Fix: Mixed languages on cookie policy page when syncing non-English cookies from Cookiedatabase.
+* Fix: WSC credentials not cleared from database after reset.
+* Fix: PHP 8.1 deprecation notices in cookie blocker and WSC authentication handler.
+
+= 7.4.6 =
+* April 13th, 2026
+* Fix: Prevent PHP warnings when cookiedatabase.org returns a malformed or unexpected response during sync.
+* Security: Fixed unauthorized access to post content via REST API endpoint.
+* Enhancement: Updated Gutenberg blocks to API version 3.
+* Fix: Resolved infinite page reload loop triggered by auto-dismiss on scroll or timeout.
+
+= 7.4.5 =
+* March 16th, 2026
+* Feature: Added WCAG color contrast calculator to color picker.
+* Feature: New plugin integration: Pinterest for WooCommerce.
+* Add: Add Tennessee (TIPA), Minnesota (MCDPA), Maryland (MODPA), Indiana (ICDPA), Kentucky (KCDPA), Rhode Island (DTPPA) to the US Privacy Policy.
+* Accessibility: Improved cookie banner keyboard navigation and focus trapping.
+* Security: Fixed Stored Cross-Site Scripting vulnerability.
+* Fix: Improved script detection for WP Google Maps Plugin.
+* Fix: Record of consent table display and cookie banner array comparison.
+* Fix: Conditionally hide script header option for integrations that handle tracking implementation.
+* Fix: Processing agreement file upload validation and DOCX mime type.
+* Fix: Website Scan onboarding modal not checking for new installations.
+* Fix: Remote scan issues in non-standard WordPress setups.
+* Fix: Added necessary classes to email and website labels in Cookie Policy.
+* Fix: Added missing Website Scan options to uninstall routine.
+* Fix: Website Scan email case sensitivity in authentication.
+* Fix: Custom cookies and services now display all fields (retention, purpose, function, service type, privacy URL) in non-English languages.
+* Fix: Support form description.
+* Fix: Hide link section in blocked content when no cookie-statement is found.
+* Fix: Old links and typos.
+
+= 7.4.4.2 =
+* December 16th, 2025
+* New: Complianz logo.
+
+= 7.4.4.1 =
+* December 3rd, 2025
+* Improvement: Tested up to WordPress 6.9.
+* Fix: Updated integration with the WP Google Maps Plugin.
+
+= 7.4.4 =
+* November 18th, 2025
+* Feature: Microsoft Clarity Consent Mode V2 integration.
+* Fix: Old documentation links update.
+* Fix: Website Scan cleanup causing fatal error when license class unavailable.
+* Security update: Shortcode stored Cross-Site scripting.
+
+= 7.4.3 =
+* October 30th, 2025
+* Enhancement: Added `cmplz_prevent_get_shortcode_page_id` filter to allow developers to prevent execution of `get_shortcode_page_id`.
+* Enhancement: Optimized DNSMPD export for large datasets.
+* Enhancement: Updated mPDF library for improved PHP compatibility (7.4 to 8.4)
+* Improvement: Updated services: Vimeo, X (Formerly Twitter), Linkedin. Added Snapchat.
+* Improvement: Added FunnelKit and updated Wp Google Maps integration.
+* Accessibility: Improved link semantics and aria-labels for “Read more” and cookie banner links
+* Fix: Correct typos and spelling errors.
+* Fix: Google Analytics, fixed "empty additional tag" issue.
+
+
 = 7.4.2 =
 * July 11th, 2025
 * Translations: Updated translations.

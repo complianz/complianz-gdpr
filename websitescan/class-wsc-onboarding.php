@@ -8,22 +8,28 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 	class cmplz_wsc_onboarding
 	{
 
-		const WSC_MAX_DISMISS   = 2;
 		const CMPLZ_PLUGIN_SLUG = 'complianz-gdpr';
 
 		public function init_hooks()
 		{
 			add_action("cmplz_do_action", array($this, 'handle_onboarding_action'), 10, 3);
-			add_action("admin_init", array($this, 'check_onboarding_status'), 10);
 			add_action("admin_init", array($this, 'maybe_show_onboarding_modal'), 20);
 			add_action("cmplz_every_week_hook", array($this, 'check_wsc_consent'), 20);
 			// Check if the option already exists, if not, set it up
 			if (!get_option('cmplz_wsc_onboarding_status')) {
 				$this->set_onboarding_status_option();
 			}
+			// One-time migration: consolidate legacy dismiss counters into single boolean.
+			// Null default distinguishes "never migrated" from "migrated, value=false".
+			if ( null === get_option( 'cmplz_wsc_dismissed', null ) ) {
+				$legacy_dismissed = (
+					(int) get_option( 'cmplz_wsc_onboarding_dismissed', 0 ) >= 1
+					|| (int) get_option( 'cmplz_wsc_websitescan_dismissed', 0 ) >= 1
+					|| (bool) get_option( 'cmplz_wsc_newsletter_dismissed', false )
+				);
+				update_option( 'cmplz_wsc_dismissed', $legacy_dismissed, false );
+			}
 			add_action('cmplz_store_wsc_onboarding_consent', array($this, 'cmplz_store_wsc_onboarding_consent_handler'), 10, 2);
-			add_action( 'upgrader_process_complete', array( $this, 'handle_onboarding_dismiss_on_upgrade' ), 10, 2 );
-			add_action( 'automatic_updates_complete', array( $this, 'handle_onboarding_dismiss_on_autoupdate' ) );
 		}
 
 
@@ -69,7 +75,7 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 				// used on onboarding to sign up
 				case 'signup_wsc':
 					$posted_data = $request->get_json_params();
-					$email = sanitize_email($posted_data['email']);
+					$email = strtolower(sanitize_email($posted_data['email']));
 					if (is_email($email)) {
 						cmplz_wsc_auth::send_auth_email($email);
 						// Schedule storing onboarding consent asynchronously
@@ -83,8 +89,6 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 					$posted_data = $request->get_json_params();
 					$step        = sanitize_text_field( $posted_data['step'] );
 					$this->store_onboarding_dismiss( $step );
-					$new_date = time() + wp_rand( 120, 14 * DAY_IN_SECONDS );
-					$this->set_onboarding_date( $new_date );
 					break;
 				case 'get_newsletter_terms':
 					$data = $this->get_onboarding_doc('newsletter');
@@ -114,159 +118,67 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 		 *
 		 * @return void
 		 */
-		public function maybe_show_onboarding_modal(): void
-		{
-			if (!cmplz_user_can_manage()) {
+		public function maybe_show_onboarding_modal(): void {
+			if ( ! cmplz_user_can_manage() ) {
 				return;
 			}
 
-			if ( ! isset( $_GET['websitescan'] ) && isset( $_GET['page'] ) && strpos( $_GET['page'], 'complianz' ) !== false && $this->should_onboard() ) {
-				wp_redirect( add_query_arg( ['websitescan' => ''], cmplz_admin_url() ) );
-				exit;
+			if ( isset( $_GET['websitescan'] ) ) {
+				return;
 			}
+
+			if ( ! isset( $_GET['page'] ) || strpos( $_GET['page'], 'complianz' ) === false ) {
+				return;
+			}
+
+			if ( ! $this->should_onboard() ) {
+				return;
+			}
+
+			wp_redirect( add_query_arg( [ 'websitescan' => '' ], cmplz_admin_url() ) );
+			exit;
 		}
 
 
 		/**
 		 * Determines whether the user should be onboarded.
-		 *
-		 * This function checks various conditions to determine if the user should be onboarded.
-		 * If the user can't manage, or if the 'cmplz_force_signup' parameter is set in the URL,
-		 * the function returns true. If the onboarding process is already complete or if the
-		 * WSC API is not open, the function returns false. Otherwise, it checks if the onboarding
-		 * start date is set and if it is earlier than the current time, and returns the result.
+		 * Capability is verified by the sole caller (maybe_show_onboarding_modal).
 		 *
 		 * @return bool Returns true if the user should be onboarded, false otherwise.
 		 */
-		private function should_onboard(): bool
-		{
-			if (!cmplz_user_can_manage()) {
-				return false;
-			}
-
-			// Force the signup, even if the user is already onboarded
-			if (isset($_GET['cmplz_force_signup'])) {
-				$cb_wsc_signup_status = cmplz_wsc_auth::wsc_api_open('signup');
-				if (!$cb_wsc_signup_status) {
-					cmplz_wsc_logger::log_errors('wsc_api_open', 'COMPLIANZ: WSC API is not open');
+		private function should_onboard(): bool {
+			// Developer override: bypasses auth/reset/dismissed guards.
+			// Still gated by wsc_api_open — if API is closed, modal is not shown.
+			if ( isset( $_GET['cmplz_force_signup'] ) ) {
+				$cb_wsc_signup_status = cmplz_wsc_auth::wsc_api_open( 'signup' );
+				if ( ! $cb_wsc_signup_status ) {
+					cmplz_wsc_logger::log_errors( 'wsc_api_open', 'COMPLIANZ: WSC API is not open' );
 					return false;
 				}
 				return true;
 			}
 
-			// if already onboarded.
 			if ( cmplz_wsc_auth::wsc_is_authenticated() ) {
 				return false;
 			}
 
-			// If the WSC has been either reset or dismissed during the onboarding.
 			if ( get_option( 'cmplz_wsc_reset_complete', false ) ) {
 				return false;
 			}
 
-			$is_dismissed = $this->wsc_is_dismissed();
-			if ( $is_dismissed ) {
-				COMPLIANZ::$wsc_scanner->wsc_scan_forced();
+			if ( $this->wsc_is_dismissed() ) {
 				return false;
 			}
 
-			$onboarding_date = get_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE, false );
-
-			if ( ! $onboarding_date ) {
+			$cb_wsc_signup_status = cmplz_wsc_auth::wsc_api_open( 'signup' );
+			if ( ! $cb_wsc_signup_status ) {
+				cmplz_wsc_logger::log_errors( 'wsc_api_open', 'COMPLIANZ: WSC API is not open' );
 				return false;
 			}
 
-			if ( $onboarding_date < time() ) { // If the onboarding date is in the past, show the onboarding modal.
-				$cb_wsc_signup_status = cmplz_wsc_auth::wsc_api_open( 'signup' );
-				if ( ! $cb_wsc_signup_status ) {
-					cmplz_wsc_logger::log_errors( 'wsc_api_open', 'COMPLIANZ: the user can onboard but WSC API is not open' );
-					return false;
-				}
-				return true;
-			}
-			return false;
+			return true;
 		}
 
-
-		/**
-		 * Check and update the onboarding status.
-		 *
-		 * This method checks if the user is already onboarded or if the onboarding process has been dismissed.
-		 * If the user is already onboarded, it logs a message and returns.
-		 * If the onboarding process has been dismissed twice, it locks all scans and returns.
-		 * Otherwise, it sets an onboarding date if it doesn't exist, or adjusts the date based on various conditions.
-		 *
-		 * @return void
-		 */
-		public function check_onboarding_status(): void {
-			// Return if already onboarded.
-			$is_onboarded = cmplz_wsc_auth::wsc_is_authenticated();
-			if ( $is_onboarded ) {
-				return;
-			}
-
-			$is_dismissed = $this->wsc_is_dismissed();
-			if ( $is_dismissed ) { // if reached the max attempts do not set onboarding_start.
-				return;
-			}
-
-			$onboarding_date = (int) get_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE, false );
-			$now             = time();
-			$staged_end      = strtotime( cmplz_wsc::WSC_ONBOARDING_STAGED_END );
-
-			// Set an onboarding date if it doesn't exist, between 120 seconds and 14 days from now.
-			if ( ! $onboarding_date ) {
-				$new_date = $now + wp_rand( 120, 14 * DAY_IN_SECONDS );
-				$this->set_onboarding_date( $now - 10 );
-				return;
-			}
-
-			// Here the onboarding date is already set.
-			// If the onboarding date is in the past or within the staged rollout period, do nothing.
-			if ( $onboarding_date < $now || $onboarding_date <= $staged_end ) {
-				return;
-			}
-
-			// Here the onboarding date is > $staged_end.
-			// Calculate the time difference between onboarding_date and staged_end.
-			$time_to_onboard = $onboarding_date - $staged_end;
-
-			// If $now is past $staged_end and the difference is less than 15 days, keep the existing date.
-			if ( $now > $staged_end && $time_to_onboard < 15 * DAY_IN_SECONDS ) {
-				return;
-			}
-
-			// If $now is past $staged_end and the difference is more than 30 days, randomize within the next 2 weeks.
-			if ( $now > $staged_end && $time_to_onboard > 30 * DAY_IN_SECONDS ) {
-				$new_date = $now + wp_rand( 1, 14 ) * DAY_IN_SECONDS;
-				$this->set_onboarding_date( $new_date );
-				return;
-			}
-
-			// If $now is past $staged_end and the difference is between 15 and 30 days, randomize within the next week.
-			if ( $now > $staged_end && $time_to_onboard <= 30 * DAY_IN_SECONDS ) {
-				$new_date = $now + wp_rand( 1, 7 ) * DAY_IN_SECONDS;
-				$this->set_onboarding_date( $new_date );
-				return;
-			}
-
-			// Fallback | Default case: Randomize within the range of $time_to_onboard.
-			$new_date = $now + wp_rand( 120, $time_to_onboard );
-			$this->set_onboarding_date( $new_date );
-		}
-
-		/**
-		 * Sets the onboarding date.
-		 *
-		 * This method updates the CMPLZ_OPT_ONBOARDING_DATE option with the provided date
-		 * and returns the updated date.
-		 *
-		 * @param int $date The onboarding date timestamp to be set.
-		 * @return void
-		 */
-		private function set_onboarding_date( int $date ): void {
-			update_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE, $date, false );
-		}
 
 
 		/**
@@ -427,11 +339,6 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 			$cmplz_wsc_onboarding_status = get_option('cmplz_wsc_onboarding_status', []);
 			$cmplz_wsc_onboarding_status[$step] = $value;
 			update_option('cmplz_wsc_onboarding_status', $cmplz_wsc_onboarding_status, false);
-
-			// check the cmplz_wsc_onboarding_status array if 'terms', 'newsletter' and 'plugins' are true, set the onboarding complete flag
-			if ($cmplz_wsc_onboarding_status['terms'] && $cmplz_wsc_onboarding_status['newsletter'] && $cmplz_wsc_onboarding_status['plugins']) {
-				update_option('cmplz_wsc_onboarding_complete', true, false);
-			}
 		}
 
 
@@ -553,76 +460,29 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 			if ( ! in_array( $step, array( 'websitescan', 'newsletter', 'onboarding' ), true ) ) {
 				return;
 			}
-
-			delete_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE );
-
-			switch ( $step ) {
-				case 'websitescan':
-					$dismiss = (int) get_option( 'cmplz_wsc_websitescan_dismissed', 0 );
-					++$dismiss;
-					update_option( 'cmplz_wsc_websitescan_dismissed', $dismiss, false );
-					break;
-				case 'newsletter':
-					update_option( 'cmplz_wsc_newsletter_dismissed', true, false );
-					break;
-				case 'onboarding':
-					$dismiss = (int) get_option( 'cmplz_wsc_onboarding_dismissed', 0 );
-					++$dismiss;
-					update_option( 'cmplz_wsc_onboarding_dismissed', $dismiss, false );
-					break;
-				default:
-					break;
-			}
-			if ( $this->wsc_is_dismissed() ) {
+			update_option( 'cmplz_wsc_dismissed', true, false );
+			if ( $this->wsc_is_dismissed( true ) ) {
 				COMPLIANZ::$wsc_scanner->wsc_scan_forced();
 			}
 		}
 
 
-		/**
-		 * Handles the onboarding dismiss action on plugin auto-update.
-		 *
-		 * This method checks if the Complianz GDPR plugin is being auto-updated.
-		 * If the plugin is found in the list of updated plugins, it calls the handle_onboarding_dismiss method.
-		 *
-		 * @param array $results The results of the auto-update process.
-		 * @return void
-		 */
-		public function handle_onboarding_dismiss_on_autoupdate( array $results ): void {
-			if ( empty( $results['plugin'] ) || ! is_array( $results['plugin'] ) ) {
-				return;
-			}
-
-			$plugin_slug = self::CMPLZ_PLUGIN_SLUG;
-
-			foreach ( $results['plugin'] as $plugin ) {
-				if ( ! empty( $plugin->item->slug ) && strpos( $plugin->item->slug, $plugin_slug ) !== false ) {
-					$this->check_onboarding_status();
-					break;
-				}
-			}
-		}
-
 
 		/**
-		 * Checks if the onboarding or websitescan has been dismissed.
+		 * Checks if the WSC onboarding has been dismissed.
 		 *
-		 * This method retrieves the dismissal counts for both onboarding and websitescan,
-		 * sums them up, and returns true if the total dismissals are greater than or equal to 2.
-		 *
-		 * @return bool True if the total dismissals are greater than or equal to 2, false otherwise.
+		 * @param bool $bust Force re-read from DB, bypassing the per-request cache.
+		 *                   Pass true after writing the dismiss option.
+		 * @return bool True if dismissed, false otherwise.
 		 */
-		public function wsc_is_dismissed(): bool {
-			$onboarding_dismissed  = (int) get_option( 'cmplz_wsc_onboarding_dismissed', false );
-			$websitescan_dismissed = (int) get_option( 'cmplz_wsc_websitescan_dismissed', false );
-			$total_dismissed       = $onboarding_dismissed + $websitescan_dismissed;
-			$is_dismissed          = $total_dismissed >= self::WSC_MAX_DISMISS;
+		public function wsc_is_dismissed( bool $bust = false ): bool {
+			static $cached = null;
 
-			if ( $is_dismissed ) {
-				delete_option( cmplz_wsc::WSC_OPT_ONBOARDING_DATE );
+			if ( $bust || null === $cached ) {
+				$cached = (bool) get_option( 'cmplz_wsc_dismissed', false );
 			}
 
-			return $is_dismissed;
+			return $cached;
 		}
 
 
@@ -646,26 +506,5 @@ if (!class_exists("cmplz_wsc_onboarding")) {
 		}
 
 
-		/**
-		 * Handles the onboarding dismiss action on plugin upgrade.
-		 *
-		 * This method checks if the Complianz GDPR plugin is being updated.
-		 * If the plugin is found in the list of updated plugins, it calls the handle_onboarding_dismiss method.
-		 *
-		 * @param WP_Upgrader $upgrader The upgrader instance.
-		 * @param array       $hook_extra Additional information about the upgrade process.
-		 * @return void
-		 */
-		public function handle_onboarding_dismiss_on_upgrade( WP_Upgrader $upgrader, array $hook_extra ): void {
-			$plugin_slug = self::CMPLZ_PLUGIN_SLUG;
-			if ( 'update' === $hook_extra['action'] && 'plugin' === $hook_extra['type'] && isset( $hook_extra['plugins'] ) ) {
-				foreach ( $hook_extra['plugins'] as $plugin ) {
-					if ( strpos( $plugin, $plugin_slug ) !== false ) {
-						$this->check_onboarding_status();
-						break;
-					}
-				}
-			}
-		}
 	}
 }

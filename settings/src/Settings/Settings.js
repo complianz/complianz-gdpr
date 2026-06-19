@@ -215,7 +215,7 @@ const Settings = () => {
 							<div className="cmplz-grid-item-footer-upsell-bar">
 								{ !cmplz_settings.is_premium &&
 									<a className="button button-default"
-										 href="https://complianz.io/pricing"
+										 href="https://complianz.io/pricing/"
 										 target="_blank" rel="noopener noreferrer">{__(
 										'Get Premium', 'complianz-gdpr')}</a>}
 							</div>}

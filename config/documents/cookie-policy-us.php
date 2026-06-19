@@ -226,8 +226,8 @@ We respect and understand that you may want to be sure that your personal inform
         'content' => '<span class="cmplz-contact-organisation">[organisation_name]</span><br />
                       <span class="cmplz-contact-address">[address_company]</span><br />
                       <span class="cmplz-contact-country">[country_company]</span><br />
-                      Website: <span class="cmplz-contact-domain">[domain]</span><br />
-                      Email: <span class="cmplz-contact-email">[email_company]</span><br />
+                      <span class="cmplz-contact-domain">Website: [domain]</span><br />
+                      <span class="cmplz-contact-email">Email: [email_company]</span><br />
                       <span class="cmplz-contact-telephone">[telephone_company]</span>',
     ),
 

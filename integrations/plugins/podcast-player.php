@@ -2,7 +2,7 @@
 
 /**
  * Whitelisting podcast player inline script.
- * Compatiblity fix for Complianz GDPR/CCPA
+ * Compatibility fix for Complianz GDPR/CCPA
  *
  * https://wordpress.org/support/plugin/podcast-player/
  * author: @vedathemes

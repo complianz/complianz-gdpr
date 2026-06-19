@@ -20,6 +20,8 @@ const CreateProcessingAgreements = () => {
 	const [file, setFile] = useState(false)
 	const [uploading, setUploading] = useState(false);
 	const [uploadDisabled, setUploadDisabled] = useState(true);
+	const [uploadError, setUploadError] = useState(false);
+	const [errorNotice, setErrorNotice] = useState('');
 
 	useEffect( () => {
 		if ( editDocumentId && scrollAnchor.current ) {
@@ -50,9 +52,9 @@ const CreateProcessingAgreements = () => {
 		const handleUpload = async () => {
 			if (!file ) return;
 
-			if (file.type!=='application/pdf' && file.type!=='application/doc' && file.type!=='application/docx') {
+			if (file.type!=='application/pdf' && file.type!=='application/msword' && file.type!=='application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
 				setUploadDisabled(true);
-				addHelpNotice('create-processing-agreements', 'warning', __("You can only upload .pdf, .doc or .docs files","complianz-gdpr"), __("Incorrect extension","complianz-gdpr"),false);
+				addHelpNotice('create-processing-agreements', 'warning', __("You can only upload .pdf, .doc or .docx files","complianz-gdpr"), __("Incorrect extension","complianz-gdpr"),false);
 			} else {
 				setUploadDisabled(false);
 				removeHelpNotice('create-processing-agreements');
@@ -70,10 +72,12 @@ const CreateProcessingAgreements = () => {
 		setUploading(true);
 
 		upload('upload_processing_agreement', file, {region:region,serviceName:serviceName} ).then((response) => {
-			if (response.data.upload_success) {
-				showSavedSettingsNotice(__("Settings imported", "complianz-gdpr"));
+			if (response.data.success) {
+				showSavedSettingsNotice(__("File uploaded successfully", "complianz-gdpr"));
 			} else {
-				addHelpNotice('import_settings', 'warning', __("You can only upload .json files","complianz-gdpr"), __("Incorrect extension","complianz-gdpr"),false);
+				// Display the error message from the backend
+				setErrorNotice(response.data.error_message || __("Upload failed", "complianz-gdpr"));
+				setUploadError(true);
 			}
 			setUploading(false);
 			setFile(false);
@@ -82,6 +86,9 @@ const CreateProcessingAgreements = () => {
 			return true;
 		}).catch((error) => {
 			console.error(error);
+			addHelpNotice('upload_error', 'error', __("Upload failed due to network error", "complianz-gdpr"), __("Network Error","complianz-gdpr"), false);
+			setUploading(false);
+			setFile(false);
 		});
 	}
 
@@ -166,7 +173,7 @@ const CreateProcessingAgreements = () => {
 							{!editDocumentId && <>
 								{file && file.name}
 								<FormFileUpload
-									accept=""
+									accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 									icon={<Icon name='upload' color='black' />}//formfile upload overrides size prop. We override that in the icon component
 									onChange={ ( event ) => setFile(event.currentTarget.files[0]) }
 								>
@@ -184,6 +191,11 @@ const CreateProcessingAgreements = () => {
 							</>}
 						</div>
 					</div>
+					{uploadError &&
+						<div className="cmplz-error-text" style={{display: uploadError ? 'block' : 'none'}}>
+							<p>{errorNotice}</p>
+						</div>
+					}
 				</>
 			}
 			{

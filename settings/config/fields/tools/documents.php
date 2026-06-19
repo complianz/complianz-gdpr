@@ -40,7 +40,7 @@ function cmplz_tools_documents_fields( $fields ) {
 				'label' => 'default',
 				'title' => __( "Custom CSS", 'complianz-gdpr' ),
 				'text'  => __( "You can add additional custom CSS here. For tips and CSS lessons, check out our documentation.", 'complianz-gdpr'),
-				'url'   => 'https://complianz.io/?s=css',
+				'url'   => 'https://complianz.io/search/css',
 			],
 			'condition_action' => 'disable',
 			'react_conditions' => [

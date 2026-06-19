@@ -128,7 +128,7 @@
 
 		.cmplz-field-wrap, .cmplz-settings-block-intro {
 			//adding display flex here causes settings-block-intro with html to break.
-			//becuse of this the cmplz-field-wrap has this property separately (see above)
+			//because of this the cmplz-field-wrap has this property separately (see above)
 			flex-direction: column;
 			gap: var(--rsp-spacing-xs);
 			padding-inline: var(--rsp-spacing-l);

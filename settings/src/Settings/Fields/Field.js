@@ -79,6 +79,9 @@ const COMPONENT_MAP = {
 	'colorpicker': {
 		componentPath: 'Settings/ColorPicker/ColorPickerControl',
 	},
+	'wcag_contrast_checker': {
+		componentPath: 'Settings/WcagContrastChecker/WcagContrastChecker',
+	},
 	'document': {
 		componentPath: 'Settings/DocumentControl',
 	},
@@ -99,6 +102,12 @@ const COMPONENT_MAP = {
 	},
 	'cookiedatabase_sync': {
 		componentPath: 'Settings/Cookiedatabase/CookieDatabaseSyncControl',
+	},
+	'translation_management': {
+		componentPath: 'Settings/Translations/TranslationManagementControl',
+	},
+	'translation_automation': {
+		componentPath: 'Settings/Translations/TranslationAutomationControl',
 	},
 	'documents_menu': {
 		componentPath: 'Settings/DocumentsMenu/DocumentsMenuControl',

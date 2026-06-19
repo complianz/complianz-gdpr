@@ -36,6 +36,23 @@
   --cmplz_slider_bullet_color: white;
 }
 
+// ----------------------------------------------------- Focus Trap ----------------------------------------------------- //
+
+/* Focus trap styles - only when soft cookie wall is active */
+body.cmplz-banner-active {
+  *:not(.cmplz-cookiebanner):not(.cmplz-cookiebanner *) {
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+}
+
+.cmplz-cookiebanner {
+  * {
+    pointer-events: auto !important;
+    user-select: auto !important;
+  }
+}
+
 // ----------------------------------------------------- Manage Consent ----------------------------------------------------- //
 
 #cmplz-manage-consent {
@@ -440,6 +457,15 @@
 	  &.cmplz-read-more-purposes {
 		display:none;
 	  }
+	}
+	
+	ul {
+	  margin: 0;
+	  padding: 0;
+	  list-style: none;
+	  display: flex;
+	  gap: var(--cmplz_banner_margin);
+	  justify-content: center;
 	}
   }
 }

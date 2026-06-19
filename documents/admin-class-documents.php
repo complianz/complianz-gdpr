@@ -420,7 +420,7 @@ if ( ! class_exists( "cmplz_documents_admin" ) ) {
 			if ( current_theme_supports( 'menus' ) ) {
 				$empty_menu_link = admin_url( 'nav-menus.php' ) ;
 			} else {
-				$empty_menu_link = "https://complianz.io/how-to-create-a-menu-in-wordpress/";
+				$empty_menu_link = cmplz_get_referral_url( 'articles', 'document-menu', "https://complianz.io/how-to-create-a-menu-in-wordpress/" );
 			}
 
 			$regions = cmplz_get_regions( true , 'full' );
@@ -851,12 +851,12 @@ if ( ! class_exists( "cmplz_documents_admin" ) ) {
 			<select name="cmplz_document_status">
 				<option value="sync" <?php echo $sync === 'sync'
 					? 'selected="selected"'
-					: '' ?>><?php esc_html_e(__( "Synchronize document with Complianz",
-						"complianz-gdpr" )); ?></option>
+					: '' ?>><?php esc_html_e( "Synchronize document with Complianz",
+						"complianz-gdpr" ); ?></option>
 				<option value="unlink" <?php echo $sync === 'unlink'
 					? 'selected="selected"'
-					: '' ?>><?php esc_html_e(__( "Edit document and stop synchronization",
-						"complianz-gdpr" )); ?></option>
+					: '' ?>><?php esc_html_e( "Edit document and stop synchronization",
+						"complianz-gdpr" ); ?></option>
 			</select>
 			<?php
 

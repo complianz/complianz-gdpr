@@ -1,26 +1,27 @@
 <?php
-defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
+defined( 'ABSPATH' ) || die( 'you do not have access to this page!' );
 
 /**
  * Keep GADWP settings in sync with Complianz
- * @param string $value
- * @param string $key
- * @param string $default
+ *
+ * @param string $value   The current value.
+ * @param string $key     The option key.
+ * @param string $default The default value.
  *
  * @return mixed
  */
 function cmplz_gadwp_options( $value, $key, $default ) {
 
-	if ( $key === 'anonymize_ips' ) {
-		if (cmplz_no_ip_addresses()){
+	if ( 'anonymize_ips' === $key ) {
+		if ( cmplz_no_ip_addresses() ) {
 			return true;
 		}
 
 		return false;
 	}
 
-	if ( $key === 'demographics' ) {
-		if (cmplz_statistics_no_sharing_allowed()){
+	if ( 'demographics' === $key ) {
+		if ( cmplz_statistics_no_sharing_allowed() ) {
 			return false;
 		}
 
@@ -28,14 +29,19 @@ function cmplz_gadwp_options( $value, $key, $default ) {
 	}
 	return $value;
 }
-add_filter( 'exactmetrics_get_option', 'cmplz_gadwp_options' , 10, 3 );
+add_filter( 'exactmetrics_get_option', 'cmplz_gadwp_options', 10, 3 );
 /**
  * Set analytics as suggested stats tool in the wizard
+ *
+ * @param mixed  $value     The current value.
+ * @param string $fieldname The field name.
+ * @param array  $field     The field configuration.
+ *
+ * @return mixed The modified value.
  */
-
 function cmplz_gadwp_set_default( $value, $fieldname, $field ) {
-	if ( $fieldname === 'compile_statistics' ) {
-		return "google-analytics";
+	if ( 'compile_statistics' === $fieldname ) {
+		return 'google-analytics';
 	}
 	return $value;
 }
@@ -44,37 +50,51 @@ add_filter( 'cmplz_default_value', 'cmplz_gadwp_set_default', 20, 3 );
 /**
  * Add notice to tell a user to choose Analytics
  *
- * @param $notices
- * @return array
+ * @param array $notices The notices array.
+ *
+ * @return array The modified notices array.
  */
-function cmplz_gadwp_show_compile_statistics_notice($notices) {
+function cmplz_gadwp_show_compile_statistics_notice( $notices ) {
 	$text = '';
 	if ( cmplz_no_ip_addresses() ) {
-		$text .=  cmplz_sprintf(__( "You have selected you anonymize IP addresses. This setting is now enabled in %s.",
-			'complianz-gdpr' ), 'Google Analytics Dashboard for WP' );
+		// translators: %s is the plugin name.
+		$text .= cmplz_sprintf(
+			__(
+				'You have selected you anonymize IP addresses. This setting is now enabled in %s.',
+				'complianz-gdpr'
+			),
+			'Google Analytics Dashboard for WP'
+		);
 	}
 	if ( cmplz_statistics_no_sharing_allowed() ) {
-		$text .=  cmplz_sprintf( __( "You have selected you do not share data with third-party networks. Display advertising is now disabled in %s.",
-			'complianz-gdpr' ), 'Google Analytics Dashboard for WP' ) ;
+		// translators: %s is the plugin name.
+		$text .= cmplz_sprintf(
+			__(
+				'You have selected you do not share data with third-party networks. Display advertising is now disabled in %s.',
+				'complianz-gdpr'
+			),
+			'Google Analytics Dashboard for WP'
+		);
 	}
 	$found_key = false;
-	//find notice with field_id 'compile_statistics' and replace it with our own
-	foreach ($notices as $key=>$notice) {
-		if ($notice['field_id']==='compile_statistics') {
+	// Find notice with field_id 'compile_statistics' and replace it with our own.
+	foreach ( $notices as $key => $notice ) {
+		if ( 'compile_statistics' === $notice['field_id'] ) {
 			$found_key = $key;
 		}
 	}
 
-	$notice = [
+	$notice = array(
 		'field_id' => 'compile_statistics',
 		'label'    => 'default',
-		'title'    => __( "Statistics plugin detected", 'complianz-gdpr' ),
-		'text'     => cmplz_sprintf( __( "You use %s, which means the answer to this question should be Google Analytics.", 'complianz-gdpr' ), 'ExactMetrics' )
-		              .' '.$text,
-	];
+		'title'    => __( 'Statistics plugin detected', 'complianz-gdpr' ),
+		// translators: %s is the plugin name.
+		'text'     => cmplz_sprintf( __( 'You use %s, which means the answer to this question should be Google Analytics.', 'complianz-gdpr' ), 'ExactMetrics' )
+						. ' ' . $text,
+	);
 
-	if ($found_key){
-		$notices[$found_key] = $notice;
+	if ( $found_key ) {
+		$notices[ $found_key ] = $notice;
 	} else {
 		$notices[] = $notice;
 	}
@@ -85,14 +105,13 @@ add_filter( 'cmplz_field_notices', 'cmplz_gadwp_show_compile_statistics_notice' 
 /**
  * Make sure there's no warning about configuring GA anymore
  *
- * @param $warnings
+ * @param array $warnings The warnings array.
  *
- * @return mixed
+ * @return array The filtered warnings array.
  */
-
 function cmplz_gadwp_filter_warnings( $warnings ) {
-	unset( $warnings[ 'ga-needs-configuring' ] );
-	unset( $warnings[ 'gtm-needs-configuring' ] );
+	unset( $warnings['ga-needs-configuring'] );
+	unset( $warnings['gtm-needs-configuring'] );
 	return $warnings;
 }
 add_filter( 'cmplz_warning_types', 'cmplz_gadwp_filter_warnings' );
@@ -100,17 +119,19 @@ add_filter( 'cmplz_warning_types', 'cmplz_gadwp_filter_warnings' );
 /**
  * Hide the stats configuration options when gadwp is enabled.
  *
- * @param $fields
+ * @param array $fields The fields array.
  *
- * @return mixed
+ * @return array The filtered fields array.
  */
-
 function cmplz_gadwp_filter_fields( $fields ) {
 
-	$index = cmplz_get_field_index('compile_statistics_more_info', $fields);
-	if ($index!==false) unset($fields[$index]['help']);
-	return  cmplz_remove_field( $fields,
-		[
+	$index = cmplz_get_field_index( 'compile_statistics_more_info', $fields );
+	if ( false !== $index ) {
+		unset( $fields[ $index ]['help'] );
+	}
+	return cmplz_remove_field(
+		$fields,
+		array(
 			'configuration_by_complianz',
 			'ua_code',
 			'aw_code',
@@ -121,8 +142,10 @@ function cmplz_gadwp_filter_fields( $fields ) {
 			'cmplz-gtag-urlpassthrough',
 			'cmplz-gtag-ads_data_redaction',
 			'gtm_code',
-			'cmplz-tm-template'
-		]);
+			'gtm_code_head',
+			'cmplz-tm-template',
+		)
+	);
 }
 add_filter( 'cmplz_fields', 'cmplz_gadwp_filter_fields', 200, 1 );
 

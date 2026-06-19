@@ -84,7 +84,7 @@ function cmplz_check_upgrade() {
 			$service_name
 				= COMPLIANZ::$banner_loader->convert_slug_to_name( $selected_stat_service );
 
-			//check if we have ohter types of this service, to prevent double services here.
+			//check if we have other types of this service, to prevent double services here.
 			$service_anonymized = new CMPLZ_SERVICE( $service_name . ' (anonymized)' );
 			$service            = new CMPLZ_SERVICE( $service_name );
 
@@ -288,7 +288,7 @@ function cmplz_check_upgrade() {
 					$banner->colorpalette_text['hyperlink']     = empty( $result->popup_text_color ) ? '#191e23' : $result->popup_text_color;
 					$banner->colorpalette_toggles['background'] = empty( $result->slider_background_color ) ? '#21759b' : $result->slider_background_color;
 					$banner->colorpalette_toggles['bullet']     = empty( $result->slider_bullet_color ) ? '#ffffff' : $result->slider_bullet_color;
-					$banner->colorpalette_toggles['inactive']   = empty( $result->slider_background_color_inactive ) ? '#F56E28' : $result->slider_background_color_inactive;
+					$banner->colorpalette_toggles['inactive']   = empty( $result->slider_background_color_inactive ) ? '#555' : $result->slider_background_color_inactive;
 
 					$consenttypes = cmplz_get_used_consenttypes();
 					$optout_only  = false;
@@ -1030,6 +1030,11 @@ function cmplz_check_upgrade() {
 			$options['uses_ad_cookies_personalized'] = 'no';
 			update_option( 'cmplz_options', $options );
 		}
+	}
+
+	// Re-save all banners to regenerate CSS and clear caches
+	if ( $prev_version && version_compare( $prev_version, '7.4.5', '<' ) ) {
+		cmplz_resave_all_banners();
 	}
 
 	#regenerate cookie policy snapshot.

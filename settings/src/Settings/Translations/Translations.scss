@@ -1,0 +1,171 @@
+.cmplz-translation-management,
+.cmplz-translation-automation {
+	margin: 20px 0;
+	
+	.cmplz-status-summary {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 20px;
+		margin-bottom: 20px;
+		
+		h4 {
+			margin-top: 0;
+			color: #333;
+		}
+		
+		p {
+			margin: 8px 0;
+			
+			strong {
+				color: #555;
+			}
+		}
+	}
+	
+	.cmplz-language-files {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 20px;
+		margin-bottom: 20px;
+		
+		h4 {
+			margin-top: 0;
+			color: #333;
+		}
+		
+		table {
+			margin-top: 20px;
+			width: 100%;
+			border-collapse: collapse;
+			
+			th, td {
+				padding: 12px;
+				text-align: left;
+				border-bottom: 1px solid #eee;
+			}
+			
+			th {
+				background: #f9f9f9;
+				font-weight: 600;
+			}
+		}
+		
+		.cmplz-status-ok {
+			color: #46b450;
+			font-weight: 500;
+		}
+		
+		.cmplz-status-missing {
+			color: #dc3232;
+			font-weight: 500;
+		}
+		
+		.cmplz-status-warning {
+			color: #ffb900;
+			font-weight: 500;
+		}
+		
+		.cmplz-status-error {
+			color: #dc3232;
+			font-weight: 500;
+		}
+		
+		.cmplz-error-details {
+			color: #666;
+			font-size: 12px;
+			font-style: italic;
+			cursor: help;
+		}
+	}
+	
+	.cmplz-management-actions {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 20px;
+		
+		button {
+			margin-right: 10px;
+		}
+	}
+	
+	.cmplz-automation-settings {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 20px;
+		margin-bottom: 20px;
+		
+		h4 {
+			margin-top: 0;
+			color: #333;
+		}
+		
+		.cmplz-interval-control {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			margin-bottom: 15px;
+			
+			input[type="number"] {
+				width: 80px;
+			}
+		}
+		
+		.cmplz-cron-status {
+			background: #f9f9f9;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			padding: 15px;
+			margin-top: 15px;
+			
+			p {
+				margin: 5px 0;
+				
+				strong {
+					color: #555;
+				}
+			}
+		}
+	}
+	
+	.cmplz-error {
+		color: #dc3232;
+		background: #fef7f7;
+		border: 1px solid #dc3232;
+		border-radius: 4px;
+		padding: 10px;
+		margin-bottom: 15px;
+	}
+	
+	.cmplz-loading {
+		text-align: center;
+		padding: 20px;
+		color: #666;
+	}
+	
+	.cmplz-test-results {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 20px;
+		margin-top: 20px;
+		
+		h4 {
+			margin-top: 0;
+			color: #333;
+		}
+		
+		pre {
+			background: #f9f9f9;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			padding: 15px;
+			overflow-x: auto;
+			font-size: 12px;
+			line-height: 1.4;
+		}
+	}
+} 

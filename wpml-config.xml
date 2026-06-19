@@ -1,0 +1,46 @@
+<wpml-config>
+  <admin-texts>
+    <key name="cmplz_options">
+      <key name="organisation_name" />
+      <key name="address_company" />
+      <key name="country_company" />
+      <key name="email_company" />
+      <key name="telephone_company" />
+      <key name="ca_name_accountable_person" />
+      <key name="ca_address_accountable_person" />
+      <!-- Purpose-generated text fields (pro/settings/fields/purposes.php).
+           If new purposes are added to load_purposes() in config/class-config.php,
+           add the corresponding keys below. -->
+      <key name="contact_retain_wmy" />
+      <key name="contact_description_criteria_retention" />
+      <key name="contact_credit_protection_relevant_legislation" />
+      <key name="payments_retain_wmy" />
+      <key name="payments_description_criteria_retention" />
+      <key name="payments_credit_protection_relevant_legislation" />
+      <key name="register-account_retain_wmy" />
+      <key name="register-account_description_criteria_retention" />
+      <key name="register-account_credit_protection_relevant_legislation" />
+      <key name="newsletters_retain_wmy" />
+      <key name="newsletters_description_criteria_retention" />
+      <key name="newsletters_credit_protection_relevant_legislation" />
+      <key name="support-services_retain_wmy" />
+      <key name="support-services_description_criteria_retention" />
+      <key name="support-services_credit_protection_relevant_legislation" />
+      <key name="legal-obligations_retain_wmy" />
+      <key name="legal-obligations_description_criteria_retention" />
+      <key name="legal-obligations_credit_protection_relevant_legislation" />
+      <key name="statistics_retain_wmy" />
+      <key name="statistics_description_criteria_retention" />
+      <key name="statistics_credit_protection_relevant_legislation" />
+      <key name="offer-personalized-products_retain_wmy" />
+      <key name="offer-personalized-products_description_criteria_retention" />
+      <key name="offer-personalized-products_credit_protection_relevant_legislation" />
+      <key name="selling-data-thirdparty_retain_wmy" />
+      <key name="selling-data-thirdparty_description_criteria_retention" />
+      <key name="selling-data-thirdparty_credit_protection_relevant_legislation" />
+      <key name="deliveries_retain_wmy" />
+      <key name="deliveries_description_criteria_retention" />
+      <key name="deliveries_credit_protection_relevant_legislation" />
+    </key>
+  </admin-texts>
+</wpml-config>

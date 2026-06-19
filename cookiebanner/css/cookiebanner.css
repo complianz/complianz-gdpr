@@ -33,6 +33,15 @@
   --cmplz_slider_inactive_color: #ccc;
   --cmplz_slider_bullet_color: white;
 }
+/* Focus trap styles - only when soft cookie wall is active */
+body.cmplz-banner-active *:not(.cmplz-cookiebanner):not(.cmplz-cookiebanner *) {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+.cmplz-cookiebanner * {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
 #cmplz-manage-consent .cmplz-manage-consent {
   margin: unset;
   z-index: 9998;
@@ -93,6 +102,7 @@
 }
 .cmplz-cookiebanner {
   max-height: calc(100vh - 20px);
+  overflow-y: auto;
   position: fixed;
   height: auto;
   left: 50%;
@@ -102,13 +112,6 @@
   grid-template-rows: minmax(0, 1fr);
   z-index: 99999;
   background: var(--cmplz_banner_background_color);
-  border-style: solid;
-  border-color: var(--cmplz_banner_border_color);
-  border-width: var(--cmplz_banner_border_width);
-  border-radius: var(--cmplz_banner_border_radius);
-  padding: 15px 20px;
-  display: grid;
-  grid-gap: 10px;
 }
 .cmplz-cookiebanner a {
   transition: initial;
@@ -144,6 +147,69 @@
     min-width: 300px;
   }
 }
+@media (max-height: 400px) {
+  .cmplz-cookiebanner {
+    height: calc(100vh - 20px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 1px;
+    grid-row-gap: 1px;
+    padding: 7px 12px !important;
+    zoom: 0.6;
+  }
+  .cmplz-cookiebanner .cmplz-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    max-height: none;
+    margin-top: 15px !important;
+  }
+  .cmplz-cookiebanner .cmplz-header,
+  .cmplz-cookiebanner .cmplz-divider,
+  .cmplz-cookiebanner .cmplz-links,
+  .cmplz-cookiebanner .cmplz-buttons,
+  .cmplz-cookiebanner .cmplz-documents {
+    flex-shrink: 0;
+  }
+  .cmplz-cookiebanner .cmplz-header {
+    margin-bottom: 15px !important;
+    max-height: 10px;
+  }
+  .cmplz-close {
+    zoom: 0.6 !important;
+  }
+  .cmplz-cookiebanner .cmplz-buttons {
+    gap: 1px !important;
+  }
+  .cmplz-cookiebanner .cmplz-buttons .cmplz-btn {
+    height: 15vh !important;
+    min-height: unset !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    font-size: 1.1rem !important;
+    line-height: 14px !important;
+    zoom: 0.5 !important;
+  }
+  .cmplz-cookiebanner .cmplz-documents,
+  .cmplz-cookiebanner .cmplz-information {
+    zoom: 0.5 !important;
+  }
+}
+@media (max-height: 400px) and (max-width: 768px) {
+  .cmplz-cookiebanner {
+    gap: 1px;
+  }
+}
+.cmplz-cookiebanner {
+  border-style: solid;
+  border-color: var(--cmplz_banner_border_color);
+  border-width: var(--cmplz_banner_border_width);
+  border-radius: var(--cmplz_banner_border_radius);
+  padding: 15px 20px;
+  display: grid;
+  grid-gap: 10px;
+}
 .cmplz-cookiebanner .cmplz-divider {
   margin-left: -20px;
   margin-right: -20px;
@@ -153,6 +219,11 @@
   align-items: center;
   display: grid;
   grid-column: span 3;
+}
+@media (max-width: 399px) {
+  .cmplz-cookiebanner .cmplz-header {
+    grid-template-columns: auto 1fr auto;
+  }
 }
 .cmplz-cookiebanner .cmplz-logo svg {
   max-height: 35px;
@@ -246,8 +317,19 @@
 .cmplz-cookiebanner .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-banner-checkbox input[data-category=cmplz_functional] {
   display: none;
 }
-.cmplz-cookiebanner .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-icon.cmplz-open {
+.cmplz-cookiebanner .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-category-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
   grid-column-start: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+.cmplz-cookiebanner .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-icon.cmplz-open {
   cursor: pointer;
   content: '';
   transform: rotate(0deg);
@@ -258,20 +340,6 @@
   background-size: cover;
   height: 18px;
   width: 18px;
-}
-.cmplz-cookiebanner .cmplz-categories .cmplz-category[open] .cmplz-icon.cmplz-open {
-  transform: rotate(180deg);
-}
-.cmplz-cookiebanner .cmplz-categories .cmplz-category summary {
-  display: block;
-}
-.cmplz-cookiebanner .cmplz-categories .cmplz-category summary::marker {
-  display: none;
-  content: '';
-}
-.cmplz-cookiebanner .cmplz-categories .cmplz-category summary::-webkit-details-marker {
-  display: none;
-  content: '';
 }
 .cmplz-cookiebanner .cmplz-categories .cmplz-category .cmplz-description {
   font-size: var(--cmplz_category_body_font_size);
@@ -295,7 +363,7 @@
   gap: var(--cmplz_banner_margin);
 }
 .cmplz-cookiebanner .cmplz-buttons .cmplz-btn {
-  height: 45px;
+  min-height: 45px;
   padding: 10px;
   margin: initial;
   width: 100%;
@@ -368,11 +436,34 @@
 .cmplz-cookiebanner .cmplz-links .cmplz-link.cmplz-read-more-purposes {
   display: none;
 }
+.cmplz-cookiebanner .cmplz-links ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: var(--cmplz_banner_margin);
+  justify-content: center;
+}
 /* The categories are also used on the cookie policy, so this needs to be outside the banner class */
 .cmplz-categories .cmplz-category .cmplz-description-statistics-anonymous {
   display: none;
 }
 .cmplz-categories .cmplz-category .cmplz-description-statistics {
   display: block;
+}
+.cmplz-categories .cmplz-category .cmplz-category-header .cmplz-category-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  grid-column-start: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+.cmplz-categories .cmplz-category .cmplz-category-toggle[aria-expanded="true"] .cmplz-icon.cmplz-open {
+  transform: rotate(180deg);
 }
 /*# sourceMappingURL=../../css/cookiebanner.css.map */

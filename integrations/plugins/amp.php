@@ -185,7 +185,7 @@ if ( ! class_exists( "cmplz_amp" ) ) {
 				= COMPLIANZ::$banner_loader->site_needs_cookie_warning( 'eu' )
 				  || COMPLIANZ::$banner_loader->site_needs_cookie_warning( 'uk' );
 			//
-			//check if this user's region reguires a cookie warning
+			//check if this user's region requires a cookie warning
 			$payload
 				= file_get_contents( 'php://input' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			if ( ! empty( $payload ) ) {

@@ -10,6 +10,8 @@ function cmplz_linkedin_script( $tags ) {
 		'urls' => array(
 			'platform.linkedin.com/in.js',
 			'linkedin.com/embed/feed/update',
+			'linkedin.com',
+            'snap.licdn.com',
 		),
 		'enable_placeholder' => '1',
 		'placeholder_class' => 'share-update-card',

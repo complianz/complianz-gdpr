@@ -1001,83 +1001,83 @@ button.button .cmplz-icon.cmplz-icon-loading > div {
 }
 
 .cmplz-placeholder .cmplz-placeholder-line:nth-of-type(1) {
-    width: 99%;
+    width: 93%;
 }
 
 .cmplz-placeholder .cmplz-placeholder-line:nth-of-type(2) {
-    width: 91%;
+    width: 82%;
 }
 
 .cmplz-placeholder .cmplz-placeholder-line:nth-of-type(3) {
-    width: 96%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(4) {
-    width: 100%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(5) {
-    width: 89%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(6) {
-    width: 80%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(7) {
-    width: 94%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(8) {
-    width: 98%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(9) {
-    width: 61%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(10) {
-    width: 77%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(11) {
     width: 75%;
 }
 
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(12) {
-    width: 74%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(13) {
-    width: 69%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(14) {
-    width: 98%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(15) {
-    width: 63%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(16) {
-    width: 89%;
-}
-
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(17) {
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(4) {
     width: 96%;
 }
 
-.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(18) {
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(5) {
+    width: 99%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(6) {
+    width: 62%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(7) {
+    width: 73%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(8) {
+    width: 82%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(9) {
+    width: 88%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(10) {
+    width: 94%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(11) {
+    width: 93%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(12) {
     width: 79%;
 }
 
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(13) {
+    width: 76%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(14) {
+    width: 81%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(15) {
+    width: 69%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(16) {
+    width: 95%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(17) {
+    width: 74%;
+}
+
+.cmplz-placeholder .cmplz-placeholder-line:nth-of-type(18) {
+    width: 82%;
+}
+
 .cmplz-placeholder .cmplz-placeholder-line:nth-of-type(19) {
-    width: 66%;
+    width: 98%;
 }
 
 .cmplz-placeholder .cmplz-placeholder-line:nth-of-type(20) {
-    width: 70%;
+    width: 81%;
 }
 
 .cmplz-placeholder .cmplz-placeholder-line ~ .cmplz-placeholder-line {
@@ -1427,7 +1427,7 @@ button.button .cmplz-icon.cmplz-icon-loading > div {
     padding-block: var(--rsp-spacing-m);
     display: grid;
     width: 100%;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: var(--rsp-spacing-s);
     background: var(--rsp-green-faded);
 }
@@ -1484,13 +1484,15 @@ button.button .cmplz-icon.cmplz-icon-loading > div {
 
 .cmplz-statistics-list {
     width: 100%;
+    height: 230px;
+    overflow-y: auto;
 }
 
 .cmplz-statistics-list-item {
     width: 100%;
     display: grid;
     justify-items: flex-start;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 2fr 1fr;
     gap: var(--rsp-spacing-s);
     padding-block: var(--rsp-spacing-xs);
     padding-inline: var(--rsp-spacing-l);
@@ -1507,6 +1509,9 @@ button.button .cmplz-icon.cmplz-icon-loading > div {
 
 .cmplz-statistics-list-item-number {
     font-weight: 600;
+    width: 100%;
+    text-align: right;
+    cursor: pointer;
 }
 
 .cmplz-confetti {

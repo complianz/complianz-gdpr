@@ -101,13 +101,14 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 		 */
 		private $thirdparty_socialmedia = array(
 			'facebook'  => 'Facebook',
-			'twitter'   => 'Twitter',
+			'twitter'   => 'X (Formerly Twitter)',
 			'linkedin'  => 'LinkedIn',
 			'whatsapp'  => 'WhatsApp',
 			'instagram' => 'Instagram',
 			'tiktok'    => 'TikTok',
 			'disqus'    => 'Disqus',
 			'pinterest' => 'Pinterest',
+			'snapchat'  => 'Snapchat',
 		);
 
 		/**
@@ -133,6 +134,9 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'platform.linkedin.com',
 				'addthis_widget.js',
 				'linkedin.com/embed/feed',
+				'linkedin.com',
+                'snap.licdn.com',
+                'insight.min.js',
 			),
 			'twitter'   => array(
 				'super-socializer',
@@ -140,6 +144,8 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'addthis_widget.js',
 				'platform.twitter.com',
 				'twitter-widgets.js',
+				'ads-twitter.com',
+                'uwt.js',
 			),
 			'facebook'  => array(
 				'fbq',
@@ -163,6 +169,7 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'instawidget.net/js/instawidget.js',
 				'instagram.com',
 			),
+			'snapchat' => array('snapchat.com'),
 		);
 
 		/**
@@ -849,13 +856,19 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'col'     => 'Colorado (CPA)',
 				'con'     => 'Connecticut (CTDPA)',
 				'del'     => 'Delaware (PDPA)',
+				'ind'     => 'Indiana (ICDPA)',
 				'iow'     => 'Iowa (CDPA)',
+				'ken'     => 'Kentucky (KCDPA)',
+				'mar'     => 'Maryland (MODPA)',
+				'min'     => 'Minnesota (MCDPA)',
 				'mon'     => 'Montana (MCDPA)',
 				'neb'     => 'Nebraska (DPA)',
 				'nev'     => 'Nevada (NRS 603A)',
 				'new_ham' => 'New Hampshire (DPA)',
 				'new_jer' => 'New Jersey (DPL)',
 				'ore'     => 'Oregon (OCPA)',
+				'rho'     => 'Rhode Island (DTPPA)',
+				'ten'     => 'Tennessee (TIPA)',
 				'tex'     => 'Texas (TDPSA)',
 				'uta'     => 'Utah (UCPA)',
 				'vir'     => 'Virginia (CDPA)',
@@ -1233,8 +1246,9 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'soundcloud'       => 'SoundCloud',
 				'spotify'          => 'Spotify',
 				'ted'              => 'Ted',
-				'twitter'          => 'Twitter',
+				'twitter'          => 'X (Formerly Twitter)',
 				'tiktok'           => 'Tik Tok',
+				'snapchat'         => 'Snapchat',
 			);
 			$this->placeholders = $placeholders;
 		}

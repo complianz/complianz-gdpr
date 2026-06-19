@@ -87,6 +87,7 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_reported_cookies',
         'cmplz_review_notice_shown',
         'cmplz_roc_export_args',
+        'cmplz_roc_file_name',
         'cmplz_run_activation',
         'cmplz_run_premium_install',
         'cmplz_run_premium_upgrade',
@@ -98,6 +99,7 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_synced_cookiedatabase_once',
         'cmplz_sync_services_complete',
         'cmplz_tcf_mail_sent',
+		'cmplz_tcf_license_active',
         'cmplz_tracking_ab_started',
         'cmplz_transients',
         'cmplz_upgraded_to_five',
@@ -127,6 +129,7 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         'cmplz_wsc_onboarding_status',
         'cmplz_wsc_onboarding_start',
         'cmplz_wsc_onboarding_complete',
+		'cmplz_wsc_dismissed',
 		'cmplz_wsc_onboarding_dismissed',
 		'cmplz_wsc_websitescan_dismissed',
 		'cmplz_wsc_scan_id',
@@ -142,7 +145,13 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
 		'cmplz_wsc_checks_last_detections',
 		'cmplz_wsc_checks_last_mail_sent',
 		'cmplz_wsc_checks_last_mail_sent_error',
-	];
+        'cmplz_wsc_logs',
+        'cmplz_wsc_newsletter_dismissed',
+        'cmplz_translation_cron_interval',
+        'cmplz_translation_errors',
+        'cmplz_wsc_scan_registry',
+        'cmplz_wsc_batch_map',
+    ];
 
 
     foreach ($options as $option_name) {
@@ -183,6 +192,11 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
         '_transient_timeout_complianz_%',
         '_transient_cmplz_dn_notifications_%',
         '_transient_timeout_cmplz_dn_notifications_%',
+        '_transient_cmplz_translation_fetched_%',
+        '_transient_cmplz_plugin_update_check_%',
+        '_transient_timeout_cmplz_plugin_update_check_%',
+        '_transient_cmplz_rate_limit_auth_email_%',
+        '_transient_timeout_cmplz_rate_limit_auth_email_%',
     ];
 
     foreach ($transients as $transient) {
@@ -190,6 +204,21 @@ if (isset($cmplz_settings['clear_data_on_uninstall']) && $cmplz_settings['clear_
             $wpdb->prepare(
                 "DELETE FROM $wpdb->options WHERE option_name LIKE %s",
                 $transient
+            )
+        );
+    }
+
+
+    // cmplz post meta
+    $post_meta_keys = [
+        '_cmplz_scanned_post',
+        '_cmplz_wsc_scanned_post',
+    ];
+    foreach ( $post_meta_keys as $meta_key ) {
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM $wpdb->postmeta WHERE meta_key = %s",
+                $meta_key
             )
         );
     }

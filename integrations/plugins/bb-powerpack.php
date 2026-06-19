@@ -21,7 +21,7 @@ if ( cmplz_uses_thirdparty('youtube') ) {
                       }
                   });
                }
-  	        <?php //If the marketing is accepted on the video, the lightbox dismisses the vidoe. We open it again. ?>
+  	        <?php //If the marketing is accepted on the video, the lightbox dismisses the video. We open it again. ?>
   			cmplz_bb_add_event('click', '.fancybox-container .cmplz-accept-category, .fancybox-container .cmplz-accept-service',
                   function(e){
                       document.querySelector('.pp-video-play-icon').click();

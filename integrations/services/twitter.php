@@ -10,6 +10,7 @@ function cmplz_twitter_script( $tags ) {
 		'urls' => array(
 			'platform.twitter.com',
 			'twitter-widgets.js',
+			'ads-twitter.com',
 		),
 		'enable_placeholder' => '1',
 		'placeholder_class' => 'twitter-tweet,twitter-timeline',

@@ -110,7 +110,7 @@ const Page = () => {
 			if (!progressLoaded) {
 				await fetchProgressData()
 			}
-			if (!loading && syncProgress<100){
+			if (!loading && syncProgress<100 && cmplz_settings.wsc_is_authenticated){
 				fetchSyncProgressData();
 			}
 		}

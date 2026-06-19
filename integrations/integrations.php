@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
+defined( 'ABSPATH' ) || die( "you do not have access to this page!" );
 if ( cmplz_admin_logged_in() ) {
 	require_once( 'admin/integrations.php' );
 }
@@ -115,13 +115,13 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 			'label'                => 'Variation Swatches for WooCommerce',
 			'firstparty_marketing' => false,
 	),
-
+	/*
 	'ultimate-addons-elementor' => array(
 			'constant_or_function' => 'UAEL_FILE',
 			'label'                => 'Ultimate Addons for Elementor - Google Maps',
 			'firstparty_marketing' => false,
 	),
-
+	*/
 	'invisible-recaptcha' => array(
 			'constant_or_function' => 'InvisibleReCaptcha',
 			'label'                => 'Google Invisible reCaptcha voor WordPress',
@@ -585,6 +585,16 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 	'greenshift' => array(
 		'constant_or_function' => 'GREENSHIFT_DIR_URL',
 		'label'                => 'Greenshift',
+		'firstparty_marketing' => false,
+	),
+	'funnelkit' => array(
+		'constant_or_function' => 'WFFN_VERSION',
+		'label'				   => 'FunnelKit',
+		'firstparty_marketing' => false,
+	),
+	'pinterest-for-woocommerce' => array(
+		'constant_or_function' => 'PINTEREST_FOR_WOOCOMMERCE_PLUGIN_FILE',
+		'label'				   => 'Pinterest for WooCommerce',
 		'firstparty_marketing' => false,
 	),
 ) );

@@ -29,7 +29,7 @@ class cmplz_placeholders {
 				0 => 'Spotify',
 				1 => 'Google Analytics',
 				2 => 'Facebook',
-				3 => 'Twitter',
+				3 => 'X (Formerly Twitter)',
 				4 => 'LinkedIn',
 				5 => 'YouTube',
 				6 => 'Instagram',

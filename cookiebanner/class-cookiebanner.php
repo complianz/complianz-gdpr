@@ -392,7 +392,7 @@ if ( ! class_exists( "cmplz_cookiebanner" ) ) {
 				}
 
 			} else if ( $type === 'css' ) {
-				$value = !empty($value) ? htmlspecialchars_decode( $value ) : '';
+				$value = !empty($value) ? htmlspecialchars_decode( $value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) : '';
 				if (empty($value) && $set_defaults) {
 					$value = $default;
 				}
@@ -765,7 +765,7 @@ if ( ! class_exists( "cmplz_cookiebanner" ) ) {
 		}
 
 		/**
-		 * santize the css to remove any commented or empty classes
+		 * sanitize the css to remove any commented or empty classes
 		 *
 		 * @param string $css
 		 *
@@ -1232,7 +1232,36 @@ if ( ! class_exists( "cmplz_cookiebanner" ) ) {
 			delete_transient('cmplz_generate_css_active' );
 		}
 
-
+		/**
+		 * Check if CSS should be regenerated based on source file modification times
+		 * 
+		 * @return bool
+		 */
+		private function should_regenerate_css() {
+			$css_files = $this->get_css_file_modules('optin', false);
+			$latest_source_time = 0;
+			$latest_generated_time = 0;
+			
+			// Get the latest modification time of source files
+			foreach ($css_files as $css_file) {
+				$file_path = trailingslashit(CMPLZ_PATH) . "cookiebanner/css/$css_file";
+				if (file_exists($file_path)) {
+					$latest_source_time = max($latest_source_time, filemtime($file_path));
+				}
+			}
+			
+			// Get the latest modification time of generated files
+			$upload_dir = cmplz_upload_dir('css');
+			$consent_types = cmplz_get_used_consenttypes();
+			foreach ($consent_types as $consent_type) {
+				$file = "{$upload_dir}banner-{$this->ID}-$consent_type.css";
+				if (file_exists($file)) {
+					$latest_generated_time = max($latest_generated_time, filemtime($file));
+				}
+			}
+			
+			return $latest_source_time > $latest_generated_time;
+		}
 
 		/**
 		 * Get array to output to front-end
@@ -1240,6 +1269,11 @@ if ( ! class_exists( "cmplz_cookiebanner" ) ) {
 		 * @return array
 		 */
 		public function get_front_end_settings( $preview = false ) {
+			// Check if CSS needs regeneration and trigger it if needed
+			if (!$preview && $this->should_regenerate_css()) {
+				$this->generate_css();
+			}
+
 			$store_consent = cmplz_ab_testing_enabled() || cmplz_get_option('records_of_consent') === 'yes';
 			$this->dismiss_timeout = $this->dismiss_on_timeout ? 1000 * $this->dismiss_timeout : false;
 			$upload_url = is_ssl() ? str_replace('http://', 'https://', cmplz_upload_url()) : cmplz_upload_url();

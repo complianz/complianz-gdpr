@@ -3,12 +3,14 @@ import * as cmplz_api from "../../utils/api";
 import {UseCookieScanData} from './CookieScanData';
 import { __ } from '@wordpress/i18n';
 import Panel from "../Panel";
-import Icon from "../../utils/Icon";
 import UseSyncData from "../Cookiedatabase/SyncData";
 import useMenu from "../../Menu/MenuData";
 import useFields from "../Fields/FieldsData";
 import Details from "./Details";
 import useProgress from "../../Dashboard/Progress/ProgressData";
+import Icon from "../../utils/Icon";
+import Alert from "../../utils/Alert";
+import { startWscOnboarding, getScanUpsellAlertProps } from "../../utils/wsc";
 
 const CookieScanControl = () => {
 	const {setSyncProgress, fetchSyncProgressData} = UseSyncData();
@@ -17,7 +19,7 @@ const CookieScanControl = () => {
 	const {addHelpNotice, fieldsLoaded} = useFields();
 	const {selectedSubMenuItem } = useMenu();
 	const {setProgressLoaded} = useProgress();
-	const [wscLocked, setWscLocked] = useState(false);
+	const wscLocked = !cmplz_settings.wsc_is_authenticated;
 
 	useEffect ( () => {
 		if (lastLoadedIframe === nextPage) return;
@@ -27,11 +29,11 @@ const CookieScanControl = () => {
 	}, [nextPage, lastLoadedIframe, iframeLoading]);
 
 	useEffect (  () => {
+		if ( wscLocked ) return;
 		if ( !iframeLoading && !loading && progress <100 ) {
 			fetchProgress();
-		} else if ( !iframeLoading && !loading && progress === 100 ) {
 		}
-	}, [iframeLoading, loading, progress]);
+	}, [iframeLoading, loading, progress, wscLocked]);
 
 	useEffect (  () => {
 		if (!fieldsLoaded) return;
@@ -50,18 +52,6 @@ const CookieScanControl = () => {
 			);
 		}
 	},[fieldsLoaded]);
-
-	useEffect(() => {
-		const checkWscLock = async () => {
-			try {
-				const response = await cmplz_api.doAction('get_wsc_status', {});
-				setWscLocked(response.wsc_lock);
-			} catch (error) {
-				console.error('Error activating Website Scan:', error);
-			}
-		};
-		checkWscLock();
-	}, []);
 
 	const doNotTrack = () => {
 		let dnt = 'doNotTrack' in navigator && navigator.doNotTrack === '1';
@@ -155,33 +145,21 @@ const CookieScanControl = () => {
 	let scanProgress = progress < 100 && progress > 0;
 	let scanDisabled = wscLocked ? true : scanProgress;
 
-	const startOnboardingFromWscAlert = () => {
-		const url = new URL(cmplz_settings.dashboard_url);
-		url.searchParams.set('websitescan', '');
-		setTimeout(() => {
-			window.location.href = url.href;
-		}, 500);
-	}
+	const upsellProps = getScanUpsellAlertProps();
 
 	return (
 		<>
 			{wscLocked &&
-				<div className="cmplz-wscscan-alert">
-					<Icon name={'warning'} color={'orange'} size={48}/>
-					<div className="cmplz-wscscan-alert-group">
-						<div className="cmplz-wscscan-alert-group-title">{__("Advanced Scan Unavailable", "complianz-gdpr")}</div>
-						<div className="cmplz-wscscan-alert-group-desc">{__("We need to authenticate this domain.", "complianz-gpdr")}</div>
-					</div>
-
-					<div className="cmplz-wscscan-alert-desc-long">
-						{__("The new advanced Website Scan needs to authenticate your website for security purposes. It only takes a second!")}
-					</div>
-					<div>
-						<button type="button" onClick={startOnboardingFromWscAlert} className="cmplz-wscscan-alert button-secondary">
-							{__("Start", "complianz-gdpr")}
-						</button>
-					</div>
-				</div>
+				<Alert
+					title={__("Cookie Scan Unavailable", "complianz-gdpr")}
+					subtitle={__("We need to authenticate this domain.", "complianz-gdpr")}
+					body={__("The new advanced Website Scan needs to authenticate your website for security purposes. It only takes a second!", "complianz-gdpr")}
+					ctaLabel={__("Start", "complianz-gdpr")}
+					onCtaClick={startWscOnboarding}
+				/>
+			}
+			{!wscLocked && upsellProps &&
+				<Alert {...upsellProps} />
 			}
 
 			<div className="cmplz-table-header">
@@ -191,11 +169,11 @@ const CookieScanControl = () => {
 			<div id="cmplz-scan-progress">
 				<div className='cmplz-progress-bar' style={getStyles()}></div>
 			</div>
-			<div>
+			{!wscLocked && (
 				<div className="cmplz-panel__list">
 					<Panel summary={description} details={Details(initialLoadCompleted, cookies)}/>
 				</div>
-			</div>
+			)}
 		</>
 	);
 }

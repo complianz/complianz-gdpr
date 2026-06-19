@@ -21,7 +21,7 @@ function cmplz_wizard_document_fields( $fields ) {
 					'no' => __("No, choose a menu per document", 'complianz-gdpr'),
 				],
 				'premium' => [
-					'url' => 'https://complianz.io/pricing',
+					'url' => 'https://complianz.io/pricing/',
 					'default' => 'yes',
 					'disabled' => false,
 				],

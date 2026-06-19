@@ -65,6 +65,11 @@ const Tools = () => {
 			link: "https://complianz.io/a-quick-introduction-to-a-b-testing/",
 		},
 		{
+			title: __("Translations", "complianz-gdpr"),
+			viewLink: "#tools/translations",
+			link: "https://complianz.io/translations/",
+		},
+		{
 			title: __("Documentation", "complianz-gdpr"),
 			link: "https://complianz.io/support/",
 		},

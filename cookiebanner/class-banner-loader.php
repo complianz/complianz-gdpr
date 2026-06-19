@@ -106,9 +106,9 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			?>
 			<script>
 				var request = new XMLHttpRequest();
-				var error_ocurred = false;
+				var error_occurred = false;
 				window.onerror = function (msg, url, lineNo, columnNo, error) {
-					error_ocurred = true;
+					error_occurred = true;
 
 					var request = new XMLHttpRequest();
 					request.open('POST', '<?php echo add_query_arg(
@@ -130,7 +130,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 
 				//if no error occurred after 3 seconds, send a reset signal
 				setTimeout(function () {
-					if (!error_ocurred) {
+					if (!error_occurred) {
 						var request = new XMLHttpRequest();
 						request.open('POST', '<?php echo add_query_arg(
 							array(
@@ -381,6 +381,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 						$temp_banner_html         = str_replace( '{' . $fieldname . '}', $value, $temp_banner_html );
 						$temp_manage_consent_html = str_replace( '{' . $fieldname . '}', $value, $temp_manage_consent_html );
 					}
+					$temp_manage_consent_html = str_replace( '{consent_type}', $consent_type, $temp_manage_consent_html );
 					$banner_html         .= $temp_banner_html;
 					$manage_consent_html .= $temp_manage_consent_html;
 				}
@@ -474,7 +475,8 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			//if a cookie warning is needed for the stats we don't add a native class, so it will be disabled by the cookie blocker by default
 			$category        = 'statistics';
 			$uses_tagmanager = cmplz_get_option( 'compile_statistics' ) === 'google-tag-manager' ? true : false;
-			$matomo          = cmplz_get_option( 'compile_statistics' ) === 'matomo' ? true : false;
+            $matomo          = cmplz_get_option( 'compile_statistics' ) === 'matomo' ? true : false;
+            $clarity          = cmplz_get_option( 'compile_statistics' ) === 'clarity' ? true : false;
 
 			//without tag manager, set as functional if no cookie warning required for stats
 			if ( ! $uses_tagmanager && ! $this->cookie_warning_required_stats() ) {
@@ -489,6 +491,10 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			if ( $matomo && cmplz_get_option( 'matomo_anonymized' ) === 'yes' ) {
 				$category = 'functional';
 			}
+
+            if ( $clarity && cmplz_get_option( 'clarity_consent_mode' ) === 'yes' ) {
+                $category = 'functional';
+            }
 
 			/*
 			 * Run Tag Manager or gtag by default if consent mode is enabled
@@ -662,8 +668,8 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 				$script = cmplz_get_template( 'statistics/matomo-tag-manager.js' );
 				$script = str_replace( '{container_id}', esc_attr( cmplz_get_option( 'matomo_container_id' ) ), $script );
 				$script = str_replace( '{matomo_url}', esc_url_raw( trailingslashit( cmplz_get_option( 'matomo_tag_url' ) ) ), $script );
-			}
-			echo apply_filters( 'cmplz_script_filter', $script );
+            }
+            echo apply_filters( 'cmplz_script_filter', $script );
 
 		}
 
@@ -689,6 +695,10 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
                 $additional_stats = array_map( 'trim', explode( ',', cmplz_get_option( "additional_gtags_stats" ) ) );
 				$additional_tags = '';
 				foreach ($additional_stats as $stat){
+					$stat = trim($stat); 
+					if (empty($stat)) {
+						 continue; 
+						}
 					$additional_tags .= str_replace( '{tag}', esc_attr($stat), $template );
 				}
 
@@ -713,8 +723,11 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 				$script = cmplz_get_template( 'statistics/clicky.js' );
 				$script = str_replace( '{site_ID}', esc_attr( cmplz_get_option( 'clicky_site_id' ) ), $script );
 			} elseif ( $statistics === 'clarity' ) {
-				$script = cmplz_get_template( 'statistics/clarity.js' );
-				$script = str_replace( '{site_ID}', esc_attr( cmplz_get_option( 'clarity_id' ) ), $script );
+                $is_consent_for_anonymous_stats = cmplz_get_option( 'consent_for_anonymous_stats' ) === 'yes';
+                $is_clarity_consent_mode = cmplz_get_option( 'clarity_consent_mode' ) === 'yes';
+                $clarity_script = $is_clarity_consent_mode && $is_consent_for_anonymous_stats ? '-consent-mode' : '';
+                $script = cmplz_get_template("statistics/clarity$clarity_script.js");
+                $script = str_replace('{site_ID}', esc_attr(cmplz_get_option('clarity_id')), $script);
 			} elseif ( $statistics === 'yandex' ) {
 				$script         = cmplz_get_template( 'statistics/yandex.js' );
 				$data_layer     = cmplz_get_option( 'yandex_ecommerce' ) === 'yes';
@@ -829,16 +842,68 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			return $social_media;
 		}
 
+		/**
+		 * Build a map from English purpose labels to the target language's labels.
+		 * Derived from actual synced cookie pairs so the mapping is always accurate
+		 * regardless of how the CDB orders purposes for each language.
+		 * Used to normalize grouping when a non-English cookie record still carries
+		 * an English purpose string (e.g. CDB has no translation for that cookie).
+		 */
+		private function build_purpose_normalization_map( string $language ): array {
+			if ( empty( $language ) || 'en' === $language ) {
+				return array();
+			}
+
+			$cache_key = 'cmplz_purpose_map_' . $language;
+			$map       = wp_cache_get( $cache_key, 'complianz' );
+			if ( false !== $map ) {
+				return $map;
+			}
+
+			global $wpdb;
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT DISTINCT en.purpose AS en_purpose, t.purpose AS target_purpose
+					 FROM {$wpdb->prefix}cmplz_cookies en
+					 INNER JOIN {$wpdb->prefix}cmplz_cookies t ON t.isTranslationFrom = en.ID
+					 WHERE en.language = 'en'
+					   AND t.language = %s
+					   AND en.purpose != ''
+					   AND t.purpose != ''
+					   AND t.purpose != en.purpose",
+					$language
+				)
+			);
+
+			$map = array();
+			foreach ( $rows as $row ) {
+				$en_label     = html_entity_decode( $row->en_purpose, ENT_QUOTES );
+				$target_label = html_entity_decode( $row->target_purpose, ENT_QUOTES );
+				if ( $en_label !== '' && $target_label !== '' ) {
+					$map[ $en_label ] = $target_label;
+				}
+			}
+
+			wp_cache_set( $cache_key, $map, 'complianz', HOUR_IN_SECONDS );
+
+			return $map;
+		}
+
 		public function get_cookies_by_service( $settings = array() ) {
 			$cookies            = $this->get_cookies( $settings );
 			$grouped_by_service = array();
 			$topServiceID       = 0;
+			$language           = $settings['language'] ?? substr( get_locale(), 0, 2 );
+			$purpose_map        = $this->build_purpose_normalization_map( $language );
 			foreach ( $cookies as $cookie ) {
-				$serviceID                                      = $cookie->serviceID ?: 999999999;
-				$topServiceID                                   = $serviceID > $topServiceID ? $serviceID : $topServiceID;
-				$purpose                                        = $cookie->purpose === 0 || strlen( $cookie->purpose ) == 0
-					? __( 'Purpose pending investigation', 'complianz-gdpr' )
-					: $cookie->purpose;
+				$serviceID    = $cookie->serviceID ?: 999999999;
+				$topServiceID = $serviceID > $topServiceID ? $serviceID : $topServiceID;
+				if ( $cookie->purpose === 0 || strlen( $cookie->purpose ) == 0 ) {
+					$purpose = __( 'Purpose pending investigation', 'complianz-gdpr' );
+				} else {
+					$decoded = html_entity_decode( $cookie->purpose, ENT_QUOTES );
+					$purpose = $purpose_map[ $decoded ] ?? $decoded;
+				}
 				$grouped_by_service[ $serviceID ][ $purpose ][] = $cookie;
 			}
 
@@ -1266,7 +1331,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 		/**
 		 * Check if the site needs a cookie banner. Pass a region to check cookie banner requirement for a specific region
 		 *
-		 * @@param string|bool $region
+		 * @param string|bool $region
 		 *
 		 * @return bool
 		 * *@since 1.2
@@ -1434,7 +1499,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			$tagmanager                                = $statistics === 'google-tag-manager';
 			$matomo                                    = $statistics === 'matomo';
 			$google_analytics                          = $statistics === 'google-analytics';
-			$clicky                                    = $statistics === 'clicky';
+            $clicky                                    = $statistics === 'clicky';
 			$accepted_google_data_processing_agreement = false;
 			$ip_anonymous                              = false;
 			$no_sharing                                = false;

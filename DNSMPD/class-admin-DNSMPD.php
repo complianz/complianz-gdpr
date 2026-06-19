@@ -13,7 +13,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 			self::$_this = $this;
 
 			add_filter( 'cmplz_do_action', array( $this, 'get_datarequests_data' ), 10, 3 );
-			add_action( 'cmplz_install_tables', array( $this, 'update_db_check' ), 10, 2 );
+			add_action( 'cmplz_install_tables', array( $this, 'update_db_check' ), 10 );
 			add_filter( 'cmplz_warning_types', array($this, 'new_datarequests_notice') );
 		}
 
@@ -65,7 +65,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 				$records  = $this->get_requests( $args );
 				foreach ($records as $key => $record ) {
 					$records[ $key ]->type = $this->get_request_type( $record );
-					$records[ $key ]->request_date = date_i18n( get_option( 'date_format' ), $record->request_date );;
+					$records[ $key ]->request_date = $this->format_request_date( $record->request_date );
 				}
 				$open_args = $args;
 				$open_args['status'] = 'open';
@@ -159,12 +159,13 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 		}
 
 		/**
-		 * Get users
+		 * Get users or count users
 		 * @param array $args
+		 * @param string $type the type of query to be run (SELECT or COUNT)
 		 *
-		 * @return array
+		 * @return array|int
 		 */
-		public function get_requests( $args ) {
+		public function get_requests( $args, $type = "SELECT" ) {
 			global $wpdb;
 			$defaults = array(
 				'number'     => false,
@@ -173,25 +174,36 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 				'orderby'    => 'request_date',
 				'start_date' => 0,
 				'end_date'   => false,
-				'search'	=> false,
+				'search'	 => false,
+				'status'     => 'all'
 			);
 
-			$args       = wp_parse_args( array_filter($args), $defaults );
-			$sql        = "SELECT * from {$wpdb->prefix}cmplz_dnsmpd WHERE request_date>0 ";
-			$sql     .= $args['end_date'] ? $wpdb->prepare( " AND request_date> %s AND request_date < %s", (int) $args['start_date'], (int) $args['end_date'] ) : "";
-			$sql     .= $args['search'] ? " AND (name like='%".esc_sql( $args['search'])."%' OR email like='%".esc_sql( $args['search'])."%' )" : "";
-//			$sql .= isset($args['resolved']) ? $wpdb->prepare( " AND resolved = %d ", (int) $args['resolved'] ) : "";
+			$args = wp_parse_args( array_filter($args), $defaults );
+			
+			// Build the base SQL query
+			$select_clause = $type === "COUNT" ? "SELECT COUNT(*)" : "SELECT *";
+			$sql = $select_clause . " from {$wpdb->prefix}cmplz_dnsmpd WHERE request_date>0 ";
+			$sql .= $args['end_date'] ? $wpdb->prepare( " AND request_date> %s AND request_date < %s", (int) $args['start_date'], (int) $args['end_date'] ) : "";
+			$sql .= $args['search'] ? " AND (name like='%".esc_sql( $args['search'])."%' OR email like='%".esc_sql( $args['search'])."%' )" : "";
+			//$sql .= isset($args['resolved']) ? $wpdb->prepare( " AND resolved = %d ", (int) $args['resolved'] ) : "";
 			if ( 'all' !== $args['status'] ) {
 				$sql .= $wpdb->prepare( " AND resolved = %d ", $args['status']==='resolved' ? 1 : 0 );
 			}
-			$limit   = (int) $args['number'];
-			$orderby = $args['orderby'] ?? 'ID';
-			$order = $args['order'] ?? 'ASC';
-			$orderby = sanitize_title( $orderby );
-			$order   = sanitize_title( $order );
-			$sql .= " ORDER BY " . esc_sql( $orderby ) . " " . esc_sql( $order );
-			$sql .= $limit>0 ? " LIMIT " . (int) $limit . " OFFSET " . (int) $args["offset"] : '';
-			return $wpdb->get_results( $sql );
+			
+			// Only add ORDER BY and LIMIT for SELECT queries, not COUNT queries
+			if ( $type === "SELECT" ) {
+				$limit   = (int) $args['number'];
+				$orderby = $args['orderby'] ?? 'ID';
+				$order = $args['order'] ?? 'ASC';
+				$orderby = sanitize_title( $orderby );
+				$order   = sanitize_title( $order );
+				$sql .= " ORDER BY " . esc_sql( $orderby ) . " " . esc_sql( $order );
+				$sql .= $limit>0 ? " LIMIT " . (int) $limit . " OFFSET " . (int) $args["offset"] : '';
+				return $wpdb->get_results( $sql );
+			} else {
+				// For COUNT queries, return the count as integer
+				return (int) $wpdb->get_var( $sql );
+			}
 		}
 
 		/**
@@ -200,10 +212,10 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 		 *
 		 * @return int
 		 */
+		
 		public function count_requests( $args ) {
 			unset( $args['number'] );
-			$users = $this->get_requests( $args );
-			return count( $users );
+			return $this->get_requests( $args, "COUNT" );
 		}
 
 		/**
@@ -244,7 +256,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 		 */
 
 		public function run_export_to_csv($dateStart, $dateEnd, $statusOnly = false ){
-			$page_batch = 5;
+			$page_batch = 500;
 			if ( ! cmplz_user_can_manage() ) {
 				return [];
 			}
@@ -307,6 +319,9 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 
 		private function create_csv_file($data, $add_header = true ){
 			$delimiter=",";
+			$enclosure = '"';
+			$escape = '\\';
+
 			require_once(ABSPATH . 'wp-admin/includes/file.php');
 			$upload_dir = cmplz_upload_dir();
 
@@ -326,7 +341,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 			//create a line with headers
 			if ( $add_header ) {
 				$headers = $this->parse_headers_from_array( $data );
-				fputcsv( $csv_handle, $headers, $delimiter );
+				fputcsv( $csv_handle, $headers, $delimiter, $enclosure, $escape );
 			}
 
 			if ( is_array($data) ) {
@@ -335,7 +350,7 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 					$line = array_values(get_object_vars($line));
 					$line = array_map( 'sanitize_text_field', $line );
 					$line[] = $date;
-					fputcsv( $csv_handle, $line, $delimiter );
+					fputcsv( $csv_handle, $line, $delimiter, $enclosure, $escape );
 				}
 			}
 			fclose ($csv_handle);
@@ -364,14 +379,66 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 		}
 
 		/**
-		 * Get a localized date for this row
+		 * Format request date with proper validation
+		 *
+		 * @param mixed $request_date
+		 * @param bool $include_time Whether to include time in the format
+		 *
+		 * @return string
+		 */
+		public function format_request_date($request_date, $include_time = false): string {
+			if (empty($request_date) || $request_date == 0) {
+				return __('No date available', 'complianz-gdpr');
+			}
+
+			$timestamp = (int) $request_date;
+
+			// Get WordPress date format, fallback to default if empty
+			$date_format = get_option('date_format');
+			if (empty($date_format)) {
+				$date_format = 'F j, Y';
+			}
+
+			// For CSV export, use a more compact format
+			if ($include_time) {
+				$time_format = get_option('time_format');
+				if (empty($time_format)) {
+					$time_format = 'g:i a';
+				}
+				$formatted_date = date_i18n($date_format, $timestamp) . ' at ' . date_i18n($time_format, $timestamp);
+				
+				// Fallback if date_i18n fails
+				if (empty($formatted_date) || $formatted_date === ' at ') {
+					$formatted_date = date($date_format, $timestamp) . ' at ' . date($time_format, $timestamp);
+				}
+				
+				// Final fallback
+				if (empty($formatted_date) || $formatted_date === ' at ') {
+					$formatted_date = date('Y-m-d H:i:s', $timestamp);
+				}
+			} else {
+				// For API responses, just date
+				$formatted_date = date_i18n($date_format, $timestamp);
+				if (empty($formatted_date)) {
+					$formatted_date = date($date_format, $timestamp);
+				}
+				if (empty($formatted_date)) {
+					$formatted_date = date('Y-m-d', $timestamp);
+				}
+			}
+			
+			return $formatted_date;
+		}
+
+		/**
+		 * Get a localized date for this row (for backward compatibility)
 		 *
 		 * @param int $unix
 		 *
 		 * @return string
 		 */
 		public function localize_date(int $unix): string {
-			return sprintf("%s at %s", date( str_replace( 'F', 'M', get_option('date_format')), $unix ), date( get_option('time_format'),  $unix ) );
+			return $this->format_request_date($unix, true);
 		}
 
 		/**
@@ -391,10 +458,12 @@ if ( ! class_exists( "cmplz_admin_DNSMPD" ) ) {
 
 		private function fileurl(){
 			if  ( file_exists($this->filepath() ) ) {
-				return untrailingslashit( cmplz_upload_url( get_option('cmplz_datarequest_file_name').".csv" ) );
+				return untrailingslashit( cmplz_upload_url( get_option('cmplz_datarequest_file_name').".csv" ) ) . '?' . time();
 			}
 			return '';
 		}
+
+
 
 		/**
 		 * Check if the table needs to be created or updated

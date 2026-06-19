@@ -140,7 +140,7 @@ function cmplz_wizard_fields($fields){
 		[
 			'id'       => 'privacy-statement',
 			'premium' => [
-				'url' => 'https://complianz.io/pricing',
+				'url' => 'https://complianz.io/pricing/',
 				'default' => 'generated',
 				'disabled' => false,
 			],
@@ -163,7 +163,7 @@ function cmplz_wizard_fields($fields){
 			'id'       => 'impressum',
 			'menu_id'  => 'documents',
 			'premium' => [
-				'url' => 'https://complianz.io/pricing',
+				'url' => 'https://complianz.io/pricing/',
 			],
 			'disabled' => ['generated'],
 			'default'  => 'none',
@@ -182,7 +182,7 @@ function cmplz_wizard_fields($fields){
 			'id'       => 'disclaimer',
 			'menu_id'  => 'documents',
 			'premium' => [
-				'url' => 'https://complianz.io/pricing',
+				'url' => 'https://complianz.io/pricing/',
 			],
 			'disabled' => ['generated'],
 			'default'  => 'none',
@@ -360,7 +360,7 @@ function cmplz_wizard_fields($fields){
 			'id'   => 'datarequest',
 			'menu_id'  => 'security-consent',
 			'premium' => [
-				'url' => 'https://complianz.io/pricing',
+				'url' => 'https://complianz.io/pricing/',
 				'description' => __( "Do you want to enable Data Request Forms?", 'complianz-gdpr' ),
 			],
 			'label'    => __( "Do you want to enable Data Request Forms?", 'complianz-gdpr' ),

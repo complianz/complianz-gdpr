@@ -158,16 +158,6 @@
     background-color: rgba(239, 239, 239, 0.25);
 }
 
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category summary::marker {
-    display: none;
-    content: "";
-}
-
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category summary::-webkit-details-marker {
-    display: none;
-    content: "";
-}
-
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-description {
     padding: 10px;
 }
@@ -224,14 +214,25 @@
     padding: initial;
 }
 
+#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-category-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    grid-column-start: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+}
+
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-header .cmplz-icon.cmplz-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    grid-column-start: 3;
     cursor: pointer;
     content: "";
-    background: var(--cmplz_category_open_icon_url) no-repeat;
     transform: rotate(0deg);
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
@@ -242,11 +243,7 @@
     width: 25px;
 }
 
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] {
-    padding-bottom: 1px;
-}
-
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] summary .cmplz-category-header:after, #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category[open] summary .cmplz-icon.cmplz-open {
+#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-toggle[aria-expanded=true] .cmplz-icon.cmplz-open {
     transform: rotate(180deg);
 }
 
@@ -369,6 +366,7 @@
 }
 
 #cmplz-document .cmplz-subtitle, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-subtitle {
+    font-size: inherit;
     font-weight: bold;
     margin-top: 25px;
 }
@@ -468,6 +466,15 @@
     margin: 0;
 }
 
+#cmplz-cookies-overview .cmplz-dropdown .name-header strong, #cmplz-cookies-overview .cmplz-dropdown .retention-header strong, #cmplz-cookies-overview .cmplz-dropdown .function-header strong, #cmplz-document .cmplz-dropdown .name-header strong, #cmplz-document .cmplz-dropdown .retention-header strong, #cmplz-document .cmplz-dropdown .function-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .name-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .retention-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .function-header strong {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+    margin: 0;
+    text-transform: initial;
+}
+
 #cmplz-cookies-overview .cmplz-dropdown .cmplz-service-description, #cmplz-cookies-overview .cmplz-dropdown .cmplz-sharing-data, #cmplz-document .cmplz-dropdown .cmplz-service-description, #cmplz-document .cmplz-dropdown .cmplz-sharing-data, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cmplz-service-description, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cmplz-sharing-data {
     padding: 0 15px 15px;
 }
@@ -499,7 +506,10 @@
 }
 
 @media only screen and (max-width: 600px) {
-    #cmplz-cookies-overview .cmplz-dropdown .cookies-per-purpose h5, #cmplz-document .cmplz-dropdown .cookies-per-purpose h5, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cookies-per-purpose h5 {
+    #cmplz-cookies-overview .cmplz-dropdown .cookies-per-purpose h5,
+  #cmplz-cookies-overview .cmplz-dropdown .cookies-per-purpose .name-header strong, #cmplz-cookies-overview .cmplz-dropdown .cookies-per-purpose .retention-header strong, #cmplz-cookies-overview .cmplz-dropdown .cookies-per-purpose .function-header strong, #cmplz-document .cmplz-dropdown .cookies-per-purpose h5,
+  #cmplz-document .cmplz-dropdown .cookies-per-purpose .name-header strong, #cmplz-document .cmplz-dropdown .cookies-per-purpose .retention-header strong, #cmplz-document .cmplz-dropdown .cookies-per-purpose .function-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cookies-per-purpose h5,
+  .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cookies-per-purpose .name-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cookies-per-purpose .retention-header strong, .editor-styles-wrapper .cmplz-unlinked-mode .cmplz-dropdown .cookies-per-purpose .function-header strong {
         line-height: 1.8;
     }
 

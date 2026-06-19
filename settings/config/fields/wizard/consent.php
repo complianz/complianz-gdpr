@@ -87,7 +87,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => "Configuring Google Tag Manager",
 					'text'  => __( 'You can configure Google Tag Manager for Complianz, and, if applicable, adjust configuration for Google Analytics for GDPR and other opt-in based privacy laws.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/how-to-configure-tag-manager-for-gdpr/',
+					'url'   => 'https://complianz.io/definitive-guide-to-tag-manager-and-complianz/',
 				],
 				'react_conditions'        => [
 					'relation' => 'AND',
@@ -187,7 +187,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'         => false,
 				],
 				'label'            => __( "Do you want to enable Google Consent Mode V2?", 'complianz-gdpr' ),
@@ -217,7 +217,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'=> false,
 				],
 				'label'            => __( "Do you want to block all Google Tags before consent?", 'complianz-gdpr' ),
@@ -247,7 +247,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'=> false,
 				],
 				'label'            => __( "Do you want to set a URL passthrough parameter", 'complianz-gdpr' ),
@@ -272,7 +272,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'=> false,
 				],
 				'label'            => __( "Deny cookies when advertising is rejected?", 'complianz-gdpr' ),
@@ -297,7 +297,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'=> false,
 				],
 				'label'            => __( "Will you be using our Tag Manager template?", 'complianz-gdpr' ),
@@ -383,7 +383,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 						'configuration_by_complianz' => 'yes',
 					]
 				],
-				'tooltip'                 => __( "For the Google Tag Manager code, log in and you will immediatly see your container codes. The one next to your website name is the code you will need to fill in here, the container ID.", 'complianz-gdpr' ),
+				'tooltip'                 => __( "For the Google Tag Manager code, log in and you will immediately see your container codes. The one next to your website name is the code you will need to fill in here, the container ID.", 'complianz-gdpr' ),
 			],
 			[
 				'id'               => 'gtm_code_head',
@@ -391,7 +391,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 				'type'             => 'radio',
 				'default'          => 'no',
 				'premium'          => [
-					'url'     => 'https://complianz.io/pricing',
+					'url'     => 'https://complianz.io/pricing/',
 					'disabled'=> false,
 				],
 				'label'            => __( "Do you want to force the script in the header?", 'complianz-gdpr' ),
@@ -570,6 +570,23 @@ function cmplz_wizard_consent_fields( $fields ) {
 					[
 						'compile_statistics'         => 'yandex',
 						'configuration_by_complianz' => 'yes',
+					]
+				],
+			],
+			[
+				'id'                      => 'clarity_consent_mode',
+				'menu_id'                 => 'statistics-configuration',
+				'type'                    => 'radio',
+				'default'                 => 'yes',
+				'options'                 => COMPLIANZ::$config->yes_no,
+				'required'                => true,
+				'revoke_consent_onchange' => true,
+				'label'                   => __( "Do you want to use Clarity Consent Mode V2?", 'complianz-gdpr' ),
+				'react_conditions'        => [
+					'relation' => 'AND',
+					[
+						'compile_statistics'         => 'clarity',
+						'consent_for_anonymous_stats' => 'yes'
 					]
 				],
 			],
