@@ -31,7 +31,7 @@ function cmplz_jetpack_script( $tags ) {
  * @param bool $stats_category_required
  */
 function cmplz_jetpack_set_statistics_required( $stats_category_required ){
-	if ( class_exists( 'JetPack' ) && Jetpack::is_module_active( 'stats' ) ) {
+	if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'stats' ) ) {
 		$stats_category_required = true;
 	}
 	return $stats_category_required;

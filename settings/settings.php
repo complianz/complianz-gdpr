@@ -145,8 +145,8 @@ function cmplz_fix_duplicate_menu_item() {
 add_action('admin_footer', 'cmplz_fix_duplicate_menu_item');
 /**
  * WordPress doesn't allow for translation of chunks resulting of code splitting.
- * Several workarounds have popped up in JetPack and Woocommerce: https://developer.wordpress.com/2022/01/06/wordpress-plugin-i18n-webpack-and-composer/
- * Below is mainly based on the Woocommerce solution, which seems to be the most simple approach. Simplicity is king here.
+ * Several workarounds have popped up in Jetpack and WooCommerce: https://developer.wordpress.com/2022/01/06/wordpress-plugin-i18n-webpack-and-composer/
+ * Below is mainly based on the WooCommerce solution, which seems to be the most simple approach. Simplicity is king here.
  *
  * @return array
  */
