@@ -318,7 +318,7 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 					</div>
 				</div>
 				<div id="rsp-plugin-suggestion-template">
-					<div class="rsp-recommended"><?php esc_html_e(__("Recommended by Really Simple Plugins","complianz-gdpr"))?></div>
+					<div class="rsp-recommended"><?php esc_html_e("Recommended by Really Simple Plugins","complianz-gdpr")?></div>
 					<div class="rsp-plugin-suggestion">
 						<div class="rsp-icon"><img alt="suggested plugin icon" src="<?=$this->get_suggested_plugin('icon_url')?>"></div>
 						<div class="rsp-summary">
@@ -343,7 +343,7 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 				</div>
 				<div class="rsp-modal-transparent-background">
 					<div class="rsp-install-plugin-modal">
-						<h3><?php esc_html_e(__("Installing", "complianz-gdpr")) . " " . $this->plugin_name ?></h3>
+						<h3><?php esc_html_e("Installing", "complianz-gdpr") . " " . $this->plugin_name ?></h3>
 						<div class="rsp-progress-bar-container">
 							<div class="rsp-progress rsp-grey">
 								<div class="rsp-bar rsp-green" style="width:0%"></div>
@@ -354,13 +354,13 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 						</div>
 						<div class="rsp-footer">
 							<a href="<?php echo $dashboard_url ?>" role="button" class="button-primary rsp-yellow rsp-hidden rsp-btn rsp-visit-dashboard">
-								<?php esc_html_e(__("Visit Dashboard", "complianz-gdpr")) ?>
+								<?php esc_html_e("Visit Dashboard", "complianz-gdpr") ?>
 							</a>
 							<a href="<?php echo $plugins_url ?>" role="button" class="button-primary rsp-red rsp-hidden rsp-btn rsp-cancel">
-								<?php esc_html_e(__("Cancel", "complianz-gdpr")) ?>
+								<?php esc_html_e("Cancel", "complianz-gdpr") ?>
 							</a>
-							<div class="rsp-error-message rsp-folder rsp-package rsp-install rsp-activate rsp-hidden"><span><?php esc_html_e(__('An error occurred:',"complianz-gdpr"))?></span>&nbsp;<?php esc_html_e(sprintf(__('Install %sManually%s.',"complianz-gdpr").'&nbsp;', '<a target="_blank" href="'.$this->instructions.'">','</a>'))?></div>
-							<div class="rsp-error-message rsp-license rsp-hidden"><span><?php esc_html_e(__('An error occurred:',"complianz-gdpr"))?></span>&nbsp;<?php esc_html_e(sprintf(__('Check your %slicense%s.',"complianz-gdpr").'&nbsp;', '<a target="_blank" href="'.$this->account_url.'">','</a>'))?></div>
+							<div class="rsp-error-message rsp-folder rsp-package rsp-install rsp-activate rsp-hidden"><span><?php esc_html_e('An error occurred:',"complianz-gdpr")?></span>&nbsp;<?php echo esc_html(sprintf(__('Install %sManually%s.',"complianz-gdpr").'&nbsp;', '<a target="_blank" href="'.$this->instructions.'">','</a>'))?></div>
+							<div class="rsp-error-message rsp-license rsp-hidden"><span><?php esc_html_e('An error occurred:',"complianz-gdpr")?></span>&nbsp;<?php echo esc_html(sprintf(__('Check your %slicense%s.',"complianz-gdpr").'&nbsp;', '<a target="_blank" href="'.$this->account_url.'">','</a>'))?></div>
 						</div>
 					</div>
 				</div>

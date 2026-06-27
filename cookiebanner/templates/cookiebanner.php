@@ -133,7 +133,7 @@
 		<ul>
 			<li><a class="cmplz-link cmplz-manage-options cookie-statement" href="#" data-relative_url="#cmplz-manage-consent-container"><?php esc_html_e( "Manage options", "complianz-gdpr" )?></a></li>
 			<li><a class="cmplz-link cmplz-manage-third-parties cookie-statement" href="#" data-relative_url="#cmplz-cookies-overview"><?php esc_html_e( "Manage services", "complianz-gdpr" )?></a></li>
-			<li><a class="cmplz-link cmplz-manage-vendors tcf cookie-statement" href="#" data-relative_url="#cmplz-tcf-wrapper"><?php esc_html_e(sprintf(__("Manage %s vendors","complianz-gdpr"),'{vendor_count}'))?></a></li>
+			<li><a class="cmplz-link cmplz-manage-vendors tcf cookie-statement" href="#" data-relative_url="#cmplz-tcf-wrapper"><?php echo esc_html(sprintf(__("Manage %s vendors","complianz-gdpr"),'{vendor_count}'))?></a></li>
 			<li><a class="cmplz-link cmplz-external cmplz-read-more-purposes tcf" target="_blank" rel="noopener noreferrer nofollow" href="https://cookiedatabase.org/tcf/purposes/" aria-label="<?php esc_attr_e( "Read more about TCF purposes on Cookie Database", "complianz-gdpr" )?>"><?php esc_html_e( "Read more about these purposes", "complianz-gdpr" )?></a></li>
 		</ul>
 		<?php do_action("cmplz_after_links")?>
