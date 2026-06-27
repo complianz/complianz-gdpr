@@ -84,7 +84,7 @@ if ( ! class_exists( "cmplz_review" ) ) {
 								'<a href="https://complianz.io/contact" target="_blank">',
 								'</a>') ); ?></p>
 						<div class="cmplz-buttons-row">
-							<a class="button button-primary" target="_blank" href="https://wordpress.org/support/plugin/complianz-gdpr/reviews/#new-post"><?php esc_html_e(__( 'Leave a review', 'complianz-gdpr' ) ); ?></a>
+							<a class="button button-primary" target="_blank" href="https://wordpress.org/support/plugin/complianz-gdpr/reviews/#new-post"><?php esc_html_e( 'Leave a review', 'complianz-gdpr' ); ?></a>
 
 							<div class="dashicons dashicons-calendar"></div>
 							<a href="#" id="maybe-later"><?php esc_html_e( 'Maybe later', 'complianz-gdpr' ); ?></a>
