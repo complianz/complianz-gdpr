@@ -288,7 +288,7 @@ function cmplz_check_upgrade() {
 					$banner->colorpalette_text['hyperlink']     = empty( $result->popup_text_color ) ? '#191e23' : $result->popup_text_color;
 					$banner->colorpalette_toggles['background'] = empty( $result->slider_background_color ) ? '#21759b' : $result->slider_background_color;
 					$banner->colorpalette_toggles['bullet']     = empty( $result->slider_bullet_color ) ? '#ffffff' : $result->slider_bullet_color;
-					$banner->colorpalette_toggles['inactive']   = empty( $result->slider_background_color_inactive ) ? '#F56E28' : $result->slider_background_color_inactive;
+					$banner->colorpalette_toggles['inactive']   = empty( $result->slider_background_color_inactive ) ? '#555' : $result->slider_background_color_inactive;
 
 					$consenttypes = cmplz_get_used_consenttypes();
 					$optout_only  = false;

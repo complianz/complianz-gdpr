@@ -6,10 +6,13 @@ import useFields from "../../Settings/Fields/FieldsData";
 import {memo} from "@wordpress/element";
 import CheckboxGroup from "../Inputs/CheckboxGroup";
 import { memoize } from 'lodash';
+import Alert from "../../utils/Alert";
+import { startWscOnboarding, getScanUpsellAlertProps } from "../../utils/wsc";
 
 const CookieDatabaseSyncControl = () => {
 	const { filterAndSort, showDeletedCookies, setShowDeletedCookies, syncDataLoaded, loadingSyncData, language, setLanguage, languages, fCookies, cookieCount, addCookie, addService, fServices, syncProgress, curlExists, hasSyncableData, setSyncProgress, restart, fetchSyncProgressData, errorMessage} = UseSyncData();
 	const {addHelpNotice, removeHelpNotice, getFieldValue} = useFields();
+	const wscLocked = !cmplz_settings.wsc_is_authenticated;
 	const [disabled, setDisabled] = useState(false);
 	const [noCookieNoticeShown, setNoCookieNoticeShown] = useState(false);
 	const [servicesAndCookies, setServicesAndCookies] = useState([]);
@@ -43,6 +46,7 @@ const CookieDatabaseSyncControl = () => {
 			let explanation = __("Synchronization disabled: All detected cookies and services have been synchronised.", "complianz-gdpr");
 			addHelpNotice('cookiedatabase_sync', 'warning', explanation, 'Cookiedatabase', 'complianz-gdpr');
 		} else if ( syncDataLoaded ) {
+			setDisabled(false);
 			if ( cookieCount === 0) {
 				setNoCookieNoticeShown(true);
 				let explanation = __("No cookies have been found currently. Please try another site scan, or check the most common causes in the article below ", "complianz-gdpr");
@@ -56,6 +60,8 @@ const CookieDatabaseSyncControl = () => {
 	useEffect ( () => {
 		if ( syncProgress<100 && syncProgress>0) {
 			setDisabled(true) ;
+		} else if ( syncProgress === 100 ) {
+			setDisabled(false);
 		}
 	},[syncProgress]);
 
@@ -104,7 +110,7 @@ const CookieDatabaseSyncControl = () => {
 	const getStyles = () => {
 		return Object.assign(
 			{},
-			{width: syncProgress+"%"},
+			{width: (wscLocked ? 0 : syncProgress)+"%"},
 		);
 	}
 
@@ -113,8 +119,22 @@ const CookieDatabaseSyncControl = () => {
 		restart();
 	}
 
+	const upsellProps = getScanUpsellAlertProps();
+
 	return (
 		<>
+			{wscLocked &&
+				<Alert
+					title={__("Cookiedatabase Sync Unavailable", "complianz-gdpr")}
+					subtitle={__("We need to authenticate this domain.", "complianz-gdpr")}
+					body={__("The cookiedatabase.org sync requires Website Scan authentication. It only takes a second!", "complianz-gdpr")}
+					ctaLabel={__("Start", "complianz-gdpr")}
+					onCtaClick={startWscOnboarding}
+				/>
+			}
+			{!wscLocked && upsellProps &&
+				<Alert {...upsellProps} />
+			}
 			<div className="cmplz-cookiedatabase-controls">
 				<button disabled={disabled || loadingSyncData} className="button button-default" onClick={ (e) => Start(e) }>{__("Sync","complianz-gdpr")}</button>
 				{ languages.length > 1 &&
@@ -124,6 +144,7 @@ const CookieDatabaseSyncControl = () => {
 				}
 				<CheckboxGroup
 					id={'show_deleted_cookies'}
+					disabled={wscLocked}
 					value={showDeletedCookies}
 					onChange={(value) => setShowDeletedCookies(value)}
 					options={{true: __('Show deleted cookies', 'complianz-gdpr')}}

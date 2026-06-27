@@ -668,8 +668,8 @@ if ( ! class_exists( "cmplz_document" ) ) {
 					       . esc_html( $element['title'] ) . '</h2>';
 				}
 				if ( isset( $element['subtitle'] ) ) {
-					return '<p class="subtitle annex">' . esc_html( $nr )
-					       . esc_html( $element['subtitle'] ) . '</p>';
+					return '<h3 class="subtitle annex">' . esc_html( $nr )
+					       . esc_html( $element['subtitle'] ) . '</h3>';
 				}
 			}
 
@@ -694,7 +694,7 @@ if ( ! class_exists( "cmplz_document" ) ) {
 				if ( $paragraph > 0 && $sub_paragraph > 0 && $this->is_numbered_element( $element ) ) {
 					$nr = $paragraph . "." . $sub_paragraph . " ";
 				}
-				return '<p class="cmplz-subtitle">' . esc_html( $nr ) . esc_html( $element['subtitle'] ) . '</p>';
+				return '<h3 class="cmplz-subtitle">' . esc_html( $nr ) . esc_html( $element['subtitle'] ) . '</h3>';
 			}
 
 

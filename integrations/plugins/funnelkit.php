@@ -142,3 +142,37 @@ function cmplz_funnelkit_filter_fields( $fields ) {
 	);
 }
 add_filter( 'cmplz_fields', 'cmplz_funnelkit_filter_fields', 2000, 1 );
+
+/**
+ * Add notice for statistics configuration managed by FunnelKit.
+ *
+ * @param array $notices The current notices.
+ *
+ * @return array
+ */
+function cmplz_funnelkit_stats_configuration_notice( $notices ) {
+	$found_key = false;
+	// Find notice with field_id 'compile_statistics' and replace it with our own.
+	foreach ( $notices as $key => $notice ) {
+		if ( isset( $notice['field_id'] ) && 'consent_for_anonymous_stats' === $notice['field_id'] ) {
+			$found_key = $key;
+		}
+	}
+	// translators: %s: FunnelKit.
+	$notice = array(
+		'field_id' => 'consent_for_anonymous_stats',
+		'label'    => 'default',
+		// translators: %s: FunnelKit.
+		'title'    => __( 'Statistics plugin detected', 'complianz-gdpr' ),
+		// translators: %s: FunnelKit.
+		'text'     => __( 'These settings are not available because the GA integration is managed by FunnelKit.', 'complianz-gdpr' ),
+	);
+
+	if ( false !== $found_key ) {
+		$notices[ $found_key ] = $notice;
+	} else {
+		$notices[] = $notice;
+	}
+	return $notices;
+}
+add_filter( 'cmplz_field_notices', 'cmplz_funnelkit_stats_configuration_notice' );

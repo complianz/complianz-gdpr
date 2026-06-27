@@ -98,11 +98,15 @@ function cmplz_rest_consented_content( WP_REST_Request $request ) {
 	$html   = $post->post_content;
 	$output = '';
 	if ( has_block( 'complianz/consent-area', $html ) ) {
-		$blocks = parse_blocks( $post->post_content );
-		foreach ( $blocks as $block ) {
-			if ( 'complianz/consent-area' === $block['blockName'] && $block['attrs']['blockId'] === $block_id ) {
-				$output = $block['attrs']['consentedContent'];
+		$queue = parse_blocks( $post->post_content );
+		while ( ! empty( $queue ) ) {
+			$block = array_shift( $queue );
+			if ( 'complianz/consent-area' === $block['blockName'] && ( $block['attrs']['blockId'] ?? '' ) === $block_id ) {
+				$output = $block['attrs']['consentedContent'] ?? '';
 				break;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				array_push( $queue, ...$block['innerBlocks'] );
 			}
 		}
 	} elseif ( strpos( $html, '[cmplz-consent-area' ) !== false ) {

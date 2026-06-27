@@ -55,7 +55,7 @@ function cmplz_fix_duplicate_menu_item() {
 		window.addEventListener("load", () => {
 			let cmplzMain = document.querySelector('li.wp-has-submenu.toplevel_page_complianz a.wp-first-item');
 			if (cmplzMain) {
-				cmplzMain.innerHTML = cmplzMain.innerHTML.replace('Complianz', '<?php esc_html_e(__( 'Dashboard', 'complianz-gdpr'))?>');
+				cmplzMain.innerHTML = cmplzMain.innerHTML.replace('Complianz', '<?php esc_html_e( 'Dashboard', 'complianz-gdpr' )?>');
 			}
 		});
 	</script>
@@ -251,7 +251,9 @@ function cmplz_plugin_admin_scripts() {
 						'user_id'           => get_current_user_id(),
                         'is_multisite'      => is_multisite(),
                         'is_multisite_plugin'=> defined('cmplz_premium_multisite'),
-						'onboarding_complete' => COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
+						'onboarding_complete' => cmplz_wsc_auth::wsc_is_authenticated() || COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
+						'wsc_is_authenticated' => cmplz_wsc_auth::wsc_is_authenticated(),
+						'scan_upsell'       => COMPLIANZ::$scan->get_scan_upsell_data(),
 						'referral'          => [
 							'source'      => cmplz_get_source(),
 							'ref_id'      => cmplz_get_ref(),

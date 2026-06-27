@@ -6,7 +6,7 @@ Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
 Tested up to: 7.0
-Stable tag: 7.4.6
+Stable tag: 7.5.0
 
 Configure your Cookie Banner, Cookie Consent and Cookie Policy with our Wizard and Cookies Scan.
 
@@ -198,6 +198,36 @@ The Brazilian General Data Protection Law is similar to the GDPR, the UK-GDPR it
 With some custom CSS this is possible, but we do not consider a cookie wall to be GDPR compliant, so it's not actively supported. We do, however, have the option to create a Soft Cookie Wall. Which blocks interaction with the website, but dismissing remains a possibility.
 
 == Changelog ==
+= 7.5.0 =
+* June 17th, 2026
+* Feature: New Website Scan column in the post overview showing the scan status of each post.
+* Enhancement: Notices when webshop pages, custom post types or a high post volume require the advanced Website Scan.
+* Enhancement: The cookie scan focuses on posts and pages for faster, more relevant results.
+* Enhancement: Website Scan errors are now visible in the plugin log.
+* Enhancement: Daily background website scan and cookie change check run via WP-Cron without requiring an admin session.
+* Enhancement: Added wpml-config.xml to improve WPML compatibility for plugin strings.
+* Enhancement: Daily cleanup of expired transients and obsolete placeholder images.
+* Accessibility: Improved screen reader support for cookie banner and manage consent button.
+* Accessibility: Fixed cookie banner reflow at high zoom levels (400%+).
+* Accessibility: Fixed interactive consent category controls in cookie banner and cookie policy.
+* Fix: Scan progress could keep polling indefinitely when the scan found no cookies.
+* Fix: Updated "Dismiss on Timeout" tooltip and GEO IP setup error message.
+* Fix: Support web components in cookie blocker placeholder regex.
+* Fix: Remove unnecessary jQuery dependency from DNSMPD script.
+* Fix: Consent area block content not served when block is nested.
+
+= 7.4.7 =
+* June 1st, 2026
+* Security: Fixed DOM-based Cross-Site Scripting (XSS) vulnerability.
+* Security: Cookie scanner and Cookiedatabase sync now require WSC authentication. Unauthenticated installs see a locked state with onboarding prompt.
+* Enhancement: Improved WSC onboarding modal — simplified dismiss logic, single-option state with automatic migration from legacy options.
+* Enhancement: Added integration notice for FunnelKit.
+* Enhancement: Updated default cookie banner color scheme to improve accessibility contrast.
+* Accessibility: Fixed heading hierarchy in cookie policy page.
+* Fix: Mixed languages on cookie policy page when syncing non-English cookies from Cookiedatabase.
+* Fix: WSC credentials not cleared from database after reset.
+* Fix: PHP 8.1 deprecation notices in cookie blocker and WSC authentication handler.
+
 = 7.4.6 =
 * April 13th, 2026
 * Fix: Prevent PHP warnings when cookiedatabase.org returns a malformed or unexpected response during sync.

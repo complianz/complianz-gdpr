@@ -51,16 +51,6 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 						$this->account_url = 'https://really-simple-ssl.com/account';
 						$this->instructions = 'https://really-simple-ssl.com/knowledge-base/install-really-simple-ssl-pro';
 						break;
-/*					case "burst_pro":
-						$this->slug = "burst-pro/burst-pro.php";
-						$this->plugin_name = "Burst";
-						$this->plugin_constant = "burst_pro";
-						$this->prefix = "burst_";
-						$this->api_url = "https://burst-statistics.com";
-						$this->dashboard_url = add_query_arg(["page" => "burst"], admin_url( "index.php" ));
-						$this->account_url = 'https://burst-statistics.com/account';
-						$this->instructions = 'https://burst-statistics.com/how-to-install-burst-premium';
-						break;*/
 					case "cmplz_pro":
 					default:
 						$this->slug = is_multisite() ? "complianz-gdpr-premium-multisite/complianz-gpdr-premium.php" : "complianz-gdpr-premium/complianz-gpdr-premium.php";
@@ -170,12 +160,12 @@ if ( !class_exists('rsp_upgrade_to_pro') ){
 				$suggestion = [
 						'icon_url' => $dir_url.'really-simple-ssl.png',
 						'constant' => 'rsssl_version',
-						'title' => 'Really Simple SSL & Security',
+						'title' => 'Really Simple Security',
 						'description_short' => __('SSL & Security', "complianz-gdpr"),
 						'disabled' => '',
 						'button_text' => __("Install", "complianz-gdpr"),
 						'slug' => 'really-simple-ssl',
-						'description' => __('Really Simple SSL & Security - Lightweight plugin, heavyweight features.', "complianz-gdpr"),
+						'description' => __('Really Simple Security - Lightweight plugin, heavyweight features.', "complianz-gdpr"),
 						'install_url' => 'ssl%20really%20simple%20plugins%20complianz+HSTS&tab=search&type=term',
 				];
 				if ( $current_plugin==='really-simple-ssl' ) {

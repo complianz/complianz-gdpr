@@ -229,7 +229,6 @@ if ( ! class_exists( "cmplz_proof_of_consent" ) ) {
 				$settings['privacy_link_us '] = COMPLIANZ::$document->get_page_url( 'privacy-statement', 'us' );
 				$settings_html = '';
 				$skip          = array(
-					'categories',
 					'use_custom_cookie_css',
 					'logo',
 					'custom_css_amp',
@@ -237,7 +236,6 @@ if ( ! class_exists( "cmplz_proof_of_consent" ) ) {
 					'set_cookies',
 					'position',
 					'version',
-					'banner_version',
 					'a_b_testing',
 					'a_b_testing_buttons',
 					'title',

@@ -381,6 +381,7 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 						$temp_banner_html         = str_replace( '{' . $fieldname . '}', $value, $temp_banner_html );
 						$temp_manage_consent_html = str_replace( '{' . $fieldname . '}', $value, $temp_manage_consent_html );
 					}
+					$temp_manage_consent_html = str_replace( '{consent_type}', $consent_type, $temp_manage_consent_html );
 					$banner_html         .= $temp_banner_html;
 					$manage_consent_html .= $temp_manage_consent_html;
 				}
@@ -841,16 +842,68 @@ if ( ! class_exists( "cmplz_banner_loader" ) ) {
 			return $social_media;
 		}
 
+		/**
+		 * Build a map from English purpose labels to the target language's labels.
+		 * Derived from actual synced cookie pairs so the mapping is always accurate
+		 * regardless of how the CDB orders purposes for each language.
+		 * Used to normalize grouping when a non-English cookie record still carries
+		 * an English purpose string (e.g. CDB has no translation for that cookie).
+		 */
+		private function build_purpose_normalization_map( string $language ): array {
+			if ( empty( $language ) || 'en' === $language ) {
+				return array();
+			}
+
+			$cache_key = 'cmplz_purpose_map_' . $language;
+			$map       = wp_cache_get( $cache_key, 'complianz' );
+			if ( false !== $map ) {
+				return $map;
+			}
+
+			global $wpdb;
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT DISTINCT en.purpose AS en_purpose, t.purpose AS target_purpose
+					 FROM {$wpdb->prefix}cmplz_cookies en
+					 INNER JOIN {$wpdb->prefix}cmplz_cookies t ON t.isTranslationFrom = en.ID
+					 WHERE en.language = 'en'
+					   AND t.language = %s
+					   AND en.purpose != ''
+					   AND t.purpose != ''
+					   AND t.purpose != en.purpose",
+					$language
+				)
+			);
+
+			$map = array();
+			foreach ( $rows as $row ) {
+				$en_label     = html_entity_decode( $row->en_purpose, ENT_QUOTES );
+				$target_label = html_entity_decode( $row->target_purpose, ENT_QUOTES );
+				if ( $en_label !== '' && $target_label !== '' ) {
+					$map[ $en_label ] = $target_label;
+				}
+			}
+
+			wp_cache_set( $cache_key, $map, 'complianz', HOUR_IN_SECONDS );
+
+			return $map;
+		}
+
 		public function get_cookies_by_service( $settings = array() ) {
 			$cookies            = $this->get_cookies( $settings );
 			$grouped_by_service = array();
 			$topServiceID       = 0;
+			$language           = $settings['language'] ?? substr( get_locale(), 0, 2 );
+			$purpose_map        = $this->build_purpose_normalization_map( $language );
 			foreach ( $cookies as $cookie ) {
-				$serviceID                                      = $cookie->serviceID ?: 999999999;
-				$topServiceID                                   = $serviceID > $topServiceID ? $serviceID : $topServiceID;
-				$purpose                                        = $cookie->purpose === 0 || strlen( $cookie->purpose ) == 0
-					? __( 'Purpose pending investigation', 'complianz-gdpr' )
-					: $cookie->purpose;
+				$serviceID    = $cookie->serviceID ?: 999999999;
+				$topServiceID = $serviceID > $topServiceID ? $serviceID : $topServiceID;
+				if ( $cookie->purpose === 0 || strlen( $cookie->purpose ) == 0 ) {
+					$purpose = __( 'Purpose pending investigation', 'complianz-gdpr' );
+				} else {
+					$decoded = html_entity_decode( $cookie->purpose, ENT_QUOTES );
+					$purpose = $purpose_map[ $decoded ] ?? $decoded;
+				}
 				$grouped_by_service[ $serviceID ][ $purpose ][] = $cookie;
 			}
 

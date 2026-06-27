@@ -330,7 +330,7 @@ if ( ! class_exists( "cmplz_admin" ) ) {
 							}
 						?>
 						</p>
-						<br /><button class="cmplz-btn-dismiss-notice button-secondary"><?php esc_html_e(__("Dismiss","complianz-gdpr"))?></button>
+						<br /><button class="cmplz-btn-dismiss-notice button-secondary"><?php esc_html_e( "Dismiss", "complianz-gdpr" )?></button>
 					</div>
 				</div>
 			</div>

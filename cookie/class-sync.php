@@ -71,6 +71,7 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 				}
 
 				// Make sure each cookie is available in all languages.
+				$created = false;
 				foreach ( $en_cookies as $en_cookie_data ) {
 					$en_cookie         = new CMPLZ_COOKIE( $en_cookie_data->ID );
 					$translated_cookie = new CMPLZ_COOKIE( $en_cookie->name, $language );
@@ -86,14 +87,28 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 						$translated_cookie->slug              = $en_cookie->slug;
 						$translated_cookie->ignored           = $en_cookie->ignored;
 						$translated_cookie->lastAddDate       = time();
-						// Copy field values from parent.
-						$translated_cookie->retention             = $en_cookie->retention;
-						$translated_cookie->cookieFunction        = $en_cookie->cookieFunction;
-						$translated_cookie->purpose               = $en_cookie->purpose;
-						$translated_cookie->type                  = $en_cookie->type;
-						$translated_cookie->collectedPersonalData = $en_cookie->collectedPersonalData;
+						// type is structural (not language-specific), always copy.
+						$translated_cookie->type = $en_cookie->type;
+						// For custom (non-synced) cookies, copy content fields since the CDB won't
+						// provide translations. For CDB-synced cookies, leave empty so the CDB can
+						// fill in the correct translated values; empty fields fall back to the English
+						// parent via the fallback mechanism in CMPLZ_COOKIE::get().
+						if ( ! $en_cookie->sync ) {
+							$translated_cookie->retention             = $en_cookie->retention;
+							$translated_cookie->cookieFunction        = $en_cookie->cookieFunction;
+							$translated_cookie->purpose               = $en_cookie->purpose;
+							$translated_cookie->collectedPersonalData = $en_cookie->collectedPersonalData;
+						}
 						$translated_cookie->save();
+						$created = true;
 					}
+				}
+
+				if ( $created ) {
+					// Flush the cookie list cache so the newly created translations are
+					// visible to the subsequent CDB sync request in the same PHP process.
+					delete_transient( 'cmplz_cookies' );
+					COMPLIANZ::$banner_loader->cookies = array();
 				}
 			}
 		}
@@ -167,8 +182,9 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 				$fields
 			);
 
+			$select_fields      = implode( ', ', array_map( 'esc_sql', $fields ) );
 			$empty_translations = $wpdb->get_results(
-				"SELECT ID, isTranslationFrom
+				"SELECT ID, isTranslationFrom, {$select_fields}
 			FROM {$wpdb->prefix}{$table}
 			WHERE isTranslationFrom > 0
 			AND (" . implode( ' OR ', $where_conditions ) . ')'
@@ -428,6 +444,15 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 				update_option( 'cmplz_sync_cookies_after_services_complete', true, false );
 			} else {
 				update_option( 'cmplz_sync_cookies_complete', true, false );
+			}
+
+			// Flush cookie caches so the updated translations are immediately visible
+			// on the frontend without waiting for the transient to expire.
+			delete_transient( 'cmplz_cookies' );
+			COMPLIANZ::$banner_loader->cookies = array();
+			$languages = COMPLIANZ::$banner_loader->get_supported_languages();
+			foreach ( $languages as $lang ) {
+				wp_cache_delete( 'cmplz_purpose_map_' . $lang, 'complianz' );
 			}
 
 			return $msg;
@@ -976,6 +1001,13 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 			update_option( 'cmplz_sync_cookies_complete', false, false );
 			update_option( 'cmplz_sync_cookies_after_services_complete', false, false );
 			update_option( 'cmplz_sync_services_complete', false, false );
+			// Reset lastUpdatedDate for all CDB-synced cookies and services so the
+			// next sync re-processes them regardless of when they were last synced.
+			// Without this, cookies saved with English content by a previous buggy
+			// sync would be permanently excluded by the 3-month time filter.
+			global $wpdb;
+			$wpdb->query( "UPDATE {$wpdb->prefix}cmplz_cookies SET lastUpdatedDate = 0 WHERE sync = 1" );
+			$wpdb->query( "UPDATE {$wpdb->prefix}cmplz_services SET lastUpdatedDate = 0 WHERE sync = 1" );
 		}
 
 		/**
@@ -1037,11 +1069,14 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 				$this->migrate_empty_translations();
 				$scan_action = sanitize_title( $request->get_param( 'scan_action' ) );
 				$language    = cmplz_sanitize_language( $request->get_param( 'language' ) );
-				if ( 'restart' === $scan_action ) {
-					$this->resync();
+				if ( COMPLIANZ::$banner_loader->use_cdb_api() ) {
+					if ( 'restart' === $scan_action ) {
+						$this->resync();
+					}
+					$msg = $this->do_sync_batch( true );
+				} else {
+					$msg = '';
 				}
-
-				$msg               = $this->do_sync_batch( true );
 				$data_cookies      = $this->get_syncable_cookies();
 				$data_services     = $this->get_syncable_services();
 				$has_syncable_data = ( count( $data_cookies ) + count( $data_services ) ) > 0;
@@ -1086,6 +1121,10 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 			}
 
 			if ( defined( 'CMPLZ_DISABLE_SYNC' ) && CMPLZ_DISABLE_SYNC ) {
+				return '';
+			}
+
+			if ( ! COMPLIANZ::$banner_loader->use_cdb_api() ) {
 				return '';
 			}
 
@@ -1217,6 +1256,10 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 						update_option( 'cmplz_serviceTypes_' . $language, $serviceTypes, false );
 					}
 				}
+				// If data was loaded from cache (not just fetched), ensure the stored flag is set.
+				if ( $serviceTypes ) {
+					update_option( 'cmplz_serviceTypes_stored', true, false );
+				}
 				// unescape label.
 				foreach ( $serviceTypes as $index => $serviceType ) {
 					$serviceTypes[ $index ]['label'] = html_entity_decode( $serviceType['label'], ENT_QUOTES );
@@ -1280,6 +1323,10 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 						update_option( 'cmplz_purposes_stored', true, false );
 						update_option( "cmplz_purposes_$language", $cookiePurposes, false );
 					}
+				}
+				// If data was loaded from cache (not just fetched), ensure the stored flag is set.
+				if ( $cookiePurposes ) {
+					update_option( 'cmplz_purposes_stored', true, false );
 				}
 				// unescape label.
 				foreach ( $cookiePurposes as $index => $cookiePurpose ) {

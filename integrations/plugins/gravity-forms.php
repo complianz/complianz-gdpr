@@ -49,7 +49,7 @@ function cmplz_gravifyforms_initform() {
 			let recaptcha_field = document.querySelector('.ginput_recaptcha');
 			if (recaptcha_field) {
 				let reCaptchaContainer = recaptcha_field.closest('.gfield');
-				let html = '<span class="cmplz-gf-recaptcha cmplz-accept-marketing"><?php esc_html_e(__( "Click to accept reCaptcha validation.", 'complianz-gdpr' ))?></span>';
+				let html = '<span class="cmplz-gf-recaptcha cmplz-accept-marketing"><?php esc_html_e( "Click to accept reCaptcha validation.", 'complianz-gdpr' )?></span>';
 				reCaptchaContainer.insertAdjacentHTML('beforeend', html);
 				document.addEventListener("cmplz_run_after_all_scripts", cmplz_cf7_fire_post_render);
 			}

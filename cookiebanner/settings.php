@@ -21,7 +21,7 @@ function cmplz_banner_color_schemes() {
 			),
 			'colorpalette_text'            => array(
 				'color'     => '#222222',
-				'hyperlink' => '#1E73BE',
+				'hyperlink' => '#3B29FF',
 			),
 			'colorpalette_toggles'         => array(
 				'background' => '#61CE71',
@@ -258,8 +258,8 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'group_id'    => 'banner-general',
 				'data_target' => 'banner',
 				'type'        => 'checkbox',
-				'label'       => __( 'Dismiss on time out', 'complianz-gdpr' ),
-				'tooltip'     => __( 'When dismiss on time out is enabled, the consent banner will be dismissed after 10 seconds, or the time you choose below. In opt-in regions (ex.: GDPR), this denies all cookies. In opt-out regions (ex.: CCPA), this allows cookies.', 'complianz-gdpr' ),
+				'label'       => __( 'Dismiss on timeout', 'complianz-gdpr' ),
+				'tooltip'     => __( 'When dismiss on timeout is enabled, the consent banner will be dismissed after 10 seconds, or the time you choose below. Note: this only applies to opt-out regions (e.g. CCPA). In opt-in regions (e.g. GDPR), the banner will remain visible until the user takes an action, regardless of this setting.', 'complianz-gdpr' ),
 				'default'     => false,
 			),
 			array(
@@ -521,7 +521,7 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'label'       => __( 'Text', 'complianz-gdpr' ),
 				'default'     => array(
 					'color'     => '#222222',
-					'hyperlink' => '#1E73BE',
+					'hyperlink' => '#3B29FF',
 				),
 				'fields'      => array(
 					array(
@@ -570,9 +570,9 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'type'             => 'colorpicker',
 				'label'            => __( 'Toggles', 'complianz-gdpr' ),
 				'default'          => array(
-					'background' => '#1e73be',
+					'background' => '#3B29FF',
 					'bullet'     => '#ffffff',
-					'inactive'   => '#F56E28',
+					'inactive'   => '#555',
 				),
 				'fields'           => array(
 					array(
@@ -631,8 +631,8 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 				'type'        => 'colorpicker',
 				'label'       => __( 'Accept', 'complianz-gdpr' ),
 				'default'     => array(
-					'background' => '#1E73BE',
-					'border'     => '#1E73BE',
+					'background' => '#3B29FF',
+					'border'     => '#3B29FF',
 					'text'       => '#ffffff',
 				),
 				'fields'      => array(

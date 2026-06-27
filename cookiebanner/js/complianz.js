@@ -62,6 +62,63 @@ function cmplz_html_decode( input ) {
 }
 
 /*
+ * Sanitize placeholder HTML before injecting it into DOM.
+ * Keeps expected markup but removes scripts and risky attributes.
+ */
+function cmplz_sanitize_placeholder_html( input ) {
+	const template = document.createElement( 'template' );
+	template.innerHTML = String( input || '' );
+
+	// Remove active content elements entirely.
+	template.content.querySelectorAll( 'script, iframe, object, embed, link, style, base, meta' ).forEach( ( el ) => {
+		el.remove();
+	} );
+
+	template.content.querySelectorAll( '*' ).forEach( ( el ) => {
+		Array.from( el.attributes ).forEach( ( attr ) => {
+			const attrName = attr.name.toLowerCase();
+			const attrValue = attr.value.trim();
+
+			// Remove inline event handlers like onclick.
+			if ( attrName.indexOf( 'on' ) === 0 ) {
+				el.removeAttribute( attr.name );
+				return;
+			}
+
+			// Block javascript: and data: URLs on URL-based attributes.
+			if ( ( attrName === 'href' || attrName === 'src' || attrName === 'xlink:href' ) &&
+				/^\s*(javascript:|data:)/i.test( attrValue ) ) {
+				el.removeAttribute( attr.name );
+			}
+		} );
+	} );
+
+	return template.innerHTML;
+}
+
+/*
+ * Validate dynamic script URLs before assigning to script.src.
+ * Only allow http(s) URLs (including relative URLs resolved by URL()).
+ */
+function cmplz_is_safe_script_src( scriptUrl ) {
+	if ( typeof scriptUrl !== 'string' ) {
+		return false;
+	}
+
+	const trimmed = scriptUrl.trim();
+	if ( ! trimmed ) {
+		return false;
+	}
+
+	try {
+		const parsedUrl = new URL( trimmed, window.location.href );
+		return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+	} catch ( e ) {
+		return false;
+	}
+}
+
+/*
  * Focus trap functions for cookie banner modal
  */
 
@@ -379,13 +436,13 @@ const cmplz_load_css = ( path ) => {
 
 function cmplz_run_script( script, category, service, type, sourceObj ) {
 	const targetObj = document.createElement( 'script' );
-	if ( type !== 'inline' ) {
+	if ( type !== 'inline' && cmplz_is_safe_script_src( script ) ) {
 		targetObj.src = script;
 	} else {
 		if ( typeof script !== 'string' ) {
 			script = script.innerHTML;
 		}
-		targetObj.innerHTML = [ script, 'cmplzScriptLoaded();' ].join( '\n' );
+		targetObj.textContent = [ script, 'cmplzScriptLoaded();' ].join( '\n' );
 	}
 
 	//check if already fired
@@ -557,7 +614,7 @@ function cmplz_insert_placeholder_text( container, category, service ) {
 				service_nicename = service_nicename.charAt( 0 ).toUpperCase() + service_nicename.slice( 1 );
 				placeholder_text = placeholder_text.replace( '{service}', service_nicename );
 				body = cmplz_create_element( 'div', placeholder_text );
-				body.innerHTML = placeholder_text;
+				body.innerHTML = cmplz_sanitize_placeholder_html( placeholder_text );
 				body.classList.add( 'cmplz-blocked-content-notice' );
 				const btn = body.querySelector( 'button' );
 				btn.setAttribute( 'data-service', service );
@@ -1086,7 +1143,7 @@ window.conditionally_show_banner = function() {
 	if ( cmplz_get_cookie( 'saved_categories' ) === '' ) {
 		//for Non optin/optout visitors, and DNT users, we just track the no-warning option
 		if ( complianz.consenttype !== 'optin' && complianz.consenttype !== 'optout' ) {
-			cmplz_track_status( 'no_warning' );
+			cmplz_track_status();
 		} else if ( cmplz_do_not_track() ) {
 			cmplz_track_status( 'do_not_track' );
 		}
@@ -1770,14 +1827,31 @@ cmplz_add_event( 'click', '.cmplz-view-preferences', function( e ) {
 		cmplz_banner.querySelector( '.cmplz-view-preferences' ).style.display = 'none';
 		cmplz_banner.querySelector( '.cmplz-save-preferences' ).style.display = 'block';
 
-		// Set focus to the first category when preferences are shown
+		// Set focus to the first category toggle when preferences are shown
 		const firstCategory = cmplz_banner.querySelector( '.cmplz-categories .cmplz-category' );
 		if ( firstCategory ) {
-			const summary = firstCategory.querySelector( 'summary' );
-			if ( summary ) {
-				summary.setAttribute( 'tabindex', '0' );
-				summary.focus();
+			const toggleBtn = firstCategory.querySelector( '.cmplz-category-toggle' );
+			if ( toggleBtn ) {
+				toggleBtn.focus();
 			}
+		}
+	}
+} );
+/*
+ * Toggle category description visibility via the expand/collapse button
+ */
+cmplz_add_event( 'click', '.cmplz-category-toggle', function( e ) {
+	const btn = e.target.closest( '.cmplz-category-toggle' );
+	if ( ! btn ) {
+		return;
+	}
+	const isExpanded = btn.getAttribute( 'aria-expanded' ) === 'true';
+	btn.setAttribute( 'aria-expanded', String( ! isExpanded ) );
+	const category = btn.closest( '.cmplz-category' );
+	if ( category ) {
+		const desc = category.querySelector( '.cmplz-description' );
+		if ( desc ) {
+			desc.hidden = isExpanded;
 		}
 	}
 } );
