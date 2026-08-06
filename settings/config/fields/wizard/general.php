@@ -204,15 +204,6 @@ function cmplz_wizard_fields($fields){
 			'default'  => '',
 			'placeholder'  => __( "Name or company name", 'complianz-gdpr' ),
 			'label'    => __( "Who is the owner of the website?", 'complianz-gdpr' ),
-			'react_conditions' => [
-				'relation' => 'OR',
-				[
-					'impressum' => 'generated',
-					'cookie-statement' => 'generated',
-					'privacy-statement' => 'generated',
-					'disclaimer' => 'generated',
-				]
-			],
 			'required' => true,
 		],
 		[
@@ -223,15 +214,6 @@ function cmplz_wizard_fields($fields){
 			'default'            => '',
 			'label'              => __( "What is your address?", 'complianz-gdpr' ),
 			'required'           => true,
-			'react_conditions' => [
-				'relation' => 'OR',
-				[
-					'impressum' => 'generated',
-					'cookie-statement' => 'generated',
-					'privacy-statement' => 'generated',
-					'disclaimer' => 'generated',
-				]
-			],
 		],
 		[
 			'id'       => 'country_company',
@@ -251,15 +233,6 @@ function cmplz_wizard_fields($fields){
 			'tooltip'     => __( "The email address will be obfuscated on the front-end to prevent spidering.", 'complianz-gdpr' ),
 			'label'    => __( "What is the email address your visitors can use to contact you about privacy issues?", 'complianz-gdpr' ),
 			'required' => true,
-			'react_conditions' => [
-				'relation' => 'OR',
-				[
-					'impressum' => 'generated',
-					'cookie-statement' => 'generated',
-					'privacy-statement' => 'generated',
-					'disclaimer' => 'generated',
-				]
-			],
 		],
 		[
 			'id'       => 'telephone_company',
@@ -269,15 +242,6 @@ function cmplz_wizard_fields($fields){
 			'document_label' => __( 'Phone number:', 'complianz-gdpr' ) . ' ',
 			'label'          => __( "What is the telephone number your visitors can use to contact you about privacy issues?", 'complianz-gdpr' ),
 			'required'       => false,
-			'react_conditions' => [
-				'relation' => 'OR',
-				[
-					'impressum' => 'generated',
-					'cookie-statement' => 'generated',
-					'privacy-statement' => 'generated',
-					'disclaimer' => 'generated',
-				]
-			],
 		],
 		[
 			'id' => 'ca_name_accountable_person',
