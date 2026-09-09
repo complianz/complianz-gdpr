@@ -142,14 +142,18 @@ function cmplz_contactform7_dependencies( $tags ) {
 
 add_filter( 'cmplz_known_script_tags', 'cmplz_contactform7_script' );
 function cmplz_contactform7_script( $tags ) {
-	if (defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) return $tags;
+	if ((defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, 5.4, '>=')) && (!class_exists('IQFix_WPCF7_Deity'))) return $message;
 
 	$service = WPCF7_RECAPTCHA::get_instance();
 	if (cmplz_get_option('block_recaptcha_service') === 'yes'){
 		if ( $service->is_active() ) {
-			$tags[] = 'modules/recaptcha/script.js';
-			$tags[] = 'recaptcha/index.js';
-			$tags[] = 'recaptcha/api.js';
+			$tags[] = array(
+			    'name' => 'google-recaptcha',
+			    'category' => 'marketing',
+			    'placeholder' => 'google-recaptcha',
+			    'urls' => array('recaptcha/api.js'),
+			    'enable_placeholder' => '1'
+		    );
 		}
 	}
 	return $tags;
