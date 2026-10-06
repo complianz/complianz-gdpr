@@ -388,6 +388,11 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 				$cookiesettings['iapi_nav'] = 'fallback';
 			}
 
+			// The banner suppresses the popup here, where the inline manage consent area already is.
+			// Not in get_front_end_settings(): that array is also served from REST and snapshotted
+			// into the consent documents, which have no main query, so is_singular() is false there.
+			$cookiesettings['is_cookiepolicy_page'] = is_singular() && cmplz_page_is_of_type( 'cookie-statement' );
+
 			wp_localize_script( 'cmplz-cookiebanner', 'complianz', $cookiesettings );
 
 			// Enqueue the banner stylesheet server-side ONLY when the variant is

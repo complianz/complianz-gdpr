@@ -105,7 +105,9 @@ function cmplz_render_document_block( $attributes, $content ): string {
 	$html = '';
 	if ( isset( $attributes['selectedDocument'] ) ) {
 		if ( isset( $attributes['documentSyncStatus'] ) && 'unlink' === $attributes['documentSyncStatus'] && isset( $attributes['customDocument'] ) ) {
-			$html = $attributes['customDocument'];
+			// customDocument is attacker-controllable stored block content; sanitize
+			// before it reaches the frontend (CWE-79). Matches cmplz_render_consent_area_block().
+			$html = wp_kses_post( $attributes['customDocument'] );
 		} else {
 			$type   = $attributes['selectedDocument'];
 			$region = cmplz_get_region_from_legacy_type( $type );

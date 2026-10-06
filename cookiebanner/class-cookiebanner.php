@@ -229,9 +229,11 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 				// table not created yet.
 				return;
 			}
+			// the ID goes first: get_translation_id() below reads it, and it ends up in the
+			// registered translation names, so a non numeric one is treated as a new banner.
+			$this->ID             = is_numeric( $ID ) ? (int) $ID : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- existing constructor signature.
 			$this->banner_fields  = cmplz_add_cookiebanner_settings( array() );
 			$this->translation_id = $this->get_translation_id();
-			$this->ID             = $ID;
 			$this->set_defaults   = $set_defaults;
 			$this->get( $load_wysiwyg_options );
 		}
@@ -486,33 +488,57 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 			}
 
 			// wpml
+			// the banner fields are already translated in the site language, so declare it. Without a
+			// source language WPML labels them English, which makes them untranslatable on a site with
+			// a non English default language.
+			$source_language = cmplz_get_wpml_source_language();
 			if ( function_exists( 'icl_register_string' ) ) {
 
-				icl_register_string( 'complianz', $fieldname . $key, $string );
+				icl_register_string( 'complianz', $fieldname . $key, $string, false, $source_language );
 			}
 
-			do_action( 'wpml_register_single_string', 'complianz', $fieldname, $string );
+			do_action( 'wpml_register_single_string', 'complianz', $fieldname . $key, $string, false, $source_language );
 		}
 
 		/**
 		 * Get a prefix for translation registration
-		 * For backward compatibility we don't use a key when only one banner, or when the lowest.
+		 * For backward compatibility one banner keeps the un-suffixed fieldnames.
 		 * If we don't use this, all field names from each banner will be the same, registering won't work.
 		 *
-		 * @return string
+		 * @return string|int Empty string for the banner that owns the un-suffixed fieldnames,
+		 *                    otherwise the banner ID.
 		 */
 		public function get_translation_id() {
-			// if this is the banner with the lowest ID's, no ID
+			// a new banner has no ID yet, so it can't own the un-suffixed fieldnames.
+			if ( ! $this->ID ) {
+				return '';
+			}
+
+			// stored, not derived: the lowest ID would move the un-suffixed fieldnames, and their
+			// translations, to the next banner once the owner is deleted.
+			$owner = (int) get_option( 'cmplz_bare_translation_banner_id' );
+			if ( ! $owner ) {
+				$owner = $this->get_lowest_banner_id();
+			}
+
+			return $owner === (int) $this->ID ? '' : $this->ID;
+		}
+
+		/**
+		 * Get the lowest cookiebanner ID, which is the banner that owns the un-suffixed fieldnames
+		 * on sites that were already running before the owner was stored.
+		 *
+		 * @return int
+		 */
+		public function get_lowest_banner_id() {
 			$lowest = cmplz_get_transient( 'cmplz_min_banner_id' );
 			if ( ! $lowest ) {
 				global $wpdb;
 				$lowest = $wpdb->get_var( "select min(ID) from {$wpdb->prefix}cmplz_cookiebanners" );
 				cmplz_set_transient( 'cmplz_min_banner_id', $lowest, HOUR_IN_SECONDS );
 			}
-			if ( $lowest == $this->ID ) {
-				return '';
-			}
-			return $this->ID;
+
+			return (int) $lowest;
 		}
 
 		/**
@@ -568,6 +594,15 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 			}
 			if ( ! $this->ID ) {
 				$this->add();
+				// the cached lowest ID is from before the insert, so drop it before deriving anything.
+				cmplz_delete_transient( 'cmplz_min_banner_id' );
+				// seed from the lowest ID, not from this banner, so a second banner on an existing
+				// site can't claim the un-suffixed fieldnames.
+				if ( ! get_option( 'cmplz_bare_translation_banner_id' ) ) {
+					update_option( 'cmplz_bare_translation_banner_id', $this->get_lowest_banner_id(), false );
+				}
+				// add() assigned the ID, so the prefix has to be derived again.
+				$this->translation_id = $this->get_translation_id();
 			}
 			++$this->banner_version;
 
@@ -836,6 +871,9 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 				// clear all statistics regarding this banner
 				$sql = $wpdb->prepare( "UPDATE {$wpdb->prefix}cmplz_statistics SET cookiebanner_id = 0 where poc_url=%s", $this->ID );
 				$wpdb->query( $sql );
+
+				// the lowest ID is the fallback owner while the option isn't set.
+				cmplz_delete_transient( 'cmplz_min_banner_id' );
 			}
 
 			return ! $error;

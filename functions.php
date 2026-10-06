@@ -909,10 +909,16 @@ if ( ! function_exists( 'cmplz_page_is_of_type' ) ) {
 		global $post;
 		if ( !$post ) return false;
 
-		$post_id = $post->ID;
+		$post_id = (int) $post->ID;
 		foreach ( $regions as $region ) {
 			$policy_id = COMPLIANZ::$document->get_shortcode_page_id( $type, $region );
-			if ( $policy_id === $post_id ) {
+			if ( ! $policy_id ) {
+				continue;
+			}
+			// Map to the current language, like the other consumers of get_shortcode_page_id() do:
+			// the lookup finds the source-language page, so a translated document would not match.
+			$policy_id = apply_filters( 'wpml_object_id', $policy_id, 'page', true, substr( get_locale(), 0, 2 ) );
+			if ( (int) $policy_id === $post_id ) {
 				return true;
 			}
 		}
@@ -2231,17 +2237,53 @@ if ( ! function_exists( 'cmplz_cdb_reference_in_policy' ) ) {
 	}
 }
 
-/**
- * Register a translation
- *
- * @param $fieldname
- *
- * @return bool
- */
+if ( ! function_exists( 'cmplz_get_wpml_source_language' ) ) {
+	/**
+	 * Get the source language to declare when registering a string with WPML.
+	 *
+	 * When no source language is passed, WPML resolves one itself: the language configured for
+	 * the string domain, or a hardcoded 'en' when that is unset. That labels our already
+	 * translated strings as English, and on a site with a non English default language they can
+	 * then no longer be translated, because WPML never offers a string for translation into its
+	 * own source language.
+	 *
+	 * @param string|null $source_language Pass 'en' for the English cookiedatabase dataset, or
+	 *                                     null to resolve WPML's own default language.
+	 *
+	 * @return string Language code, or an empty string to keep WPML's own fallback.
+	 */
+	function cmplz_get_wpml_source_language( $source_language = null ) {
+		if ( ! is_string( $source_language ) ) {
+			$source_language = '';
+
+			// read wpml's own setting rather than the wpml_default_language filter: other
+			// multilingual plugins answer that filter as a compatibility shim, so it can return a
+			// language code that is not wpml's. Don't run the result through
+			// cmplz_sanitize_language(), which would mangle codes like pt-br and zh-hans.
+			if ( function_exists( 'wpml_get_setting' ) ) {
+				$default_language = wpml_get_setting( 'default_language' );
+				if ( is_string( $default_language ) ) {
+					$source_language = $default_language;
+				}
+			}
+		}
+
+		return $source_language;
+	}
+}
 
 if ( ! function_exists( 'cmplz_register_translation' ) ) {
 
-	function cmplz_register_translation( $string, $fieldname ) {
+	/**
+	 * Register a translation
+	 *
+	 * @param string      $string          The string to register for translation.
+	 * @param string      $fieldname       Name that identifies the string in the translation plugin.
+	 * @param string|null $source_language Language of $string. Defaults to WPML's default language.
+	 *
+	 * @return void
+	 */
+	function cmplz_register_translation( $string, $fieldname, $source_language = null ) {
 		if ( ! is_string( $string ) || !is_string($fieldname) ) {
 			return;
 		}
@@ -2251,11 +2293,12 @@ if ( ! function_exists( 'cmplz_register_translation' ) ) {
 		}
 
 		//wpml
+		$source_language = cmplz_get_wpml_source_language( $source_language );
 		if ( function_exists( 'icl_register_string' ) ) {
-			icl_register_string( 'complianz', $fieldname, $string );
+			icl_register_string( 'complianz', $fieldname, $string, false, $source_language );
 		}
 
-		do_action( 'wpml_register_single_string', 'complianz', $fieldname, $string );
+		do_action( 'wpml_register_single_string', 'complianz', $fieldname, $string, false, $source_language );
 
 	}
 }

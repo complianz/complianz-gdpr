@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkcomplianz_gdpr||=[]).push([[756],{80756(a,d,e){var i=e(10790);e.d(d,["default",0,(a,d)=>(0,i.jsx)(i.Fragment,{children:a&&d.map((a,d)=>(0,i.jsx)("div",{children:a},d))})])}}]);

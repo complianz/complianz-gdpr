@@ -377,7 +377,7 @@ if ( ! class_exists( 'cmplz_admin_DNSMPD' ) ) {
 					$line   = array_values( get_object_vars( $line ) );
 					$line   = array_map( 'sanitize_text_field', $line );
 					$line[] = $date;
-					$line = array_map( array( $this, 'csv_safe_value' ), $line );
+					$line   = array_map( array( $this, 'csv_safe_value' ), $line );
 					fputcsv( $csv_handle, $line, $delimiter, $enclosure, $escape );
 				}
 			}

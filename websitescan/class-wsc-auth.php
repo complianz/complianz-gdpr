@@ -713,7 +713,8 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				// store the consent for the time we can resend the request.
 				$error_consentdata = get_option( 'cmplz_consent_error_consentdata_' . $key, false );
 
-				if ( $error_consentdata && $error_timestamp < time() - 68400 ) {
+				// A missing timestamp must not bypass the backoff: (int) false is 0, always in the past.
+				if ( $error_consentdata && $error_timestamp && (int) $error_timestamp < time() - 68400 ) {
 					$this->store_onboarding_consent( $key, array(), true, $error_consentdata );
 				}
 			}
@@ -926,22 +927,39 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 			update_option( 'cmplz_options', $options );
 		}
 
-		// Getters
-
+		/**
+		 * Get the stored WSC OAuth client ID.
+		 *
+		 * @return string The client ID, or an empty string if not set.
+		 */
 		public static function get_wsc_client_id(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY );
 		}
 
+		/**
+		 * Get the stored WSC OAuth client secret.
+		 *
+		 * @return string The client secret, or an empty string if not set.
+		 */
 		public static function get_wsc_client_secret(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY );
 		}
 
+		/**
+		 * Get the stored WSC account email.
+		 *
+		 * @return string The email, or an empty string if not set.
+		 */
 		public static function get_wsc_email(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_EMAIL_OPTION_KEY );
 		}
 
-		// Setters
-
+		/**
+		 * Store the WSC account email (sanitized).
+		 *
+		 * @param string $email The email to store.
+		 * @return void
+		 */
 		public static function set_wsc_email( string $email ): void {
 			self::wsc_write_options( array( cmplz_wsc::WSC_EMAIL_OPTION_KEY => sanitize_email( $email ) ) );
 		}
@@ -956,6 +974,14 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY => sanitize_text_field( $client_secret ),
 				)
 			);
+
+			// Storing (new) credentials is a fresh authentication start: clear any
+			// lingering auth-failure cooldown and the sticky error flag left by the
+			// previous credentials. Without this, a stale backoff from earlier invalid
+			// creds keeps get_token()'s gate closed (up to 6h) and the new, valid
+			// credentials are never even tried — the WSC UI stays stuck on 'error'.
+			self::clear_token_backoff();
+			delete_option( 'cmplz_wsc_error_token_api' );
 		}
 
 		/**

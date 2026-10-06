@@ -1,29 +1,32 @@
-const Hyperlink = (props) => {
+const Hyperlink = ( props ) => {
 	let label_pre = '';
 	let label_post = '';
 	let link_text = '';
-	if (props.text.indexOf('%s') !== -1) {
-		let parts = props.text.split(/%s/);
-		label_pre = parts[0];
-		link_text = parts[1];
-		label_post = parts[2];
+	// Accept both %s...%s and numbered %1$s...%2$s placeholders.
+	const placeholder = /%(?:\d+\$)?s/;
+	if ( placeholder.test( props.text ) ) {
+		const parts = props.text.split( placeholder );
+		label_pre = parts[ 0 ];
+		link_text = parts[ 1 ];
+		label_post = parts[ 2 ];
 	} else {
 		link_text = props.text;
 	}
-	let className = props.className ? props.className : 'cmplz-link';
+	const className = props.className ? props.className : 'cmplz-link';
 
 	return (
 		<>
-			{label_pre}
+			{ label_pre }
 			<a
-				className={className}
-				target={props.target}
-				rel={props.rel}
-				href={props.url}>
-				{link_text}
+				className={ className }
+				target={ props.target }
+				rel={ props.rel }
+				href={ props.url }
+			>
+				{ link_text }
 			</a>
-			{label_post}
+			{ label_post }
 		</>
 	);
-}
+};
 export default Hyperlink;

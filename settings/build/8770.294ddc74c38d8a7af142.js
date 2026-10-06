@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkcomplianz_gdpr||=[]).push([[8770],{88770(a,s,e){var t=e(81621),u=e(9588);const r=(0,t.vt)((a,s)=>({measures:{},has_7:!1,measuresDataLoaded:!1,getMeasuresData:async()=>{const{measures:s,has_7:e}=await u.Eo("get_security_measures_data",{}).then(a=>a);a(a=>({measuresDataLoaded:!0,measures:s,has_7:e}))}}));e.d(s,["default",0,r])}}]);

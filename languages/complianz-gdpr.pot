@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Complianz | GDPR/CCPA Cookie Consent plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Complianz | GDPR/CCPA Cookie Consent 7.5.5\n"
+"Project-Id-Version: Complianz | GDPR/CCPA Cookie Consent 7.5.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/complianz-gdpr\n"
 "Last-Translator: Complianz <support@complianz.io>\n"
 "Language-Team: Complianz <support@complianz.io>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-08T10:49:46+00:00\n"
+"POT-Creation-Date: 2026-09-30T13:55:49+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: complianz-gdpr\n"
@@ -44,7 +44,7 @@ msgid "It is highly recommended that you back up your data before updating to th
 msgstr ""
 
 #: class-admin.php:234
-#: cookiebanner/settings.php:692
+#: cookiebanner/settings.php:707
 #: settings/config/menu.php:252
 #: settings/config/menu.php:322
 #: settings/config/menu.php:338
@@ -56,7 +56,7 @@ msgstr ""
 #: class-admin.php:241
 #: settings/config/menu.php:285
 #: settings/config/menu.php:289
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Support"
 msgstr ""
 
@@ -71,7 +71,7 @@ msgstr ""
 
 #: class-admin.php:352
 #: class-admin.php:353
-#: functions.php:2053
+#: functions.php:2059
 msgid "Read more about %s"
 msgstr ""
 
@@ -2354,7 +2354,7 @@ msgid "Queued"
 msgstr ""
 
 #: cookie/class-scan.php:1053
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Pending"
 msgstr ""
 
@@ -2363,14 +2363,14 @@ msgid "Upgrade to Complianz Premium to enable per-post website scanning."
 msgstr ""
 
 #: cookie/class-scan.php:1076
-#: functions.php:1475
+#: functions.php:1481
 #: settings/build/11.773ce66896be1c8a4d07.js:1
 #: settings/build/4186.616704c21483c73a9fbe.js:1
 #: settings/build/4570.dedb4dde2dccc3188414.js:1
 #: settings/build/4644.ce465c5d9733b80acf30.js:1
 #: settings/build/8596.9b42544648802b678f6d.js:1
 #: settings/build/9487.e9838335195a59707dfe.js:1
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Upgrade"
 msgstr ""
 
@@ -2413,7 +2413,7 @@ msgid "Your free plan covers only 50 posts. Upgrade to scan your full site and a
 msgstr ""
 
 #: cookie/class-scan.php:1140
-msgid "Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks. Get 40% OFF with code SC4N1T4LL. Limited Offer, Get it Now!"
+msgid "Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks. Get 10% OFF with code SC4N1T4LL. Limited Offer, Get it Now!"
 msgstr ""
 
 #: cookie/class-sync.php:277
@@ -2471,48 +2471,48 @@ msgstr ""
 msgid "On a cookie policy, the banner will be minimized by default"
 msgstr ""
 
-#: cookiebanner/class-banner-loader.php:1138
-#: functions.php:2060
+#: cookiebanner/class-banner-loader.php:1143
+#: functions.php:2066
 msgid "Purpose pending investigation"
 msgstr ""
 
 #. translators: 1: date, 2: time
-#: cookiebanner/class-banner-loader.php:1483
+#: cookiebanner/class-banner-loader.php:1488
 msgid "%1$s at %2$s"
 msgstr ""
 
-#: cookiebanner/class-banner-loader.php:1502
+#: cookiebanner/class-banner-loader.php:1507
 msgid "(not synced yet)"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:337
+#: cookiebanner/class-cookiebanner.php:339
 #: cookiebanner/settings.php:165
-#: cookiebanner/settings.php:860
-#: cookiebanner/settings.php:861
+#: cookiebanner/settings.php:875
+#: cookiebanner/settings.php:876
 msgid "Manage consent"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:854
-#: cookiebanner/settings.php:1009
-#: cookiebanner/settings.php:1010
-#: cookiebanner/settings.php:1011
+#: cookiebanner/class-cookiebanner.php:892
+#: cookiebanner/settings.php:1024
+#: cookiebanner/settings.php:1025
+#: cookiebanner/settings.php:1026
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "Functional"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:857
-#: cookiebanner/settings.php:1036
-#: cookiebanner/settings.php:1039
-#: cookiebanner/settings.php:1040
+#: cookiebanner/class-cookiebanner.php:895
+#: cookiebanner/settings.php:1051
+#: cookiebanner/settings.php:1054
+#: cookiebanner/settings.php:1055
 #: gutenberg/build/index.js:1
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "Preferences"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:861
-#: cookiebanner/settings.php:1076
-#: cookiebanner/settings.php:1079
-#: cookiebanner/settings.php:1080
+#: cookiebanner/class-cookiebanner.php:899
+#: cookiebanner/settings.php:1091
+#: cookiebanner/settings.php:1094
+#: cookiebanner/settings.php:1095
 #: settings/config/menu.php:118
 #: settings/config/menu.php:454
 #: settings/config/menu.php:465
@@ -2527,10 +2527,10 @@ msgstr ""
 msgid "Statistics"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:865
-#: cookiebanner/settings.php:1141
-#: cookiebanner/settings.php:1144
-#: cookiebanner/settings.php:1145
+#: cookiebanner/class-cookiebanner.php:903
+#: cookiebanner/settings.php:1156
+#: cookiebanner/settings.php:1159
+#: cookiebanner/settings.php:1160
 #: gutenberg/build/index.js:1
 #: settings/build/1137.521c056ed304050ba669.js:1
 #: settings/build/1356.47a194349e5cee442354.js:1
@@ -2539,31 +2539,31 @@ msgstr ""
 msgid "Marketing"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:869
+#: cookiebanner/class-cookiebanner.php:907
 msgid "Do Not Track"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:870
+#: cookiebanner/class-cookiebanner.php:908
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "No Choice"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:873
+#: cookiebanner/class-cookiebanner.php:911
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "No Warning"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:1387
+#: cookiebanner/class-cookiebanner.php:1425
 msgctxt "as in: click to accept statistics cookies"
 msgid "statistics"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:1388
+#: cookiebanner/class-cookiebanner.php:1426
 msgctxt "as in: click to accept marketing cookies"
 msgid "marketing"
 msgstr ""
 
-#: cookiebanner/class-cookiebanner.php:1398
+#: cookiebanner/class-cookiebanner.php:1436
 msgid "Click button to enable {service}"
 msgstr ""
 
@@ -2685,49 +2685,49 @@ msgid "Dismiss on scroll"
 msgstr ""
 
 #: cookiebanner/settings.php:252
-msgid "When dismiss on scroll is enabled, the consent banner will be dismissed as soon as the user scrolls. In opt-in regions (ex.: GDPR), this denies all cookies. In opt-out regions (ex.: CCPA), this allows cookies."
+msgid "When dismiss on scroll is enabled, the consent banner will be dismissed once the user scrolls 400 pixels down the page, which keeps cookies enabled. Note: this only applies to opt-out regions (e.g. CCPA). In opt-in regions (e.g. GDPR), the banner will remain visible until the user takes an action, regardless of this setting."
 msgstr ""
 
-#: cookiebanner/settings.php:261
+#: cookiebanner/settings.php:267
 msgid "Dismiss on timeout"
 msgstr ""
 
-#: cookiebanner/settings.php:262
+#: cookiebanner/settings.php:268
 msgid "When dismiss on timeout is enabled, the consent banner will be dismissed after 10 seconds, or the time you choose below. Note: this only applies to opt-out regions (e.g. CCPA). In opt-in regions (e.g. GDPR), the banner will remain visible until the user takes an action, regardless of this setting."
 msgstr ""
 
-#: cookiebanner/settings.php:271
+#: cookiebanner/settings.php:283
 msgid "Timeout in seconds"
 msgstr ""
 
-#: cookiebanner/settings.php:287
+#: cookiebanner/settings.php:302
 msgid "Position"
 msgstr ""
 
-#: cookiebanner/settings.php:289
+#: cookiebanner/settings.php:304
 msgid "Center"
 msgstr ""
 
-#: cookiebanner/settings.php:290
+#: cookiebanner/settings.php:305
 #: settings/build/1370.9dc9c94c443870d44ab9.js:1
 #: settings/build/3549.e5ba19d1953def146594.js:1
 #: settings/build/6009.498d0da1c09d09915322.js:1
 msgid "Bottom"
 msgstr ""
 
-#: cookiebanner/settings.php:291
+#: cookiebanner/settings.php:306
 msgid "Bottom left"
 msgstr ""
 
-#: cookiebanner/settings.php:292
+#: cookiebanner/settings.php:307
 msgid "Bottom right"
 msgstr ""
 
-#: cookiebanner/settings.php:302
+#: cookiebanner/settings.php:317
 msgid "Animation"
 msgstr ""
 
-#: cookiebanner/settings.php:304
+#: cookiebanner/settings.php:319
 #: settings/config/fields/wizard/general.php:37
 #: settings/config/fields/wizard/general.php:195
 #: settings/config/fields/wizard/general.php:227
@@ -2735,125 +2735,125 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: cookiebanner/settings.php:305
+#: cookiebanner/settings.php:320
 msgid "Fade"
 msgstr ""
 
-#: cookiebanner/settings.php:306
+#: cookiebanner/settings.php:321
 msgid "Slide"
 msgstr ""
 
-#: cookiebanner/settings.php:319
+#: cookiebanner/settings.php:334
 msgid "Width of the banner in pixels"
 msgstr ""
 
-#: cookiebanner/settings.php:334
+#: cookiebanner/settings.php:349
 msgid "Checkbox style"
 msgstr ""
 
-#: cookiebanner/settings.php:335
+#: cookiebanner/settings.php:350
 msgid "This style is for the checkboxes on the consent banner, as well as on your policy for managing consent."
 msgstr ""
 
-#: cookiebanner/settings.php:337
+#: cookiebanner/settings.php:352
 msgid "Classic"
 msgstr ""
 
-#: cookiebanner/settings.php:338
+#: cookiebanner/settings.php:353
 msgid "Slider"
 msgstr ""
 
-#: cookiebanner/settings.php:355
+#: cookiebanner/settings.php:370
 msgid "Legal document links on banner"
 msgstr ""
 
-#: cookiebanner/settings.php:356
+#: cookiebanner/settings.php:371
 msgid "On the consent banner the generated documents are shown. The title is based on the actual post title."
 msgstr ""
 
-#: cookiebanner/settings.php:363
+#: cookiebanner/settings.php:378
 msgid "You can upload your own logo, hide it, or use the site logo."
 msgstr ""
 
-#: cookiebanner/settings.php:364
+#: cookiebanner/settings.php:379
 msgid "The site logo is the default logo set in your theme's site identity."
 msgstr ""
 
-#: cookiebanner/settings.php:366
+#: cookiebanner/settings.php:381
 msgid "Logo"
 msgstr ""
 
-#: cookiebanner/settings.php:368
+#: cookiebanner/settings.php:383
 msgid "Hide"
 msgstr ""
 
-#: cookiebanner/settings.php:369
+#: cookiebanner/settings.php:384
 msgid "Use Site Logo"
 msgstr ""
 
-#: cookiebanner/settings.php:370
+#: cookiebanner/settings.php:385
 msgid "Use \"Powered by Complianz\""
 msgstr ""
 
-#: cookiebanner/settings.php:371
+#: cookiebanner/settings.php:386
 msgid "Upload Custom Logo"
 msgstr ""
 
-#: cookiebanner/settings.php:388
+#: cookiebanner/settings.php:403
 msgid "Close button"
 msgstr ""
 
-#: cookiebanner/settings.php:389
+#: cookiebanner/settings.php:404
 msgid "If enabled, a close icon will be shown on your consent banner."
 msgstr ""
 
-#: cookiebanner/settings.php:399
+#: cookiebanner/settings.php:414
 msgid "Box shadow"
 msgstr ""
 
-#: cookiebanner/settings.php:408
+#: cookiebanner/settings.php:423
 msgid "Box shadow on header and footer"
 msgstr ""
 
-#: cookiebanner/settings.php:417
+#: cookiebanner/settings.php:432
 msgid "Show as soft cookie wall"
 msgstr ""
 
 #. translators: %1$s: opening link tag, %2$s: closing link tag
-#: cookiebanner/settings.php:418
+#: cookiebanner/settings.php:433
 msgid "Unlike the regular cookie wall, the soft cookie wall doesn't block visitors that do not deny consent or dismiss the banner. It will however forces a choice before visitors enter your website."
 msgstr ""
 
 #. translators: %1$s: opening link tag, %2$s: closing link tag
-#: cookiebanner/settings.php:422
+#: cookiebanner/settings.php:437
 msgid "Read more about %1$sthe soft cookie wall%2$s."
 msgstr ""
 
-#: cookiebanner/settings.php:425
+#: cookiebanner/settings.php:440
 msgid "Soft cookie wall"
 msgstr ""
 
-#: cookiebanner/settings.php:426
+#: cookiebanner/settings.php:441
 msgid "Read more about our privacy-friendly cookie wall."
 msgstr ""
 
-#: cookiebanner/settings.php:449
+#: cookiebanner/settings.php:464
 msgid "Border radius banner"
 msgstr ""
 
-#: cookiebanner/settings.php:463
+#: cookiebanner/settings.php:478
 msgid "Border width banner"
 msgstr ""
 
-#: cookiebanner/settings.php:478
+#: cookiebanner/settings.php:493
 msgid "Border radius buttons"
 msgstr ""
 
-#: cookiebanner/settings.php:487
+#: cookiebanner/settings.php:502
 msgid "Font size"
 msgstr ""
 
-#: cookiebanner/settings.php:498
+#: cookiebanner/settings.php:513
 #: functions.php:767
 #: settings/config/menu.php:27
 #: settings/config/menu.php:191
@@ -2870,218 +2870,218 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: cookiebanner/settings.php:499
-#: cookiebanner/settings.php:507
-#: cookiebanner/settings.php:549
-#: cookiebanner/settings.php:557
-#: cookiebanner/settings.php:580
-#: cookiebanner/settings.php:610
-#: cookiebanner/settings.php:641
-#: cookiebanner/settings.php:668
-#: cookiebanner/settings.php:701
+#: cookiebanner/settings.php:514
+#: cookiebanner/settings.php:522
+#: cookiebanner/settings.php:564
+#: cookiebanner/settings.php:572
+#: cookiebanner/settings.php:595
+#: cookiebanner/settings.php:625
+#: cookiebanner/settings.php:656
+#: cookiebanner/settings.php:683
+#: cookiebanner/settings.php:716
 msgid "Background"
 msgstr ""
 
-#: cookiebanner/settings.php:511
-#: cookiebanner/settings.php:645
-#: cookiebanner/settings.php:672
-#: cookiebanner/settings.php:705
+#: cookiebanner/settings.php:526
+#: cookiebanner/settings.php:660
+#: cookiebanner/settings.php:687
+#: cookiebanner/settings.php:720
 msgid "Border"
 msgstr ""
 
-#: cookiebanner/settings.php:521
-#: cookiebanner/settings.php:552
-#: cookiebanner/settings.php:649
-#: cookiebanner/settings.php:676
-#: cookiebanner/settings.php:709
+#: cookiebanner/settings.php:536
+#: cookiebanner/settings.php:567
+#: cookiebanner/settings.php:664
+#: cookiebanner/settings.php:691
+#: cookiebanner/settings.php:724
 msgid "Text"
 msgstr ""
 
-#: cookiebanner/settings.php:529
+#: cookiebanner/settings.php:544
 msgid "Color"
 msgstr ""
 
-#: cookiebanner/settings.php:533
-#: cookiebanner/settings.php:560
+#: cookiebanner/settings.php:548
+#: cookiebanner/settings.php:575
 msgid "Hyperlink"
 msgstr ""
 
-#: cookiebanner/settings.php:542
-#: cookiebanner/settings.php:603
-#: cookiebanner/settings.php:724
+#: cookiebanner/settings.php:557
+#: cookiebanner/settings.php:618
+#: cookiebanner/settings.php:739
 msgid "Accessibility"
 msgstr ""
 
-#: cookiebanner/settings.php:571
+#: cookiebanner/settings.php:586
 #: settings/config/menu.php:208
 msgid "Toggles"
 msgstr ""
 
-#: cookiebanner/settings.php:584
-#: cookiebanner/settings.php:613
-#: cookiebanner/settings.php:621
+#: cookiebanner/settings.php:599
+#: cookiebanner/settings.php:628
+#: cookiebanner/settings.php:636
 msgid "Bullet"
 msgstr ""
 
-#: cookiebanner/settings.php:588
-#: cookiebanner/settings.php:618
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: cookiebanner/settings.php:603
+#: cookiebanner/settings.php:633
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Inactive"
 msgstr ""
 
-#: cookiebanner/settings.php:632
-#: cookiebanner/settings.php:884
-#: cookiebanner/settings.php:886
+#: cookiebanner/settings.php:647
+#: cookiebanner/settings.php:899
 #: cookiebanner/settings.php:901
-#: cookiebanner/settings.php:905
+#: cookiebanner/settings.php:916
+#: cookiebanner/settings.php:920
 #: integrations/plugins/gravity-forms.php:130
 #: integrations/plugins/gravity-forms.php:135
 #: integrations/plugins/gravity-forms.php:136
 msgid "Accept"
 msgstr ""
 
-#: cookiebanner/settings.php:659
-#: cookiebanner/settings.php:922
-#: cookiebanner/settings.php:926
+#: cookiebanner/settings.php:674
+#: cookiebanner/settings.php:937
+#: cookiebanner/settings.php:941
 msgid "Deny"
 msgstr ""
 
-#: cookiebanner/settings.php:731
+#: cookiebanner/settings.php:746
 msgid "Accept background"
 msgstr ""
 
-#: cookiebanner/settings.php:734
+#: cookiebanner/settings.php:749
 msgid "Accept text"
 msgstr ""
 
-#: cookiebanner/settings.php:739
+#: cookiebanner/settings.php:754
 msgid "Deny background"
 msgstr ""
 
-#: cookiebanner/settings.php:742
+#: cookiebanner/settings.php:757
 msgid "Deny text"
 msgstr ""
 
-#: cookiebanner/settings.php:747
+#: cookiebanner/settings.php:762
 msgid "Settings background"
 msgstr ""
 
-#: cookiebanner/settings.php:750
+#: cookiebanner/settings.php:765
 msgid "Settings text"
 msgstr ""
 
-#: cookiebanner/settings.php:762
+#: cookiebanner/settings.php:777
 msgid "Disable width auto correction"
 msgstr ""
 
-#: cookiebanner/settings.php:770
+#: cookiebanner/settings.php:785
 msgid "This will disable a back-end javascript to keep the banner width aligned with other elements."
 msgstr ""
 
-#: cookiebanner/settings.php:778
+#: cookiebanner/settings.php:793
 msgid "Use Custom CSS"
 msgstr ""
 
-#: cookiebanner/settings.php:780
+#: cookiebanner/settings.php:795
 msgid "Custom CSS is not recommended for publishers that use TCF and additional frameworks due to strict guidelines."
 msgstr ""
 
-#: cookiebanner/settings.php:790
+#: cookiebanner/settings.php:805
 #: settings/config/fields/tools/documents.php:41
 #: settings/config/menu.php:224
 msgid "Custom CSS"
 msgstr ""
 
-#: cookiebanner/settings.php:791
+#: cookiebanner/settings.php:806
 #: settings/config/fields/tools/documents.php:42
 msgid "You can add additional custom CSS here. For tips and CSS lessons, check out our documentation."
 msgstr ""
 
-#: cookiebanner/settings.php:862
+#: cookiebanner/settings.php:877
 msgid "Text on the manage consent tab"
 msgstr ""
 
-#: cookiebanner/settings.php:863
+#: cookiebanner/settings.php:878
 msgid "The tab will show after the visitor interacted with the banner, and can be used to make the consent banner reappear."
 msgstr ""
 
-#: cookiebanner/settings.php:871
+#: cookiebanner/settings.php:886
 msgid "Header"
 msgstr ""
 
-#: cookiebanner/settings.php:872
-#: cookiebanner/settings.php:874
+#: cookiebanner/settings.php:887
+#: cookiebanner/settings.php:889
 msgid "Manage Consent"
 msgstr ""
 
-#: cookiebanner/settings.php:885
-#: cookiebanner/settings.php:904
+#: cookiebanner/settings.php:900
+#: cookiebanner/settings.php:919
 msgid "Accept button"
 msgstr ""
 
-#: cookiebanner/settings.php:925
-#: cookiebanner/settings.php:929
+#: cookiebanner/settings.php:940
+#: cookiebanner/settings.php:944
 msgid "Deny button"
 msgstr ""
 
-#: cookiebanner/settings.php:930
+#: cookiebanner/settings.php:945
 msgid "This button will reject all cookies except necessary cookies, and dismisses the consent banner."
 msgstr ""
 
-#: cookiebanner/settings.php:945
-#: cookiebanner/settings.php:946
-#: cookiebanner/settings.php:947
+#: cookiebanner/settings.php:960
+#: cookiebanner/settings.php:961
+#: cookiebanner/settings.php:962
 msgid "View preferences"
 msgstr ""
 
-#: cookiebanner/settings.php:968
-#: cookiebanner/settings.php:969
-#: cookiebanner/settings.php:970
+#: cookiebanner/settings.php:983
+#: cookiebanner/settings.php:984
+#: cookiebanner/settings.php:985
 msgid "Save preferences"
 msgstr ""
 
-#: cookiebanner/settings.php:992
-#: cookiebanner/settings.php:1188
+#: cookiebanner/settings.php:1007
+#: cookiebanner/settings.php:1203
 msgid "Cookie message"
 msgstr ""
 
-#: cookiebanner/settings.php:1021
+#: cookiebanner/settings.php:1036
 msgid "The technical storage or access is strictly necessary for the legitimate purpose of enabling the use of a specific service explicitly requested by the subscriber or user, or for the sole purpose of carrying out the transmission of a communication over an electronic communications network."
 msgstr ""
 
-#: cookiebanner/settings.php:1027
+#: cookiebanner/settings.php:1042
 msgid "Functional description"
 msgstr ""
 
-#: cookiebanner/settings.php:1055
+#: cookiebanner/settings.php:1070
 msgid "The technical storage or access is necessary for the legitimate purpose of storing preferences that are not requested by the subscriber or user."
 msgstr ""
 
-#: cookiebanner/settings.php:1061
+#: cookiebanner/settings.php:1076
 msgid "Preferences description"
 msgstr ""
 
-#: cookiebanner/settings.php:1089
+#: cookiebanner/settings.php:1104
 msgid "The technical storage or access that is used exclusively for statistical purposes."
 msgstr ""
 
-#: cookiebanner/settings.php:1092
+#: cookiebanner/settings.php:1107
 msgid "Statistics description"
 msgstr ""
 
-#: cookiebanner/settings.php:1114
+#: cookiebanner/settings.php:1129
 msgid "The technical storage or access that is used exclusively for anonymous statistical purposes. Without a subpoena, voluntary compliance on the part of your Internet Service Provider, or additional records from a third party, information stored or retrieved for this purpose alone cannot usually be used to identify you."
 msgstr ""
 
-#: cookiebanner/settings.php:1120
+#: cookiebanner/settings.php:1135
 msgid "Anonymous statistics description"
 msgstr ""
 
-#: cookiebanner/settings.php:1160
+#: cookiebanner/settings.php:1175
 msgid "The technical storage or access is required to create user profiles to send advertising, or to track the user on a website or across several websites for similar marketing purposes."
 msgstr ""
 
-#: cookiebanner/settings.php:1166
+#: cookiebanner/settings.php:1181
 msgid "Marketing description"
 msgstr ""
 
@@ -3133,82 +3133,86 @@ msgstr ""
 msgid "No date available"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:70
+#: DNSMPD/class-DNSMPD.php:72
 msgid "Global opt-out"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:71
+#: DNSMPD/class-DNSMPD.php:73
 msgid "Global opt-out from selling and sharing my personal information and limiting the use or disclosure of sensitive personal information."
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:75
+#: DNSMPD/class-DNSMPD.php:77
 msgid "Do not sell my info"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:76
+#: DNSMPD/class-DNSMPD.php:78
 msgid "Do not sell my personal information for cross-context behavioral advertising"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:80
+#: DNSMPD/class-DNSMPD.php:82
 msgid "Limit sensitive data"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:81
+#: DNSMPD/class-DNSMPD.php:83
 msgid "Limit the use of my sensitive personal information"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:85
-#: DNSMPD/class-DNSMPD.php:86
+#: DNSMPD/class-DNSMPD.php:87
+#: DNSMPD/class-DNSMPD.php:88
 msgid "Request for access"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:90
-#: DNSMPD/class-DNSMPD.php:91
+#: DNSMPD/class-DNSMPD.php:92
+#: DNSMPD/class-DNSMPD.php:93
 msgid "Right to be Forgotten"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:95
-#: DNSMPD/class-DNSMPD.php:96
+#: DNSMPD/class-DNSMPD.php:97
+#: DNSMPD/class-DNSMPD.php:98
 msgid "Right to Data Portability"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:127
+#: DNSMPD/class-DNSMPD.php:129
 msgid "You have received a new data request on %s"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:128
+#: DNSMPD/class-DNSMPD.php:130
 msgid "Please check the data request on %s"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:202
+#: DNSMPD/class-DNSMPD.php:212
 msgid "Sorry, it looks like you're a bot"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:207
+#: DNSMPD/class-DNSMPD.php:217
 #: settings/build/120.60b34ecde3060286c7b2.js:1
 #: settings/build/8447.8962604dfe85e2b482cb.js:1
 #: settings/build/9877.512049e6b42bbd9b1bc6.js:1
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:212
+#: DNSMPD/class-DNSMPD.php:222
 msgid "Please enter your name"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:217
+#: DNSMPD/class-DNSMPD.php:227
 msgid "That's a long name you got there. Please try to shorten the name."
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:254
+#: DNSMPD/class-DNSMPD.php:284
+msgid "Please select at least one request type."
+msgstr ""
+
+#: DNSMPD/class-DNSMPD.php:302
 msgid "Your request has been processed successfully!"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:256
-msgid "Your request could not be processed. A request is already in progress for this email address or the form is not complete."
+#: DNSMPD/class-DNSMPD.php:425
+msgid "Too many requests. Please try again later."
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:282
-#: DNSMPD/class-DNSMPD.php:284
+#: DNSMPD/class-DNSMPD.php:483
+#: DNSMPD/class-DNSMPD.php:485
 #: templates/cookiepolicy/cookies_row.php:2
 #: settings/build/1137.521c056ed304050ba669.js:1
 #: settings/build/2111.847b0d94c7100f73f709.js:1
@@ -3222,16 +3226,16 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:285
+#: DNSMPD/class-DNSMPD.php:486
 msgid "Your name"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:288
+#: DNSMPD/class-DNSMPD.php:489
 #: settings/build/1624.9d702c7e6ca31b8faac0.js:1
 msgid "Email"
 msgstr ""
 
-#: DNSMPD/class-DNSMPD.php:303
+#: DNSMPD/class-DNSMPD.php:504
 #: settings/build/2827.bb78b0624a7550aee9be.js:1
 msgid "Send"
 msgstr ""
@@ -3271,71 +3275,71 @@ msgstr ""
 msgid "For more information, see the Complianz %1$sPrivacy Statement%2$s."
 msgstr ""
 
-#: documents/class-document.php:548
-msgid "Region %s not activated for %s."
+#: documents/class-document.php:551
+msgid "Region %1$s not activated for %2$s."
 msgstr ""
 
-#: documents/class-document.php:665
+#: documents/class-document.php:670
 msgid "Annex"
 msgstr ""
 
-#: documents/class-document.php:791
+#: documents/class-document.php:793
 msgid "(See paragraph %s)"
 msgstr ""
 
-#: documents/class-document.php:797
+#: documents/class-document.php:804
 msgid "(See annex %s)"
 msgstr ""
 
-#: documents/class-document.php:827
-#: documents/class-document.php:834
+#: documents/class-document.php:837
+#: documents/class-document.php:844
 msgctxt "if phonenumber is entered, this string is part of the sentence \"you may contact %s, via %s or by telephone via %s\""
 msgid "or by telephone on %s"
 msgstr ""
 
-#: documents/class-document.php:908
+#: documents/class-document.php:918
 msgid "and"
 msgstr ""
 
-#: documents/class-document.php:1116
+#: documents/class-document.php:1129
 msgctxt "Subject in notification email"
 msgid "Your legal documents on %s need to be updated."
 msgstr ""
 
-#: documents/class-document.php:1123
+#: documents/class-document.php:1141
 msgctxt "notification email"
-msgid "Your legal documents on %s have not been updated in 12 months. Please log in and run the %swizard%s in the Complianz plugin to check if everything is up to date."
+msgid "Your legal documents on %1$s have not been updated in 12 months. Please log in and run the %2$swizard%3$s in the Complianz plugin to check if everything is up to date."
 msgstr ""
 
-#: documents/class-document.php:1127
+#: documents/class-document.php:1151
 msgid "This message was generated by Complianz GDPR/CCPA."
 msgstr ""
 
-#: documents/class-document.php:1154
+#: documents/class-document.php:1182
 msgctxt "cookie policy"
 msgid "You have loaded the Cookie Policy without javascript support."
 msgstr ""
 
-#: documents/class-document.php:1155
+#: documents/class-document.php:1183
 msgctxt "cookie policy"
 msgid "On AMP, you can use the manage consent button on the bottom of the page."
 msgstr ""
 
-#: documents/class-document.php:1185
+#: documents/class-document.php:1212
 msgid "Click to accept marketing cookies"
 msgstr ""
 
-#: documents/class-document.php:1461
-#: documents/class-document.php:1505
+#: documents/class-document.php:1483
+#: documents/class-document.php:1535
 msgid "Click to accept the cookies for this service"
 msgstr ""
 
 #. translators: 1: site name, 2: document title, 3: date the PDF was generated
-#: documents/class-document.php:2048
+#: documents/class-document.php:2081
 msgid "%1$s — %2$s — Generated on %3$s"
 msgstr ""
 
-#: documents/class-document.php:2158
+#: documents/class-document.php:2193
 msgid "No title"
 msgstr ""
 
@@ -3369,60 +3373,60 @@ msgstr ""
 msgid "Denied"
 msgstr ""
 
-#: functions.php:1103
+#: functions.php:1109
 msgid "the page source"
 msgstr ""
 
-#: functions.php:1106
+#: functions.php:1112
 msgid "%s on line %s of %s"
 msgstr ""
 
-#: functions.php:2024
+#: functions.php:2030
 msgid "Miscellaneous"
 msgstr ""
 
-#: functions.php:2031
-#: functions.php:2041
+#: functions.php:2037
+#: functions.php:2047
 msgid "This data is not shared with third parties."
 msgstr ""
 
-#: functions.php:2033
-#: functions.php:2038
+#: functions.php:2039
+#: functions.php:2044
 msgid "For more information, please read the %s%s Privacy Statement%s."
 msgstr ""
 
-#: functions.php:2043
+#: functions.php:2049
 msgid "Sharing of data is pending investigation"
 msgstr ""
 
-#: functions.php:2046
+#: functions.php:2052
 msgctxt "Legal document cookie policy"
 msgid "We use %s for %s."
 msgstr ""
 
-#: functions.php:2054
+#: functions.php:2060
 msgid "Read more about %s service on Cookie Database"
 msgstr ""
 
-#: functions.php:2550
+#: functions.php:2593
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "Opt-in"
 msgstr ""
 
-#: functions.php:2552
+#: functions.php:2595
 #: settings/build/3078.7ed8e986bf8c5688fd8a.js:1
 msgid "Opt-out"
 msgstr ""
 
-#: functions.php:2554
+#: functions.php:2597
 msgid "All consent types"
 msgstr ""
 
-#: functions.php:2934
+#: functions.php:2977
 msgid "In September 2023 the Quebec bill 64 will be enforced in Canada. In order to keep your site compliant, %sopt-in must be implemented for Canada%s. Please Navigate to the %sWizard%s and enable opt-in for Canada."
 msgstr ""
 
-#: functions.php:2935
+#: functions.php:2978
 msgid "Please be aware that this will activate opt-in for Canada, altering the banner and blocking non-functional scripts and cookies prior to consent. Please check the front-end of your site after activating opt-in."
 msgstr ""
 
@@ -6023,7 +6027,7 @@ msgstr ""
 #: settings/build/5193.f173371ca89b7cfd1dc7.js:1
 #: settings/build/7771.c248b4fe81dc93792714.js:1
 #: settings/build/9709.a24b2a1fe24c4ad466ea.js:1
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Something went wrong"
 msgstr ""
 
@@ -6992,7 +6996,7 @@ msgid "Invalid format"
 msgstr ""
 
 #: settings/build/2752.b30854561dc6e4cb2ebf.js:1
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Error"
 msgstr ""
 
@@ -7388,7 +7392,7 @@ msgstr ""
 #: settings/build/4570.dedb4dde2dccc3188414.js:1
 #: settings/build/6644.18e0447b120324cb47ec.js:1
 #: settings/build/8596.9b42544648802b678f6d.js:1
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Documentation"
 msgstr ""
 
@@ -7458,19 +7462,19 @@ msgstr ""
 msgid "Your selection does not contain any data."
 msgstr ""
 
-#: settings/build/4604.ba62f648ad485269d824.js:1
+#: settings/build/4604.146d206b6562f3d9caa1.js:1
 msgid "Disable Website Scan"
 msgstr ""
 
-#: settings/build/4604.ba62f648ad485269d824.js:1
+#: settings/build/4604.146d206b6562f3d9caa1.js:1
 msgid "Enable Website Scan"
 msgstr ""
 
-#: settings/build/4604.ba62f648ad485269d824.js:1
+#: settings/build/4604.146d206b6562f3d9caa1.js:1
 msgid "Reset Website Scan"
 msgstr ""
 
-#: settings/build/4604.ba62f648ad485269d824.js:1
+#: settings/build/4604.146d206b6562f3d9caa1.js:1
 msgid "Activate Website Scan"
 msgstr ""
 
@@ -7572,12 +7576,12 @@ msgid "Status:"
 msgstr ""
 
 #: settings/build/5540.11a0a3f2fa92ef466bb5.js:1
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Enabled"
 msgstr ""
 
 #: settings/build/5540.11a0a3f2fa92ef466bb5.js:1
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Disabled"
 msgstr ""
 
@@ -7915,55 +7919,55 @@ msgstr ""
 msgid "Your Records Of Consent Export has been completed."
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Active"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Token Status:"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Website Scan:"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Website Scan only scans your homepage."
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Upgrade to scan all pages individually."
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Website Scan — Background scanning:"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "scanned"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "in progress"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "queued"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Didn't receive the activation email?"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Request again!"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Check your email to activate the Website Scan!"
 msgstr ""
 
-#: settings/build/7489.ee40781cf1a971e97fc6.js:1
+#: settings/build/7489.9a35e9a8d2bd2aad7b45.js:1
 msgid "Didn't receive the activation email? Please wait 1 hour before requesting again."
 msgstr ""
 
@@ -8076,110 +8080,110 @@ msgstr ""
 msgid "%s rating based on %d ratings"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Saving settings..."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Settings saved"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Unexpected error"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "New"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Go Pro"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "This field is required"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Please enter a valid URL"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Please enter a valid email address"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Please enter a valid number"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Please enter a valid phone number"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The wizard is currently in use by user with ID: "
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "To prevent conflicts during saving the wizard is temporarily locked."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The lock will automatically clear after two minutes."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "required"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Please check if security settings on the server or a plugin is blocking the requests from Complianz."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The Complianz Rest API is disabled."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The Complianz Rest API returned a not found."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The Complianz Rest API returned a 403 forbidden error."
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "A problem was detected during the loading of the settings"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "The request returned the following errors:"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Response code:"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Status code:"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Server response:"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "More information"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Switch between banners"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Banner"
 msgstr ""
 
-#: settings/build/index.b0f83689c82f07ab1916.js:1
+#: settings/build/index.ce74f0d7b0415ea1e960.js:1
 msgid "Edit consent types"
 msgstr ""

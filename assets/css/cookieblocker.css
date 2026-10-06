@@ -52,6 +52,10 @@
     border: 0 !important;
 }
 
+.cmplz-blocked-content-container .cmplz-custom-accept-btn:focus, .cmplz-wp-video .cmplz-custom-accept-btn:focus {
+    border: 1px dotted #cecece;
+}
+
 .cmplz-blocked-content-container .cmplz-custom-accept-btn, .cmplz-wp-video .cmplz-custom-accept-btn {
     white-space: normal;
     text-transform: initial;
@@ -72,10 +76,6 @@
     z-index: 98;
   /*We need some lineheight, for example Elementor will force a lineheight of 0*/
     line-height: 23px;
-}
-
-.cmplz-blocked-content-container .cmplz-custom-accept-btn:focus, .cmplz-wp-video .cmplz-custom-accept-btn:focus {
-    border: 1px dotted #cecece;
 }
 
 .cmplz-blocked-content-container .cmplz-blocked-content-notice, .cmplz-wp-video .cmplz-blocked-content-notice {

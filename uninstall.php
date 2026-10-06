@@ -151,6 +151,10 @@ if ( isset( $cmplz_settings['clear_data_on_uninstall'] ) && $cmplz_settings['cle
 		'cmplz_translation_errors',
 		'cmplz_wsc_scan_registry',
 		'cmplz_wsc_batch_map',
+		'cmplz_bare_translation_banner_id',
+		'cmplz_migrate_banner_translation_names',
+		'cmplz_banner_translation_names_migrated',
+		'cmplz_migrate_banner_strings_lock',
 	);
 
 

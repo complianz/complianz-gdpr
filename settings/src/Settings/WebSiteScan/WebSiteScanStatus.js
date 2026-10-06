@@ -85,7 +85,7 @@ const WebSiteScanStatus = () => {
 						size={ 16 }
 					/>
 					<span>
-						{ __( 'Token Status:', 'complianz-gdpr' ) }
+						{ __( 'Token Status:', 'complianz-gdpr' ) }{ ' ' }
 						<strong>{ tokenStatuses[ tokenStatus ]?.label }</strong>
 					</span>
 				</div>
@@ -99,7 +99,7 @@ const WebSiteScanStatus = () => {
 						size={ 16 }
 					/>
 					<span>
-						{ __( 'Website Scan:', 'complianz-gdpr' ) }
+						{ __( 'Website Scan:', 'complianz-gdpr' ) }{ ' ' }
 						<strong>{ statuses[ wscStatus ]?.label }</strong>
 					</span>
 				</div>
@@ -142,20 +142,24 @@ const WebSiteScanStatus = () => {
 							{ __(
 								'Website Scan — Background scanning:',
 								'complianz-gdpr'
-							) }
-							<strong>{ batchStats.done }</strong>
+							) }{ ' ' }
+							<strong>{ batchStats.done }</strong>{ ' ' }
 							{ __( 'scanned', 'complianz-gdpr' ) }
 							{ batchStats.inflight > 0 && (
 								<>
 									{ ' ' }
-									· <strong>{ batchStats.inflight }</strong>
+									· <strong>
+										{ batchStats.inflight }
+									</strong>{ ' ' }
 									{ __( 'in progress', 'complianz-gdpr' ) }
 								</>
 							) }
 							{ batchStats.queue > 0 && (
 								<>
 									{ ' ' }
-									· <strong>{ batchStats.queue }</strong>
+									· <strong>
+										{ batchStats.queue }
+									</strong>{ ' ' }
 									{ __( 'queued', 'complianz-gdpr' ) }
 								</>
 							) }
@@ -174,7 +178,7 @@ const WebSiteScanStatus = () => {
 							{ __(
 								'Website Scan — Background scanning:',
 								'complianz-gdpr'
-							) }
+							) }{ ' ' }
 							<strong>
 								{ __( 'Disabled', 'complianz-gdpr' ) }
 							</strong>

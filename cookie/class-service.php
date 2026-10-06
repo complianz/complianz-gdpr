@@ -170,7 +170,7 @@ if ( ! class_exists( "CMPLZ_SERVICE" ) ) {
 			}
 
 			if ( $this->language === 'en' ) {
-				cmplz_register_translation( $this->serviceType, 'service_type' );
+				cmplz_register_translation( $this->serviceType, 'service_type', 'en' );
 			}
 
 			$update_array = array(

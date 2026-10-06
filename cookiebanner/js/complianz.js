@@ -140,6 +140,11 @@ function cmplz_trap_focus() {
 		return;
 	}
 
+	// Trapping a suppressed banner would block the page with nothing to answer.
+	if ( cmplz_banner_suppressed ) {
+		return;
+	}
+
 	// Store current active element
 	cmplz_original_active_element = cmplz_banner.ownerDocument.activeElement;
 
@@ -332,6 +337,10 @@ const cmplz_categories = [
 // Focus trap variables
 let cmplz_original_active_element = null;
 let cmplz_banner_trigger_source = 'page-load'; // 'page-load' | 'manage-consent'
+
+// Banner hidden on this page while the stored status is still 'show' — the cookie policy
+// page renders the consent controls inline. See show_cookie_banner().
+let cmplz_banner_suppressed = false;
 
 // Track the last input modality so we only move focus to the skip link when
 // the banner was dismissed via keyboard. Mouse/touch users keep their focus
@@ -1239,13 +1248,13 @@ function cmplz_get_services_on_page() {
 
 window.show_cookie_banner = function() {
 	let disableCookiebanner = complianz.disable_cookiebanner || cmplz_is_speedbot();
-	//do not show banner when manage consent area on cookie policy is visible
-	//when users use only the shortcode, the manage consent container is not active, but the dropdown cookie policy class is.
-	//when the complianz shortcode is used, the dropdown cookie policy class is loaded late because it's loaded with javascript.
-	let tmpDismissCookiebanner = false;
-	if ( document.querySelector( '#cmplz-manage-consent-container' ) || document.querySelector( '.cmplz-dropdown-cookiepolicy' ) ) {
-		tmpDismissCookiebanner = true;
-	}
+	//do not show the popup banner on the Cookie Policy page: the inline manage consent area is already there.
+	//is_cookiepolicy_page is resolved server-side against the configured Cookie Policy page. Presence of the
+	//consent markup is not a usable signal: [cmplz-manage-consent] and [cmplz-cookies] are both supported
+	//anywhere, so a footer widget would suppress the banner site-wide.
+	const tmpDismissCookiebanner = Number( complianz.is_cookiepolicy_page ) === 1;
+	//reset on every run, so a client side navigation off the cookie policy clears it.
+	cmplz_banner_suppressed = tmpDismissCookiebanner;
 
 	const container = document.getElementById( 'cmplz-cookiebanner-container' );
 	if ( container ) {
@@ -1258,7 +1267,20 @@ window.show_cookie_banner = function() {
 	if ( ! cmplz_banner ) {
 		disableCookiebanner = true;
 	}
-	cmplz_manage_consent_button = document.querySelector( '#cmplz-manage-consent .cmplz-manage-consent.manage-consent-' + complianz.user_banner_id );
+	//get the manage consent button for this banner AND consent type. On sites with more
+	//than one consent type a button is rendered per variant, and they only differ in their
+	//aria-controls target. Matching on banner id alone returns the first button in the DOM,
+	//so the button we reveal would point at a banner variant that can never open here.
+	cmplz_manage_consent_button = document.querySelector( '#cmplz-manage-consent .cmplz-manage-consent[aria-controls="cmplz-cookiebanner-' + complianz.user_banner_id + '-' + complianz.consenttype + '"]' );
+	if ( ! cmplz_manage_consent_button ) {
+		//fallback on the banner id alone, for a theme overriding manage-consent.php without
+		//the aria-controls attribute, and for the deploy window where a page cached before
+		//the attribute existed is served to freshly deployed javascript.
+		cmplz_manage_consent_button = document.querySelector( '#cmplz-manage-consent .cmplz-manage-consent.manage-consent-' + complianz.user_banner_id );
+		if ( ! cmplz_manage_consent_button ) {
+			cmplz_log( 'No manage consent button found for banner ' + complianz.user_banner_id + ' and consent type ' + complianz.consenttype + '. The button will stay hidden.' );
+		}
+	}
 
 	// Reveal the banner once its stylesheet is applied. Idempotent: removing an
 	// already-removed class is a no-op, so calling this more than once is safe.
@@ -1267,10 +1289,12 @@ window.show_cookie_banner = function() {
 			return;
 		}
 		cmplz_banner.classList.remove( 'cmplz-hidden' );
-		cmplz_manage_consent_button.classList.remove( 'cmplz-hidden' );
+		if ( cmplz_manage_consent_button ) {
+			cmplz_manage_consent_button.classList.remove( 'cmplz-hidden' );
+		}
 
-		// Activate focus trap only if banner is currently shown (not already dismissed)
-		if ( cmplz_get_banner_status() === 'show' ) {
+		// Activate focus trap only if banner is currently shown (not dismissed or suppressed)
+		if ( ! cmplz_banner_suppressed && cmplz_get_banner_status() === 'show' ) {
 			cmplz_trap_focus();
 
 			// Set focus to the close button when banner is shown
@@ -1317,8 +1341,16 @@ window.show_cookie_banner = function() {
 		if ( tmpDismissCookiebanner ) {
 			cmplz_banner.classList.remove( 'cmplz-show' );
 			cmplz_banner.classList.add( 'cmplz-dismissed' );
-			cmplz_manage_consent_button.classList.remove( 'cmplz-dismissed' );
-			cmplz_manage_consent_button.classList.add( 'cmplz-show' );
+			if ( cmplz_manage_consent_button ) {
+				cmplz_manage_consent_button.classList.remove( 'cmplz-dismissed' );
+				cmplz_manage_consent_button.classList.add( 'cmplz-show' );
+			}
+			//the call above marked the container shown, which would leave the soft
+			//cookiewall overlay covering the page without a banner.
+			if ( container ) {
+				container.classList.remove( 'cmplz-show' );
+				container.classList.add( 'cmplz-dismissed' );
+			}
 		}
 	}
 
@@ -1387,14 +1419,12 @@ function cmplzEnsureBannerCss() {
 
 /*
  * Re-sync consent state and de-duplicate banner instances after a client-side
- * navigation. The banner is rendered once in the footer (outside any router
- * region) so it normally persists untouched; this is a safety pass in case a
- * theme/plugin wraps it in a router region, which would duplicate it with the
- * cache-default markup on swap.
+ * navigation: the router re-inserts the footer's cache-default markup on swap.
  */
 function cmplzSyncConsentState() {
 	const banners = document.querySelectorAll( '.cmplz-cookiebanner' );
-	//drop copies brought in inside a router region; the footer original persists
+	//show_cookie_banner() prepends the container to body, so the originals are never
+	//in a region and only router-inserted copies match here.
 	if ( banners.length > 1 ) {
 		banners.forEach( function( banner ) {
 			if ( banner.closest( '[data-wp-router-region]' ) ) {
@@ -1410,11 +1440,8 @@ function cmplzSyncConsentState() {
 		banner.classList.toggle( 'cmplz-dismissed', dismissed );
 	} );
 
-	//remove a manage-consent button duplicated inside a region, but only when an
-	//out-of-region original survives. Mirrors the banner guard above: if a theme
-	//wraps the whole page (footer included) in a single router region, the only
-	//copy lives inside it — removing it unconditionally would delete the manage-
-	//consent button with no replacement.
+	//the button is never relocated, so an in-region copy may be the only one: check
+	//an out-of-region original survives before removing.
 	const manageBtns = document.querySelectorAll( '#cmplz-manage-consent' );
 	const hasOriginal = Array.prototype.some.call( manageBtns, function( btn ) {
 		return ! btn.closest( '[data-wp-router-region]' );
@@ -1523,10 +1550,14 @@ window.cmplz_set_banner_status = function( status ) {
 		// Activate focus trap only if soft cookie wall is enabled
 		cmplz_trap_focus();
 
-		// Set focus to the close button when banner is shown
-		const closeButton = cmplz_banner.querySelector( '.cmplz-close' );
-		if ( closeButton ) {
-			closeButton.focus();
+		// Set focus to the close button when banner is shown.
+		// cmplz_banner may still be undefined here: cmplz_check_cookie_policy_id() calls
+		// cmplz_set_banner_status('show') before show_cookie_banner() assigns it.
+		if ( cmplz_banner ) {
+			const closeButton = cmplz_banner.querySelector( '.cmplz-close' );
+			if ( closeButton ) {
+				closeButton.focus();
+			}
 		}
 	} else {
 		// Release focus trap when banner is dismissed
@@ -2051,11 +2082,16 @@ cmplz_add_event( 'click', '.cmplz-category-toggle', function( e ) {
  * On the cookie policy, clicking a category should fire the category immediately
  *
  */
-cmplz_add_event( 'change', '.cmplz-manage-consent-container .cmplz-category', function() {
+cmplz_add_event( 'change', '.cmplz-manage-consent-container .cmplz-category', function( e ) {
+	//there can be more than one container on a page, so only read the one the visitor changed
+	const changed_container = e.target.closest( '.cmplz-manage-consent-container' );
+	if ( ! changed_container ) {
+		return;
+	}
 	for ( const key in cmplz_categories ) {
 		if ( cmplz_categories.hasOwnProperty( key ) ) {
 			const category = cmplz_categories[ key ];
-			const categoryElement = document.querySelector( '.cmplz-manage-consent-container input.cmplz-' + category );
+			const categoryElement = changed_container.querySelector( 'input.cmplz-' + category );
 			if ( categoryElement ) {
 				if ( categoryElement.checked ) {
 					cmplz_set_consent( category, 'allow' );
@@ -2095,6 +2131,8 @@ cmplz_add_event( 'click', 'button.cmplz-manage-settings', function( e ) {
 cmplz_add_event( 'click', 'button.cmplz-manage-consent', function( e ) {
 	e.preventDefault();
 	cmplz_banner_trigger_source = 'manage-consent';
+	//deliberately reopened, so the focus trap and cookiewall apply again.
+	cmplz_banner_suppressed = false;
 	cmplz_set_banner_status( 'show' );
 } );
 
@@ -2539,20 +2577,26 @@ function cmplz_clear_storage( item ) {
 
 function cmplz_load_manage_consent_container() {
 	//don't load manage html code in the block editor
-	const manage_consent_container = document.querySelector( '.cmplz-manage-consent-container' );
+	const manage_consent_containers = document.querySelectorAll( '.cmplz-manage-consent-container' );
 	const is_block_editor = false;//document.querySelector('.wp-admin .cmplz-unlinked-mode');
-	if ( manage_consent_container && ! is_block_editor ) {
+	if ( manage_consent_containers.length > 0 && ! is_block_editor ) {
 		const request = new XMLHttpRequest();
 		request.open( 'GET', complianz.url + 'manage_consent_html?' + complianz.locale, true );
 		request.setRequestHeader( 'Content-type', 'application/json' );
 		request.send();
 		request.onload = function() {
 			const html = JSON.parse( request.response );
-			manage_consent_container.insertAdjacentHTML( 'beforeend', html );
+			//the shortcode can be used more than once on a page, so fill each container with one request
+			manage_consent_containers.forEach( ( container ) => {
+				container.insertAdjacentHTML( 'beforeend', html );
+				container.style.display = 'block';
+			} );
+			//each container has been initialized, so no visitor needs the no javascript notice anymore.
+			//the shortcode renders the notice with an id, so match on the attribute to reach every instance
+			document.querySelectorAll( '[id="cmplz-manage-consent-container-nojavascript"]' ).forEach( ( obj ) => {
+				obj.style.display = 'none';
+			} );
 			cmplz_sync_category_checkboxes();
-			const nojavascript = document.querySelector( '#cmplz-manage-consent-container-nojavascript' );
-			nojavascript.style.display = 'none';
-			manage_consent_container.style.display = 'block';
 			const event = new CustomEvent( 'cmplz_manage_consent_container_loaded' );
 			document.dispatchEvent( event );
 		};
