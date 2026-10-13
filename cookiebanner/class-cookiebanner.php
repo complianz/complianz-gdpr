@@ -1267,6 +1267,21 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 		 * @param bool $preview
 		 */
 		public function generate_css( $preview = false ): void {
+			/**
+			 * Filter whether the banner css file should be generated at all.
+			 * Return false to take over banner styling entirely, for example when
+			 * the banner is styled from a theme or a custom stylesheet.
+			 *
+			 * @since 7.5.4
+			 *
+			 * @param bool               $generate Whether to generate the file.
+			 * @param bool               $preview  True for the admin preview file.
+			 * @param CMPLZ_COOKIEBANNER $banner   The banner being generated.
+			 */
+			if ( ! apply_filters( 'cmplz_generate_banner_css', true, $preview, $this ) ) {
+				return;
+			}
+
 			if ( get_transient( 'cmplz_generate_css_active' ) ) {
 				return;
 			}
