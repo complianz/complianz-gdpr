@@ -139,6 +139,15 @@ function cmplz_settings_fields( $fields ) {
 				'tooltip'  => __( 'When content is loaded with ajax, for example with a load more button or lightbox, this option could help blocking the service correctly', 'complianz-gdpr' ),
 			),
 			array(
+				'id'       => 'enable_scan_column',
+				'menu_id'  => 'settings-general',
+				'group_id' => 'settings-general',
+				'type'     => 'checkbox',
+				'default'  => true,
+				'label'    => __( 'Show the Website Scan column in the Posts and Pages overview', 'complianz-gdpr' ),
+				'tooltip'  => __( 'When disabled, the "Complianz Website Scan" column is removed from the Posts and Pages list for all users. In Complianz Premium, this also applies to all custom post types.', 'complianz-gdpr' ),
+			),
+			array(
 				'id'       => 'set_cookies_on_root',
 				'menu_id'  => 'settings-general',
 				'group_id' => 'settings-general',

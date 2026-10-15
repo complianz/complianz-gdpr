@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkcomplianz_gdpr||=[]).push([[2945],{32945(e,o,a){var l=a(68394),n=a(86087),t=a(10790);const s=(0,n.memo)(({colorValue:e,onChangeComplete:o})=>{const[a,s]=(0,n.useState)(e);return(0,t.jsx)(l.xk,{color:a,onChange:e=>{s(e.hex)},onChangeComplete:o,disableAlpha:!0})});a.d(o,["default",0,s])}}]);

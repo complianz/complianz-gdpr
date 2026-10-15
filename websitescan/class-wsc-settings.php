@@ -158,7 +158,9 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 			$error_token_api = get_option( 'cmplz_wsc_error_token_api' );
 
 			if ( ! $token ) {
-				$token = cmplz_wsc_auth::get_token( true );
+				// Reuse/refresh via get_token(); respects the auth-failure backoff so
+				// the admin status page cannot storm /oauth/token on a 401 site.
+				$token = cmplz_wsc_auth::get_token();
 			}
 
 			if ( $token ) {

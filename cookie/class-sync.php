@@ -1241,7 +1241,7 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 								if ( empty( $serviceType ) ) {
 									continue;
 								}
-								cmplz_register_translation( $serviceType, $serviceType );
+								cmplz_register_translation( $serviceType, $serviceType, 'en' );
 							}
 						}
 						$s            = $serviceTypes;
@@ -1308,7 +1308,7 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 								if ( empty( $cookiePurpose ) ) {
 									continue;
 								}
-								cmplz_register_translation( $cookiePurpose, $cookiePurpose );
+								cmplz_register_translation( $cookiePurpose, $cookiePurpose, 'en' );
 							}
 						}
 						// convert to react compatible array.

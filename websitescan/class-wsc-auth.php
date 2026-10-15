@@ -303,14 +303,34 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				throw new InvalidArgumentException( '$client_credentials must be an array or false' );
 			}
 
+			// Fetches that pass provided credentials or ask not to store are the
+			// credential-validation / reconnect paths: they must bypass the reuse
+			// margin and the backoff gate (they validate given creds, not the
+			// stored, possibly cooling-down ones).
+			$uses_stored_creds = ( false === $client_credentials && ! $no_store );
+
 			// clear stored token.
 			if ( $new_token ) {
 				cmplz_delete_transient( 'cmplz_wsc_access_token' );
 			}
 
-			$token = cmplz_get_transient( 'cmplz_wsc_access_token' );
-			if ( $token ) {
-				return $token;
+			// Reuse the cached token instead of minting a new one per call. A hard
+			// refresh ( $new_token ) skips reuse. For stored-credential fetches, only
+			// reuse while the token still has a comfortable margin of life left, so a
+			// long scan+poll cycle cannot start with an about-to-expire token.
+			if ( ! $new_token ) {
+				$token = cmplz_get_transient( 'cmplz_wsc_access_token' );
+				if ( $token && ( ! $uses_stored_creds || self::token_seconds_left() >= self::token_min_ttl() ) ) {
+					return $token;
+				}
+			}
+
+			// Auth-failure backoff: do not re-hit /oauth/token while a cooldown from a
+			// previous failure is active. Gates only unforced, stored-credential
+			// fetches — a hard refresh, provided credentials, or $no_store are
+			// explicit "try now" paths and bypass the gate.
+			if ( $uses_stored_creds && ! $new_token && self::in_token_backoff() ) {
+				return false;
 			}
 
 			// if no token found, try retrieving a fresh one.
@@ -346,40 +366,117 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				)
 			);
 
-			if ( ! is_wp_error( $request ) ) { // request success true.
-
-				$request = json_decode( wp_remote_retrieve_body( $request ) );
-
-				if ( isset( $request->access_token ) ) { // if there's an access token.
-					if ( $no_store ) {
-						return $request->access_token;
-					}
-
-					delete_option( 'cmplz_wsc_error_token_api' );
-					update_option( 'cmplz_wsc_connection_updated', time(), false );
-
-					$token   = $request->access_token;
-					$expires = $request->expires_in ?? 7200;
-					cmplz_set_transient( 'cmplz_wsc_access_token', $token, $expires - 10 );
-
-					return $token;
-				} else {
-					if ( $no_store ) {
-						return false;
-					}
-
-					update_option( 'cmplz_wsc_error_token_api', true, false );
-					cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token, token not found in response' );
-					return false;
-				}
-			} else {
+			if ( is_wp_error( $request ) ) {
 				if ( ! $no_store ) {
 					update_option( 'cmplz_wsc_error_token_api', true, false );
+					self::register_token_failure( 'transient' );
 				}
 				$error_message = $request->get_error_message();
 				cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token, request failed' . ( $error_message ? ': ' . $error_message : '' ) );
 				return false;
 			}
+
+			$response_code = (int) wp_remote_retrieve_response_code( $request );
+			$body          = json_decode( wp_remote_retrieve_body( $request ) );
+
+			if ( 200 === $response_code && isset( $body->access_token ) ) {
+				if ( $no_store ) {
+					return $body->access_token;
+				}
+
+				delete_option( 'cmplz_wsc_error_token_api' );
+				self::clear_token_backoff();
+				update_option( 'cmplz_wsc_connection_updated', time(), false );
+
+				$token   = $body->access_token;
+				$expires = $body->expires_in ?? 7200;
+				cmplz_set_transient( 'cmplz_wsc_access_token', $token, $expires - 10 );
+
+				return $token;
+			}
+
+			// Failure. Distinguish auth failures (persistent bad creds → long backoff)
+			// from transient errors (5xx / malformed → short backoff), so the plugin
+			// stops re-hitting /oauth/token instead of storming it every cron pulse.
+			if ( ! $no_store ) {
+				update_option( 'cmplz_wsc_error_token_api', true, false );
+				$kind = ( 401 === $response_code || 403 === $response_code ) ? 'auth' : 'transient';
+				self::register_token_failure( $kind );
+			}
+			cmplz_wsc_logger::log_errors( 'get_token', 'cannot retrieve token (HTTP ' . $response_code . ')' );
+			return false;
+		}
+
+		/**
+		 * Minimum remaining token life (seconds) below which a stored-credential
+		 * fetch refreshes instead of reusing the cached token. Filterable so a site
+		 * with a longer scan+poll cycle can widen the margin without a release.
+		 *
+		 * @return int
+		 */
+		private static function token_min_ttl(): int {
+			return (int) apply_filters( 'cmplz_wsc_token_min_ttl', 300 );
+		}
+
+		/**
+		 * Seconds of life left on the cached access token (0 if none/expired).
+		 * Reads the absolute expiry the custom transient store persists.
+		 *
+		 * @return int
+		 */
+		private static function token_seconds_left(): int {
+			$transients = get_option( 'cmplz_transients', array() );
+			if ( ! is_array( $transients ) || ! isset( $transients['cmplz_wsc_access_token']['expires'] ) ) {
+				return 0;
+			}
+			return max( 0, (int) $transients['cmplz_wsc_access_token']['expires'] - time() );
+		}
+
+		/**
+		 * Whether an auth-failure cooldown is currently active.
+		 *
+		 * @return bool
+		 */
+		private static function in_token_backoff(): bool {
+			$backoff = cmplz_get_transient( 'cmplz_wsc_token_backoff' );
+			return is_array( $backoff ) && isset( $backoff['retry_after'] ) && (int) $backoff['retry_after'] > time();
+		}
+
+		/**
+		 * Record a failed token fetch and (re)arm the cooldown. Auth failures escalate
+		 * 15m → 1h → 6h; transient errors use a short 15m window.
+		 *
+		 * @param string $kind 'auth' or 'transient'.
+		 * @return void
+		 */
+		private static function register_token_failure( string $kind ): void {
+			$backoff    = cmplz_get_transient( 'cmplz_wsc_token_backoff' );
+			$fail_count = ( is_array( $backoff ) && isset( $backoff['fail_count'] ) ) ? (int) $backoff['fail_count'] + 1 : 1;
+
+			if ( 'auth' === $kind ) {
+				$tiers = array( 15 * MINUTE_IN_SECONDS, HOUR_IN_SECONDS, 6 * HOUR_IN_SECONDS );
+				$ttl   = $tiers[ min( $fail_count - 1, count( $tiers ) - 1 ) ];
+			} else {
+				$ttl = 15 * MINUTE_IN_SECONDS;
+			}
+
+			cmplz_set_transient(
+				'cmplz_wsc_token_backoff',
+				array(
+					'fail_count'  => $fail_count,
+					'retry_after' => time() + $ttl,
+				),
+				$ttl
+			);
+		}
+
+		/**
+		 * Clear the auth-failure cooldown (on a successful token fetch).
+		 *
+		 * @return void
+		 */
+		private static function clear_token_backoff(): void {
+			cmplz_delete_transient( 'cmplz_wsc_token_backoff' );
 		}
 
 
@@ -616,7 +713,8 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				// store the consent for the time we can resend the request.
 				$error_consentdata = get_option( 'cmplz_consent_error_consentdata_' . $key, false );
 
-				if ( $error_consentdata && $error_timestamp < time() - 68400 ) {
+				// A missing timestamp must not bypass the backoff: (int) false is 0, always in the past.
+				if ( $error_consentdata && $error_timestamp && (int) $error_timestamp < time() - 68400 ) {
 					$this->store_onboarding_consent( $key, array(), true, $error_consentdata );
 				}
 			}
@@ -721,8 +819,8 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 				return;
 			}
 
-			// Retrieve the token.
-			$token = self::get_token( true );
+			// Retrieve the token (reuse cached; refresh only near expiry).
+			$token = self::get_token();
 
 			if ( ! $token ) {
 				return;
@@ -829,22 +927,39 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 			update_option( 'cmplz_options', $options );
 		}
 
-		// Getters
-
+		/**
+		 * Get the stored WSC OAuth client ID.
+		 *
+		 * @return string The client ID, or an empty string if not set.
+		 */
 		public static function get_wsc_client_id(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_ID_OPTION_KEY );
 		}
 
+		/**
+		 * Get the stored WSC OAuth client secret.
+		 *
+		 * @return string The client secret, or an empty string if not set.
+		 */
 		public static function get_wsc_client_secret(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY );
 		}
 
+		/**
+		 * Get the stored WSC account email.
+		 *
+		 * @return string The email, or an empty string if not set.
+		 */
 		public static function get_wsc_email(): string {
 			return (string) cmplz_get_option( cmplz_wsc::WSC_EMAIL_OPTION_KEY );
 		}
 
-		// Setters
-
+		/**
+		 * Store the WSC account email (sanitized).
+		 *
+		 * @param string $email The email to store.
+		 * @return void
+		 */
 		public static function set_wsc_email( string $email ): void {
 			self::wsc_write_options( array( cmplz_wsc::WSC_EMAIL_OPTION_KEY => sanitize_email( $email ) ) );
 		}
@@ -859,6 +974,14 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 					cmplz_wsc::WSC_CLIENT_SECRET_OPTION_KEY => sanitize_text_field( $client_secret ),
 				)
 			);
+
+			// Storing (new) credentials is a fresh authentication start: clear any
+			// lingering auth-failure cooldown and the sticky error flag left by the
+			// previous credentials. Without this, a stale backoff from earlier invalid
+			// creds keeps get_token()'s gate closed (up to 6h) and the new, valid
+			// credentials are never even tried — the WSC UI stays stuck on 'error'.
+			self::clear_token_backoff();
+			delete_option( 'cmplz_wsc_error_token_api' );
 		}
 
 		/**

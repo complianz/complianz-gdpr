@@ -143,6 +143,7 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				'sumoSiteId',
 				'addthis_widget.js',
 				'platform.twitter.com',
+				'platform.x.com',
 				'twitter-widgets.js',
 				'ads-twitter.com',
 				'uwt.js',
@@ -1437,7 +1438,9 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				),
 				'us'  => array(
 					'cookie-statement'  => array(
-						'title'             => 'Opt-out preferences',
+						// Title reflects the consent model: opt-in (California opt-in enabled) reads as a
+						// Cookie Policy; the default US opt-out model keeps the DNSMPI "Opt-out preferences" title.
+						'title'             => cmplz_get_option( 'us_california_optin' ) === 'yes' ? 'Cookie Policy (US)' : 'Opt-out preferences',
 						'public'            => true,
 						'document_elements' => '',
 						'condition'         => array(

@@ -848,7 +848,7 @@ if ( ! class_exists( 'cmplz_documents_admin' ) ) {
 					null,
 					'side',
 					'high',
-					array()
+					array( '__rtc_compatible_meta_box' => true )
 				);
 			}
 		}
@@ -1067,6 +1067,11 @@ if ( ! class_exists( 'cmplz_documents_admin' ) ) {
 					}
 				}
 			}
+
+			// The banner caches document links (page_links_{banner_id}_{locale}) for 10 minutes. Clear them
+			// too, so a changed document title (e.g. the US opt-in "Cookie Policy" vs "Opt-out preferences")
+			// is reflected in the banner's footer link immediately instead of after the cache expires.
+			cmplz_delete_transients_by_prefix( 'page_links_' );
 		}
 
 		/**

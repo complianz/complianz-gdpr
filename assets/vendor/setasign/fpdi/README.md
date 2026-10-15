@@ -25,8 +25,8 @@ To use FPDI with FPDF include following in your composer.json file:
 ```json
 {
     "require": {
-        "setasign/fpdf": "1.8.*",
-        "setasign/fpdi": "^2.5"
+        "setasign/fpdf": "1.9.*",
+        "setasign/fpdi": "^2.6"
     }
 }
 ```
@@ -36,8 +36,8 @@ If you want to use TCPDF, you have to update your composer.json to:
 ```json
 {
     "require": {
-        "tecnickcom/tcpdf": "6.6.*",
-        "setasign/fpdi": "^2.5"
+        "tecnickcom/tcpdf": "6.11.*",
+        "setasign/fpdi": "^2.6"
     }
 }
 ```
@@ -48,7 +48,7 @@ If you want to use tFPDF, you have to update your composer.json to:
 {
     "require": {
         "setasign/tfpdf": "1.33.*",
-        "setasign/fpdi": "^2.3"
+        "setasign/fpdi": "^2.6"
     }
 }
 ```

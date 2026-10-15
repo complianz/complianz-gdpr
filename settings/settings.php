@@ -381,7 +381,7 @@ function cmplz_add_option_menu() {
 			$submenu['complianz'][] = array(
 				__( 'Upgrade to premium', 'complianz-gdpr' ),
 				apply_filters( 'cmplz_capability', 'manage_privacy' ),
-				cmplz_get_referral_url( 'menu', 'admin-submenu', 'https://complianz.io/l/pricing' ),
+				cmplz_get_referral_url( 'menu', 'admin-submenu', 'https://complianz.io/pricing/' ),
 			);
 			if ( isset( $submenu['complianz'][ $highest_index ] ) ) {
 				if ( ! isset( $submenu['complianz'][ $highest_index ][4] ) ) {

@@ -8,9 +8,12 @@
 	convertWarningsToExceptions="true"
 	>
 	<testsuites>
-		<testsuite name="complianz-gdpr">
-			<directory prefix="test-" suffix=".php">./tests/</directory>
-			<exclude>./tests/test-sample.php</exclude>
+		<!-- Live-WP tests only. CI should run the WP_Mock suite via phpunit-mock.xml
+		     and the integration suite via phpunit-integration.xml separately. Scoped
+		     to tests/legacy/ so bare vendor/bin/phpunit never mixes WP_Mock tests
+		     (which expect bootstrap-mock.php) into this live-WP bootstrap. -->
+		<testsuite name="complianzphp composer.phar require --dev phpunit/phpunit ^9">
+			<directory prefix="test-" suffix=".php">./tests/legacy/</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>

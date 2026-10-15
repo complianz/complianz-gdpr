@@ -200,16 +200,16 @@
     width: 100%;
 }
 
-#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category {
-    background-color: rgba(239, 239, 239, 0.25);
-}
-
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-description {
     padding: 10px;
 }
 
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category:not(:last-child) {
     margin-bottom: 5px;
+}
+
+#cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category {
+    background-color: rgba(239, 239, 239, 0.25);
 }
 
 #cmplz-manage-consent-container.cmplz-manage-consent-container .cmplz-categories .cmplz-category .cmplz-category-header {

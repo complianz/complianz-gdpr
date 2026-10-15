@@ -89,7 +89,7 @@ if ( ! class_exists( 'cmplz_review' ) ) {
 						echo wp_kses_post(
 							sprintf(
 								__( 'Hi, you have been using Complianz | GDPR cookie consent for a month now, awesome! If you have a moment, please consider leaving a review on WordPress.org to spread the word. We greatly appreciate it! If you have any questions or feedback, leave us a %1$smessage%2$s.', 'complianz-gdpr' ),
-								'<a href="https://complianz.io/contact" target="_blank">',
+								'<a href="https://complianz.io/support/" target="_blank">',
 								'</a>'
 							)
 						);

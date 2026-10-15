@@ -1,19 +1,20 @@
 <?php
-defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
+defined( 'ABSPATH' ) or die( 'you do not have access to this page!' );
 
 add_filter( 'cmplz_known_script_tags', 'cmplz_twitter_script' );
 function cmplz_twitter_script( $tags ) {
 	$tags[] = array(
-		'name' => 'twitter',
-		'placeholder' => 'twitter',
-		'category' => 'marketing',
-		'urls' => array(
+		'name'               => 'twitter',
+		'placeholder'        => 'twitter',
+		'category'           => 'marketing',
+		'urls'               => array(
 			'platform.twitter.com',
+			'platform.x.com',
 			'twitter-widgets.js',
 			'ads-twitter.com',
 		),
 		'enable_placeholder' => '1',
-		'placeholder_class' => 'twitter-tweet,twitter-timeline',
+		'placeholder_class'  => 'twitter-tweet,twitter-timeline',
 	);
 	return $tags;
 }
@@ -40,13 +41,13 @@ function cmplz_add_twitter_js() {
 	}
     ";
 	ob_get_clean();
-	wp_add_inline_script( 'cmplz-cookiebanner', $script);
+	wp_add_inline_script( 'cmplz-cookiebanner', $script );
 }
-add_action( 'wp_enqueue_scripts', 'cmplz_add_twitter_js', PHP_INT_MAX);
+add_action( 'wp_enqueue_scripts', 'cmplz_add_twitter_js', PHP_INT_MAX );
 
 /**
  * This empty function ensures Complianz recognizes that this integration has a placeholder
- * @return void
  *
+ * @return void
  */
-function cmplz_twitter_placeholder(){}
+function cmplz_twitter_placeholder() {}

@@ -3,23 +3,22 @@ defined( 'ABSPATH' ) or die();
 
 /**
  * Whitelist Elementor Add on
- *
  */
-
-function cmplz_elementor_whitelist($tags){
+function cmplz_elementor_whitelist( $tags ) {
 	$tags[] = 'elementorFrontendConfig';
 	return $tags;
 }
-add_filter( 'cmplz_whitelisted_script_tags', 'cmplz_elementor_whitelist');
+add_filter( 'cmplz_whitelisted_script_tags', 'cmplz_elementor_whitelist' );
 
 /**
  * Add script to remove the placeholders which are left in place when the consent is already given and the popup is opened.
+ *
  * @return void
  */
 function cmplz_elementor_popup_content_blocking() {
-    ob_start();
-    ?>
-    <script>
+	ob_start();
+	?>
+	<script>
 		if ('undefined' != typeof window.jQuery) {
 			jQuery(document).ready(function ($) {
 				$(document).on('elementor/popup/show', () => {
@@ -50,20 +49,19 @@ function cmplz_elementor_popup_content_blocking() {
 				});
 			});
 		}
-    </script>
-    <?php
-    $script = ob_get_clean();
-    $script = str_replace(array('<script>', '</script>'), '', $script);
-    wp_add_inline_script( 'cmplz-cookiebanner', $script);
+	</script>
+	<?php
+	$script = ob_get_clean();
+	$script = str_replace( array( '<script>', '</script>' ), '', $script );
+	wp_add_inline_script( 'cmplz-cookiebanner', $script );
 }
 add_action( 'wp_enqueue_scripts', 'cmplz_elementor_popup_content_blocking', PHP_INT_MAX );
 
 /**
  *
  */
-
 function cmplz_elementor_initDomContentLoaded() {
-	if ( cmplz_uses_thirdparty('youtube') || cmplz_uses_thirdparty('facebook') || cmplz_uses_thirdparty('twitter') ) {
+	if ( cmplz_uses_thirdparty( 'youtube' ) || cmplz_uses_thirdparty( 'facebook' ) || cmplz_uses_thirdparty( 'twitter' ) ) {
 		ob_start();
 		?>
 		<script>
@@ -137,31 +135,30 @@ function cmplz_elementor_initDomContentLoaded() {
 		</script>
 		<?php
 		$script = ob_get_clean();
-		$script = str_replace(array('<script>', '</script>'), '', $script);
-		wp_add_inline_script( 'cmplz-cookiebanner', $script);
+		$script = str_replace( array( '<script>', '</script>' ), '', $script );
+		wp_add_inline_script( 'cmplz-cookiebanner', $script );
 	}
 }
-add_action( 'wp_enqueue_scripts', 'cmplz_elementor_initDomContentLoaded',PHP_INT_MAX );
+add_action( 'wp_enqueue_scripts', 'cmplz_elementor_initDomContentLoaded', PHP_INT_MAX );
 
 /**
  * Filter cookie blocker output
  */
+function cmplz_elementor_cookieblocker( $output ) {
 
-function cmplz_elementor_cookieblocker( $output ){
-
-	if ( cmplz_uses_thirdparty('youtube') ) {
+	if ( cmplz_uses_thirdparty( 'youtube' ) ) {
 		$iframe_pattern = '/elementor-widget elementor-widget-video[ |\"][^>]+?data-settings="[^"]+?youtube_url[^;]*?&quot;:&quot;(.+?(?=&quot;))&quot;/is';
 		if ( preg_match_all( $iframe_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 			foreach ( $matches[0] as $key => $total_match ) {
 				$placeholder = '';
-				if ( cmplz_use_placeholder('youtube') && isset($matches[1][$key]) ) {
-					$youtube_url = $matches[1][$key];
-					$placeholder = 'data-placeholder-image="'.cmplz_placeholder( false, stripcslashes($youtube_url) ).'" ';
+				if ( cmplz_use_placeholder( 'youtube' ) && isset( $matches[1][ $key ] ) ) {
+					$youtube_url = $matches[1][ $key ];
+					$placeholder = 'data-placeholder-image="' . cmplz_placeholder( false, stripcslashes( $youtube_url ) ) . '" ';
 				}
 
-				$new_match = str_replace('data-settings', $placeholder.' data-category="marketing" data-service="youtube" data-cmplz-elementor-settings', $total_match);
-				$new_match = str_replace('elementor-widget-video', 'elementor-widget-video cmplz-placeholder-element', $new_match);
-				$output = str_replace($total_match, $new_match, $output);
+				$new_match = str_replace( 'data-settings', $placeholder . ' data-category="marketing" data-service="youtube" data-cmplz-elementor-settings', $total_match );
+				$new_match = str_replace( 'elementor-widget-video', 'elementor-widget-video cmplz-placeholder-element', $new_match );
+				$output    = str_replace( $total_match, $new_match, $output );
 			}
 		}
 		/**
@@ -171,58 +168,59 @@ function cmplz_elementor_cookieblocker( $output ){
 		if ( preg_match_all( $iframe_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 			foreach ( $matches[0] as $key => $total_match ) {
 				$placeholder = '';
-				if ( cmplz_use_placeholder('youtube') && isset($matches[1][$key]) ) {
-					$youtube_url = $matches[1][$key];
-					$placeholder = 'data-placeholder-image="'.cmplz_placeholder( false, stripcslashes($youtube_url) ).'" ';
+				if ( cmplz_use_placeholder( 'youtube' ) && isset( $matches[1][ $key ] ) ) {
+					$youtube_url = $matches[1][ $key ];
+					$placeholder = 'data-placeholder-image="' . cmplz_placeholder( false, stripcslashes( $youtube_url ) ) . '" ';
 				}
 
-				$new_match = str_replace('data-settings', $placeholder.' data-category="marketing" data-service="youtube" data-cmplz-elementor-settings', $total_match);
-				$new_match = str_replace('data-widget_type', 'data-cmplz_elementor_widget_type', $new_match);
-				$new_match = str_replace('elementor-widget-video-playlist', 'cmplz-elementor-widget-video-playlist cmplz-placeholder-element', $new_match);
-				$output = str_replace($total_match, $new_match, $output);
+				$new_match = str_replace( 'data-settings', $placeholder . ' data-category="marketing" data-service="youtube" data-cmplz-elementor-settings', $total_match );
+				$new_match = str_replace( 'data-widget_type', 'data-cmplz_elementor_widget_type', $new_match );
+				$new_match = str_replace( 'elementor-widget-video-playlist', 'cmplz-elementor-widget-video-playlist cmplz-placeholder-element', $new_match );
+				$output    = str_replace( $total_match, $new_match, $output );
 			}
 		}
 	}
 
-	if ( cmplz_uses_thirdparty('facebook') ) {
-		$iframe_pattern = '/elementor-widget-facebook-.*?data-href="(.*?)"/is';
+	if ( cmplz_uses_thirdparty( 'facebook' ) ) {
+		$iframe_pattern = '/<[^>]*\bclass\s*=\s*"[^"]*\belementor-widget-facebook-[^"]*".{0,500}?\bdata-href="([^"]*)"/is';
 		if ( preg_match_all( $iframe_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 			foreach ( $matches[0] as $key => $total_match ) {
 				$placeholder = '';
 
-				if ( cmplz_use_placeholder('facebook') ) {
-					$placeholder = 'data-placeholder-image="'.cmplz_placeholder( 'facebook' ).'" ';
+				if ( cmplz_use_placeholder( 'facebook' ) ) {
+					$placeholder = 'data-placeholder-image="' . cmplz_placeholder( 'facebook' ) . '" ';
 				}
-				$new_match = str_replace('data-href="', $placeholder.'data-category="marketing" data-service="facebook" data-cmplz-elementor-href="', $total_match);
-				$new_match = str_replace('fb-video', 'cmplz-fb-video', $new_match);
+				$new_match = str_replace( 'data-href="', $placeholder . 'data-category="marketing" data-service="facebook" data-cmplz-elementor-href="', $total_match );
+				$new_match = str_replace( 'fb-video', 'cmplz-fb-video', $new_match );
 
-				$new_match = str_replace('elementor-facebook-widget', 'elementor-facebook-widget cmplz-placeholder-element', $new_match);
-				$output = str_replace($total_match, $new_match, $output);
+				$new_match = str_replace( 'elementor-facebook-widget', 'elementor-facebook-widget cmplz-placeholder-element', $new_match );
+				$output    = str_replace( $total_match, $new_match, $output );
 			}
 		}
 	}
 
-	if ( cmplz_uses_thirdparty('twitter') ) {
-		$iframe_pattern = '/elementor-widget-twitter-.*?data-href="(.*?)"/is';
+	if ( cmplz_uses_thirdparty( 'twitter' ) ) {
+		$iframe_pattern = '/<[^>]*\bclass\s*=\s*"[^"]*\belementor-widget-twitter-[^"]*".{0,500}?\bdata-href="([^"]*)"/is';
 		if ( preg_match_all( $iframe_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 			foreach ( $matches[0] as $key => $total_match ) {
 				$placeholder = '';
-				if ( cmplz_use_placeholder('twitter') ) {
-					$placeholder = 'data-placeholder-image="'.cmplz_placeholder( 'twitter' ).'" ';
+				if ( cmplz_use_placeholder( 'twitter' ) ) {
+					$placeholder = 'data-placeholder-image="' . cmplz_placeholder( 'twitter' ) . '" ';
 				}
-				$new_match = str_replace('data-href="', $placeholder.'data-category="marketing" data-service="twitter" data-cmplz-elementor-href="', $total_match);
-				$output = str_replace($total_match, $new_match, $output);
+				$new_match = str_replace( 'data-href="', $placeholder . 'data-category="marketing" data-service="twitter" data-cmplz-elementor-href="', $total_match );
+				$output    = str_replace( $total_match, $new_match, $output );
 			}
 		}
 	}
 
 	return $output;
 }
-add_filter('cmplz_cookie_blocker_output', 'cmplz_elementor_cookieblocker');
+add_filter( 'cmplz_cookie_blocker_output', 'cmplz_elementor_cookieblocker' );
 
 add_action( 'cmplz_banner_css', 'cmplz_elementor_css' );
 function cmplz_elementor_css() {
-	if (cmplz_get_option('block_recaptcha_service') === 'yes'){ ?>
+	if ( cmplz_get_option( 'block_recaptcha_service' ) === 'yes' ) {
+		?>
 	.cmplz-blocked-content-container.elementor-g-recaptcha  {
 		max-width: initial !important;
 		height: 80px !important;
@@ -242,5 +240,6 @@ function cmplz_elementor_css() {
 		top:initial;
 		left:initial;
 	}
-	<?php }
+		<?php
+	}
 }

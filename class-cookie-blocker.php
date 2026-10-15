@@ -251,7 +251,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 				$custom_script_tags = array_filter(
 					$scripts['block_script'],
 					function ( $script ) {
-						return $script['enable'] == 1;
+						return true === (bool) $script['enable'];
 					}
 				);
 				$blocked_scripts    = array_merge( $blocked_scripts, $custom_script_tags );
@@ -342,7 +342,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 				$added_scripts = array_filter(
 					$scripts['add_script'],
 					static function ( $script ) {
-						return $script['enable'] == 1;
+						return true === (bool) $script['enable'];
 					}
 				);
 				if ( ! empty( $added_scripts ) ) {
@@ -374,7 +374,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 				$added_scripts   = array_filter(
 					$scripts['block_script'],
 					function ( $script ) {
-						return $script['enable'] == 1;
+						return true === (bool) $script['enable'];
 					}
 				);
 				$blocked_scripts = array_merge( $blocked_scripts, $added_scripts );
@@ -406,7 +406,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 				$custom_whitelisted_script_tags = array_filter(
 					$scripts['whitelist_script'],
 					function ( $script ) {
-						return $script['enable'] == 1;
+						return true === (bool) $script['enable'];
 					}
 				);
 

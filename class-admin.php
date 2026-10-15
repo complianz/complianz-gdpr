@@ -179,7 +179,7 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 		 */
 		public function plugin_update_message( $plugin_data, $response ) {
 			// if ( strpos($response->slug , 'complianz') !==false && $response->new_version === '7.0.0' && !cmplz_get_option("beta") ) {
-			// echo '<br /><b>' . '&nbsp'.cmplz_sprintf(__("This is a major release and while tested thoroughly you might experience conflicts or lost data. We recommend you back up your data before updating and check your configuration after update.", "complianz-gdpr").'</b>','<a target="_blank" href="https://complianz.io/upgrade-to-complianz-7-0/">','</a>');
+			// echo '<br /><b>' . '&nbsp'.cmplz_sprintf(__("This is a major release and while tested thoroughly you might experience conflicts or lost data. We recommend you back up your data before updating and check your configuration after update.", "complianz-gdpr").'</b>','<a target="_blank" href="https://complianz.io/meet-complianz-7/">','</a>');
 			// }
 
 			if ( strpos( $response->slug, 'complianz' ) !== false && strpos( $response->new_version, 'beta.' ) !== false && cmplz_get_option( 'beta' ) ) {
@@ -243,7 +243,7 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 
 			if ( ! defined( 'cmplz_premium' ) ) {
 				$upgrade_link
-					= '<a style="color:#2DAAE1;font-weight:bold" target="_blank" href="' . cmplz_get_referral_url( 'menu', 'plugins-page', 'https://complianz.io/l/pricing' ) . '">'
+					= '<a style="color:#2DAAE1;font-weight:bold" target="_blank" href="' . cmplz_get_referral_url( 'menu', 'plugins-page', 'https://complianz.io/pricing/' ) . '">'
 						. __( 'Upgrade to premium', 'complianz-gdpr' ) . '</a>';
 				array_unshift( $links, $upgrade_link );
 			}

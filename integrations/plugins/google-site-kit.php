@@ -21,7 +21,7 @@ function cmplz_google_site_kit_show_compile_statistics_notice( array $notices ):
 	$notices[] = array(
 		'field_id' => 'consent-mode',
 		'label'    => 'warning',
-		'url'      => 'https://complianz.io/configuring-google-site-kit/',
+		'url'      => 'https://complianz.io/a-complete-guide-to-install-site-kit-and-configure-google-consent-mode-with-complianz/',
 		'title'    => 'Google Site Kit',
 		// translators: %s is the plugin name.
 		'text'     => cmplz_sprintf( __( "Because you're using %s, you can choose which plugin should insert the relevant snippet. If you want to use Google Consent Mode, you can only use the default, advanced mode. You can read more about configuring SiteKit and the different Consent Mode below.", 'complianz-gdpr' ), 'Google Site Kit' ),

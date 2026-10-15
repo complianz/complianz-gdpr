@@ -81,7 +81,7 @@ function cmplz_field_notices(): array {
 			'label'    => 'warning',
 			'title'    => __( 'Divi detected', 'complianz-gdpr' ),
 			'text'     => __( 'Your site uses Divi. If you use reCAPTCHA on your site, you may need to disable the reCAPTCHA integration in Complianz. ', 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/blocking-recaptcha-on-divi/',
+			'url'      => 'https://complianz.io/blocking-recaptcha-divi/',
 		);
 	}
 
@@ -198,11 +198,10 @@ function cmplz_field_notices(): array {
 			'title'       => __( 'Single Functional Category Detected', 'complianz-gdpr' ),
 			'text'        => '<strong>' . __( 'Attention: please review your cookie configuration', 'complianz-gdpr' ) . '</strong><br><br>' .
 							__(
-								'Currently, the only active cookie category is Functional. In some regions, when only one category is available, the cookie banner may not be 
-	displayed. We recommend double-checking your settings and, if needed, following this guide to force the banner display.',
+								"Currently, the only active cookie category is Functional. In some regions, when only one category is available, the cookie banner may not be displayed. We recommend double-checking your settings and, if needed, following this guide on why cookie banners sometimes don't show, and how to force the banner to display.",
 								'complianz-gdpr'
 							),
-			'url'         => 'https://complianz.io/display-a-cookie-banner-even-when-not-required',
+			'url'         => 'https://complianz.io/cookie-banner-does-not-appear/',
 			'dismissible' => true,
 		);
 	}

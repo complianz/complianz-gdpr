@@ -322,10 +322,13 @@ const Field = ({field, highLightField, isCustomField, customChangeHandler}) => {
 						<Placeholder lines="1"></Placeholder>
 				)}
 				{field.comment && (
-					<div
-						className={"cmplz-comment "+commentStatusClass}
-						dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(field.comment) } } >{/* nosemgrep: react-dangerouslysetinnerhtml */}
-					</div>
+					<>
+						{/* nosemgrep: react-dangerouslysetinnerhtml */}
+						<div
+							className={"cmplz-comment "+commentStatusClass}
+							dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(field.comment) } } >
+						</div>
+					</>
 				)}
 				{error && (
 					<div className="cmplz-error-text">

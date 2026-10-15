@@ -31,9 +31,9 @@ const DataBreachConclusionItem = ({conclusion, delay}) => {
 			{!generating &&
 				<li className={"cmplz-conclusion__check icon-"+conclusion.report_status}>
 					<Icon name={conclusion.report_status} color={iconColor}/>
+					{/* nosemgrep: react-dangerouslysetinnerhtml */}
 					<div className="cmplz-conclusion__check--report-text"
-						 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize( conclusion.report_text ) } }> {/* nosemgrep: react-dangerouslysetinnerhtml */}
-					</div>
+						 dangerouslySetInnerHTML={{__html: DOMPurify.sanitize( conclusion.report_text ) } } />
 				</li>
 			}
 		</>

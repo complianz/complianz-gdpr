@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkcomplianz_gdpr||=[]).push([[293],{20293(e,l,a){var r=a(27723),t=a(10790);a.d(l,["default",0,()=>(0,t.jsx)("a",{href:"https://complianz.io/docs/",className:"button button-default cmplz-flex-push-left",target:"_blank",rel:"noopener noreferrer",children:(0,r.__)("View all","complianz-gdpr")})])}}]);

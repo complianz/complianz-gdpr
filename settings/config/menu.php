@@ -143,7 +143,7 @@ function cmplz_menu() {
 								'The below questions will help you configure a vendor list of your choosing. Only vendors that adhere to the purposes and special features you configure will be able to serve ads.',
 								'complianz-gdpr'
 							),
-							'helpLink' => 'https://complianz.io/tcf/',
+							'helpLink' => 'https://complianz.io/tcf-for-wordpress/',
 						),
 						array(
 							'id'                    => 'cookie-descriptions',

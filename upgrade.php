@@ -1061,6 +1061,15 @@ function cmplz_check_upgrade() {
 		delete_option( 'cmplz_wsc_checks_scan_id' );
 	}
 
+	// the per banner translation suffix works again, so every banner that doesn't own the
+	// un-suffixed fieldnames needs its own WPML string names. Flag it instead of running it here:
+	// WPML String Translation isn't necessarily loaded on this request. The flag is set from a
+	// done marker rather than a version_compare, because the release this ships in isn't known
+	// here, and a wrong guess either skips the migration for good or runs it a second time.
+	if ( $prev_version && ! get_option( 'cmplz_banner_translation_names_migrated' ) ) {
+		update_option( 'cmplz_migrate_banner_translation_names', true, false );
+	}
+
 	// regenerate cookie policy snapshot.
 	update_option( 'cmplz_generate_new_cookiepolicy_snapshot', true, false );
 
@@ -1068,5 +1077,223 @@ function cmplz_check_upgrade() {
 	delete_transient( 'complianz_warnings' );
 	delete_transient( 'complianz_warnings_admin_notices' );
 	do_action( 'cmplz_upgrade', $prev_version );
+
+	// also run it here: admin_init doesn't fire on cron, which is how an automatic update gets
+	// here. Failing isn't final, the flag keeps it queued.
+	cmplz_maybe_migrate_banner_translation_names();
+
 	update_option( 'cmplz-current-version', $new_version );
+}
+
+add_action( 'admin_init', 'cmplz_maybe_migrate_banner_translation_names', 20 );
+// admin_init never fires on cron or WP-CLI, so give the retry a path that doesn't need wp-admin.
+add_action( 'cmplz_every_day_hook', 'cmplz_maybe_migrate_banner_translation_names' );
+
+/**
+ * Run the queued banner translation name migration, and keep it queued until it completes
+ *
+ * @return void
+ */
+function cmplz_maybe_migrate_banner_translation_names() {
+	if ( ! get_option( 'cmplz_migrate_banner_translation_names' ) ) {
+		return;
+	}
+
+	if ( cmplz_migrate_banner_translation_names() ) {
+		delete_option( 'cmplz_migrate_banner_translation_names' );
+		update_option( 'cmplz_banner_translation_names_migrated', true, false );
+	}
+}
+
+if ( ! function_exists( 'cmplz_migrate_banner_translation_names' ) ) {
+	/**
+	 * Give each cookiebanner its own WPML string names, keeping the translations it renders now
+	 *
+	 * Records which banner owns the un-suffixed fieldnames, registers the missing fieldname+ID
+	 * strings with the text of the banner they belong to, and copies the bare fieldname's
+	 * translations across. Strings and translations that already exist are never overwritten or
+	 * deleted, so a banner whose translations were written for another banner's wording keeps
+	 * rendering them until WPML flags them and a translator revisits them.
+	 *
+	 * Polylang needs none of this: pll__() translates by string value, not by registered name.
+	 *
+	 * @return bool False to retry on a later request, true when done or when nothing has to move.
+	 */
+	function cmplz_migrate_banner_translation_names() {
+		// this writes data, so hold it for a request that is allowed to.
+		if ( ! wp_doing_cron() && ! cmplz_user_can_manage() ) {
+			return false;
+		}
+
+		// everything below reads the banner table: retry once it has been installed.
+		if ( ! get_option( 'cmplz_cbdb_version' ) || ! class_exists( 'CMPLZ_COOKIEBANNER' ) ) {
+			return false;
+		}
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one time upgrade on a custom table.
+		$banner_ids = $wpdb->get_col( "select ID from {$wpdb->prefix}cmplz_cookiebanners order by ID asc" );
+		if ( empty( $banner_ids ) ) {
+			return false;
+		}
+
+		// record the owner now. Deriving it from the lowest ID later would move the un-suffixed
+		// names, and their translations, to another banner after a delete.
+		if ( ! get_option( 'cmplz_bare_translation_banner_id' ) ) {
+			update_option( 'cmplz_bare_translation_banner_id', (int) $banner_ids[0], false );
+		}
+
+		// WPML isn't installed, so the bare names were never registered: nothing to move, ever.
+		if ( ! defined( 'ICL_SITEPRESS_VERSION' ) ) {
+			return true;
+		}
+
+		// String Translation isn't loaded yet: retry rather than report done and lose the copies.
+		if ( ! function_exists( 'icl_register_string' ) ) {
+			return false;
+		}
+
+		// a single banner owns the un-suffixed fieldnames, so there is nothing to move.
+		if ( count( $banner_ids ) < 2 ) {
+			return true;
+		}
+
+		$banners = array();
+		foreach ( $banner_ids as $banner_id ) {
+			$banner = new CMPLZ_COOKIEBANNER( $banner_id );
+			// the row didn't load, so this banner's own text isn't available: retry.
+			if ( (int) $banner->ID !== (int) $banner_id ) {
+				return false;
+			}
+			$banners[] = $banner;
+		}
+
+		// the translatable fields, using the same pairing as CMPLZ_COOKIEBANNER::is_translatable().
+		$fieldnames = array();
+		foreach ( $banners[0] as $fieldname => $value ) {
+			if ( property_exists( $banners[0], $fieldname . '_x' ) ) {
+				$fieldnames[] = $fieldname;
+			}
+		}
+		if ( empty( $fieldnames ) ) {
+			return true;
+		}
+
+		// claim atomically: cmplz_get_transient() returns false whenever cmplz_nocache is set.
+		if ( ! add_option( 'cmplz_migrate_banner_strings_lock', time(), '', false ) ) {
+			$claimed = (int) get_option( 'cmplz_migrate_banner_strings_lock' );
+			if ( $claimed && ( time() - $claimed ) < 5 * MINUTE_IN_SECONDS ) {
+				return false;
+			}
+			// a lock left behind by a request that died is taken over after five minutes.
+			update_option( 'cmplz_migrate_banner_strings_lock', time(), false );
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $fieldnames ), '%s' ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one time upgrade, placeholders are generated from the same array.
+		$source_rows = $wpdb->get_results( $wpdb->prepare( "select id, name, value, language from {$wpdb->prefix}icl_strings where context = 'complianz' and name in ( {$placeholders} )", $fieldnames ) );
+		if ( empty( $source_rows ) ) {
+			// nothing was ever registered under the bare names, so there is nothing to copy.
+			delete_option( 'cmplz_migrate_banner_strings_lock' );
+			return true;
+		}
+
+		$sources = array();
+		foreach ( $source_rows as $source_row ) {
+			$sources[ $source_row->name ] = $source_row;
+		}
+
+		// every complianz string, so the fieldname+ID strings that already exist keep their text.
+		$existing = array();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one time upgrade, no core API for these tables.
+		$existing_rows = $wpdb->get_results( "select id, name from {$wpdb->prefix}icl_strings where context = 'complianz'" );
+		foreach ( $existing_rows as $existing_row ) {
+			$existing[ $existing_row->name ] = (int) $existing_row->id;
+		}
+
+		// the translations of every complianz string, so a re-run doesn't add a second row.
+		$translations = array();
+		if ( ! empty( $existing ) ) {
+			$string_ids      = array_values( $existing );
+			$id_placeholders = implode( ', ', array_fill( 0, count( $string_ids ), '%d' ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- one time upgrade, placeholders are generated from the same array.
+			$translation_rows = $wpdb->get_results( $wpdb->prepare( "select string_id, language, value, status from {$wpdb->prefix}icl_string_translations where string_id in ( {$id_placeholders} ) and value <> ''", $string_ids ) );
+			foreach ( $translation_rows as $translation_row ) {
+				$translations[ (int) $translation_row->string_id ][ $translation_row->language ] = $translation_row;
+			}
+		}
+
+		foreach ( $banners as $banner ) {
+			$key = (string) $banner->translation_id;
+			foreach ( $fieldnames as $fieldname ) {
+				if ( ! isset( $sources[ $fieldname ] ) ) {
+					continue;
+				}
+				$source = $sources[ $fieldname ];
+				$name   = $fieldname . $key;
+
+				// this banner's own text: the bare string holds whichever banner saved last.
+				$value = $banner->{$fieldname};
+				if ( is_array( $value ) && isset( $value['text'] ) ) {
+					$value = $value['text'];
+				}
+				if ( ! is_string( $value ) || '' === $value || is_serialized( $value ) ) {
+					continue;
+				}
+
+				// WPML only updates a string's value when the language it is registered with matches
+				// the one it already has; otherwise it stores the value as a translation instead.
+				// So use the site default, never a legacy language carried by the bare string.
+				$source_language = function_exists( 'cmplz_get_wpml_source_language' ) ? cmplz_get_wpml_source_language() : '';
+				if ( '' === $source_language && ! empty( $source->language ) ) {
+					$source_language = $source->language;
+				}
+
+				if ( '' === $key ) {
+					// the owner's translations are already attached; only its text needs correcting.
+					icl_register_string( 'complianz', $name, $value, false, $source_language );
+					continue;
+				}
+
+				if ( isset( $existing[ $name ] ) ) {
+					// already registered, possibly before 2020: keep its text, top up translations.
+					$string_id = $existing[ $name ];
+				} else {
+					$string_id = (int) icl_register_string( 'complianz', $name, $value, false, $source_language );
+					if ( ! $string_id ) {
+						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one time upgrade, no core API for these tables.
+						$string_id = (int) $wpdb->get_var( $wpdb->prepare( "select id from {$wpdb->prefix}icl_strings where context = 'complianz' and name = %s", $name ) );
+					}
+					if ( ! $string_id ) {
+						continue;
+					}
+					$existing[ $name ] = $string_id;
+				}
+
+				foreach ( $translations[ (int) $source->id ] ?? array() as $language => $translation ) {
+					// a string isn't translated into its own source language.
+					if ( $language === $source_language ) {
+						continue;
+					}
+					// don't overwrite a translation that is already there.
+					if ( isset( $translations[ $string_id ][ $language ] ) ) {
+						continue;
+					}
+
+					$status = (int) $translation->status;
+					// the copy translates the bare text, so a differing own text needs review.
+					if ( $value !== $source->value && defined( 'ICL_TM_NEEDS_UPDATE' ) ) {
+						$status = ICL_TM_NEEDS_UPDATE;
+					}
+
+					do_action( 'wpml_add_string_translation', $string_id, $language, $translation->value, $status );
+					$translations[ $string_id ][ $language ] = $translation;
+				}
+			}
+		}
+
+		delete_option( 'cmplz_migrate_banner_strings_lock' );
+
+		return true;
+	}
 }

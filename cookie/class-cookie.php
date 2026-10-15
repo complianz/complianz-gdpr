@@ -480,11 +480,15 @@ if ( ! class_exists( 'CMPLZ_COOKIE' ) ) {
 
 			if ( $this->language === 'en' ) {
 				if ( ! defined( 'POLYLANG_VERSION' ) || ! $this->sync ) {
-					cmplz_register_translation( $this->purpose, 'cookie_purpose' );
+					cmplz_register_translation( $this->purpose, 'cookie_purpose', 'en' );
 				}
-				cmplz_register_translation( $this->retention, 'cookie_retention' );
-				cmplz_register_translation( $this->cookieFunction, 'cookie_function' );
-				cmplz_register_translation( $this->collectedPersonalData, 'cookie_collected_personal_data' );
+				// retention is 'en' on purpose, even though our own cookies build it with __() above.
+				// Every cookie registers under the same 'cookie_retention' name, so declaring two
+				// source languages for that one string would make WPML store the value as a
+				// translation of itself and overwrite the existing one on each sync.
+				cmplz_register_translation( $this->retention, 'cookie_retention', 'en' );
+				cmplz_register_translation( $this->cookieFunction, 'cookie_function', 'en' );
+				cmplz_register_translation( $this->collectedPersonalData, 'cookie_collected_personal_data', 'en' );
 			}
 
 			// update legacy data

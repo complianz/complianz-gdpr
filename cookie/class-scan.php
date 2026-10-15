@@ -973,6 +973,10 @@ if ( ! class_exists( 'cmplz_scan' ) ) {
 		 * post types via the cmplz_cookiescan_post_types filter before this fires.
 		 */
 		public function register_scan_post_columns(): void {
+			// Global opt-out. Defaults to enabled.
+			if ( ! cmplz_get_option( 'enable_scan_column' ) ) {
+				return;
+			}
 			foreach ( $this->get_scannable_post_types() as $post_type ) {
 				add_filter(
 					"manage_{$post_type}_posts_columns",

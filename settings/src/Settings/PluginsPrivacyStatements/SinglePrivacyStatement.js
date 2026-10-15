@@ -15,7 +15,8 @@ const SinglePrivacyStatement = (props) => {
 
 		return (
 			<>
-				<div className="cmplz-details-row" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize( props.plugin.policy_text ) } }  >{/* nosemgrep: react-dangerouslysetinnerhtml */}</div>
+				{/* nosemgrep: react-dangerouslysetinnerhtml */}
+				<div className="cmplz-details-row" dangerouslySetInnerHTML={{__html: DOMPurify.sanitize( props.plugin.policy_text ) } }  />
 			</>
 		)
 	}

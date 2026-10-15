@@ -198,7 +198,9 @@ if ( ! class_exists( 'cmplz_wsc_scanner' ) ) {
 		 * @return string|null Scan ID on success, null on failure.
 		 */
 		public function wsc_scan_start( string $url = '', string $secret = '' ): ?string {
-			$token = cmplz_wsc_auth::get_token( true );
+			// Reuse the cached token across pages; get_token() refreshes only near
+			// expiry. Do NOT force a new token per scanned page (per-page /oauth/token storm).
+			$token = cmplz_wsc_auth::get_token();
 
 			if ( ! $token ) {
 				cmplz_wsc_logger::log_errors( 'wsc_scan_start', 'COMPLIANZ: no token' );
@@ -753,8 +755,8 @@ if ( ! class_exists( 'cmplz_wsc_scanner' ) ) {
 				return;
 			}
 
-			// Check for the token and source.
-			$token  = cmplz_wsc_auth::get_token( true ); // Get a new token.
+			// Check for the token and source (reuse cached; refresh only near expiry).
+			$token  = cmplz_wsc_auth::get_token();
 			$source = $this->wsc_get_scanner_source();
 
 			if ( ! $source ) {
