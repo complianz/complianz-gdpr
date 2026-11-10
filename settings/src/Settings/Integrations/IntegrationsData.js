@@ -172,16 +172,16 @@ const useIntegrations = create(( set, get ) => ({
 	updatePlaceholderStatus: async (id, enabled, isPlugin) => {
 		set({fetching:true});
 
-		if (isPlugin) {
-			set(
-				produce((state) => {
-					const index = state.plugins.findIndex(plugin => {
-						return plugin.id===id;
-					});
-					if (index!==-1) state.plugins[index].placeholder = enabled ? 'enabled' : 'disabled';
-				})
-			)
-		}
+		// keep the store in sync for services too, otherwise a screen that remounts re-reads the stale value
+		set(
+			produce((state) => {
+				const list = isPlugin ? state.plugins : state.services;
+				const index = list.findIndex(item => {
+					return item.id===id;
+				});
+				if (index!==-1) list[index].placeholder = enabled ? 'enabled' : 'disabled';
+			})
+		)
 		const response = await cmplz_api.doAction('update_placeholder_status', {id: id, enabled: enabled}).then((response) => {
 			return response;
 		}).catch((error) => {

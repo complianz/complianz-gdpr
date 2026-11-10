@@ -6,7 +6,7 @@ Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 7.5.6
+Stable tag: 7.5.7
 
 Publish your cookie banner or notice in minutes. Automatically scan cookies, and create policies to align with GDPR, CCPA, and Google Consent Mode. 
 
@@ -226,6 +226,18 @@ Complianz uses geo-based detection to show the correct consent banner for each v
 The free version works on a single site. Complianz Premium supports WordPress multisite networks and includes features for managing consent across multiple domains. 
 
 == Changelog ==
+= 7.5.7 =
+* November 4th, 2026
+* Fix: On sites with more than one consent type, the cookie banner briefly appeared unstyled with an oversized close icon, because its stylesheet was only fetched after the banner script ran.
+* Fix: The cookie banner stylesheet URL in the page source kept its unresolved {banner_id} and {type} placeholders, which search engines reported as a 404. With a single consent type, the URL is now resolved server-side. Code filtering css_file through cmplz_cookiebanner_settings should no longer assume it contains placeholders.
+* Fix: With Google Site Kit inserting the Tag Manager container, Complianz added a second, empty Tag Manager container to the page. With Consent Mode enabled the signals are now printed in the header, before Site Kit's container, instead of in the footer.
+* Fix: On sites upgraded from before 7.0, a placeholder switched off on the old Integrations page could not be switched back on for services with a dash in their name, such as Google Maps: Integrations > Services reported the placeholder as enabled while the content was blocked with no placeholder at all, and the toggle had no effect. The setting is now reported accurately and can be changed again from Integrations > Services.
+* Fix: Switching a placeholder on or off now takes effect on the front end immediately, instead of after up to 30 minutes.
+* Fix: On some setups, the cookie banner and script blocking could be silently absent because the cookie-warning check ran before other plugins' filters were registered.
+* Fix: The "accept service" button label showed a raw {Service} placeholder in some German translations.
+* Fix: The accessible name of the placeholder buttons now includes their visible text (WCAG 2.5.3).
+* Fix: Google Analytics 4 sent the first page view of a returning visitor as unconsented. Consent Mode now waits up to 500 ms for the saved consent, adjustable with the cmplz_gtag_wait_for_update filter.
+
 = 7.5.6 =
 * October 13th, 2026
 * Security: Rate-limited the public data request endpoint and removed an email enumeration oracle.

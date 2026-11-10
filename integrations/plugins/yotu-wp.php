@@ -1,5 +1,14 @@
 <?php
-defined( 'ABSPATH' ) or die();
+/**
+ * YotuWP integration for Complianz.
+ *
+ * This file blocks the YotuWP YouTube playlists until consent is given and restores
+ * them once the marketing category (or the YouTube service) is accepted.
+ *
+ * @package ComplianzIntegrations
+ */
+
+defined( 'ABSPATH' ) || die();
 
 /**
  * Block the YotuWP playlists when YouTube is used on the site.
@@ -37,13 +46,15 @@ function cmplz_yotuwp_rewrite_playlists( $output ) {
 	$tags = $matches[0];
 	// Rewrite from the end, so the offsets of the earlier tags stay valid.
 	for ( $i = count( $tags ) - 1; $i >= 0; $i-- ) {
-		list( $tag, $offset ) = $tags[ $i ];
+		// PREG_OFFSET_CAPTURE: each match is [ string $text, int $byte_offset ].
+		$tag    = $tags[ $i ][0];
+		$offset = (int) $tags[ $i ][1];
 
 		$placeholder = '';
 		if ( cmplz_use_placeholder( 'youtube' ) ) {
 			// Look for the first video of this playlist, before the next playlist starts.
 			$start  = $offset + strlen( $tag );
-			$end    = isset( $tags[ $i + 1 ] ) ? $tags[ $i + 1 ][1] : strlen( $output );
+			$end    = isset( $tags[ $i + 1 ] ) ? (int) $tags[ $i + 1 ][1] : strlen( $output );
 			$window = substr( $output, $start, min( $end - $start, 20000 ) );
 			if ( preg_match( '/<a\b[^>]*\bdata-videoid\s*=\s*"([A-Za-z0-9_-]{6,20})"/i', $window, $video ) ) {
 				$youtube_url = 'https://www.youtube.com/watch?v=' . $video[1];
@@ -138,6 +149,14 @@ function cmplz_yotuwp_whitelist( $tags ) {
 }
 add_filter( 'cmplz_whitelisted_script_tags', 'cmplz_yotuwp_whitelist' );
 add_filter( 'cmplz_known_script_tags', 'cmplz_yotuwp_iframetags' );
+
+/**
+ * Register the YotuWP scripts as YouTube, so they are blocked until consent.
+ *
+ * @param array $tags Known script tags.
+ *
+ * @return array
+ */
 function cmplz_yotuwp_iframetags( $tags ) {
 	$tags[] = array(
 		'name'        => 'youtube',
@@ -156,12 +175,12 @@ function cmplz_yotuwp_iframetags( $tags ) {
 /**
  * Add services to the list of detected items, so it will get set as default, and will be added to the notice about it
  *
- * @param $services
+ * @param array $services Detected services.
  *
  * @return array
  */
 function cmplz_yotuwp_detected_services( $services ) {
-	if ( ! in_array( 'youtube', $services ) ) {
+	if ( ! in_array( 'youtube', $services, true ) ) {
 		$services[] = 'youtube';
 	}
 	return $services;

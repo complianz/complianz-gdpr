@@ -1070,6 +1070,16 @@ function cmplz_check_upgrade() {
 		update_option( 'cmplz_migrate_banner_translation_names', true, false );
 	}
 
+	// normalise cmplz_disabled_placeholders on the canonical dash form. Done marker rather than a
+	// version_compare, same reason as the block above. The marker is only set once the migration
+	// reports success; a failed write therefore retries, but note that cmplz-current-version is
+	// advanced unconditionally below, so the retry lands on the next release, not the next request.
+	if ( $prev_version && ! get_option( 'cmplz_disabled_placeholders_migrated' )
+		&& cmplz_migrate_disabled_placeholders()
+	) {
+		update_option( 'cmplz_disabled_placeholders_migrated', true, false );
+	}
+
 	// regenerate cookie policy snapshot.
 	update_option( 'cmplz_generate_new_cookiepolicy_snapshot', true, false );
 
@@ -1083,6 +1093,57 @@ function cmplz_check_upgrade() {
 	cmplz_maybe_migrate_banner_translation_names();
 
 	update_option( 'cmplz-current-version', $new_version );
+}
+
+if ( ! function_exists( 'cmplz_migrate_disabled_placeholders' ) ) {
+	/**
+	 * Normalise the disabled placeholders option on the canonical dash form
+	 *
+	 * Nothing is dropped. Pre 7.0 the Integrations page stored the underscore form - its renderer
+	 * built the field name with str_replace( '-', '_', ... ) and the save handler stored that suffix
+	 * verbatim - and it read and cleared that same form correctly. So an underscore entry is a
+	 * choice the site owner made and left standing, and it is normalised here, not discarded.
+	 *
+	 * On its own this changes no enforcement verdict: cmplz_placeholder_id_in_list() already treats
+	 * both spellings as the same id. What it does is converge the stored data on the single form the
+	 * settings UI now writes, so one setting stops being recorded under two names.
+	 *
+	 * @return bool True when there is nothing left to do, false when the write failed and the
+	 *              migration should be retried on the next upgrade.
+	 */
+	function cmplz_migrate_disabled_placeholders(): bool {
+		$disabled_placeholders = get_option( 'cmplz_disabled_placeholders' );
+		if ( ! is_array( $disabled_placeholders ) || empty( $disabled_placeholders ) ) {
+			return true;
+		}
+
+		// de-duplicated with a strict in_array rather than array_unique(): the option is read
+		// straight from the database, and array_unique() casts every element to string, which
+		// collapses distinct values and throws outright on an object.
+		$keep = array();
+		foreach ( $disabled_placeholders as $disabled_placeholder ) {
+			$id = is_string( $disabled_placeholder )
+				? cmplz_canonical_placeholder_id( $disabled_placeholder )
+				: $disabled_placeholder;
+			if ( ! in_array( $id, $keep, true ) ) {
+				$keep[] = $id;
+			}
+		}
+
+		if ( $keep === $disabled_placeholders ) {
+			return true;
+		}
+
+		if ( ! update_option( 'cmplz_disabled_placeholders', $keep ) ) {
+			return false;
+		}
+
+		// the blocked scripts cache is derived from this option, so drop it rather than reason about
+		// whether any individual verdict moved.
+		cmplz_delete_transient( 'cmplz_blocked_scripts' );
+
+		return true;
+	}
 }
 
 add_action( 'admin_init', 'cmplz_maybe_migrate_banner_translation_names', 20 );

@@ -189,4 +189,11 @@
 .cmplz-tcf-container .cmplz-tcf-checkbox-container .cmplz-tcf-info .cmplz-tcf-info-content .cmplz-tcf-description input {
   margin-left: 15px;
 }
+/**
+ * Features/special purposes have no checkbox (informational only), so
+ * pad the list entry to line up with the checkbox-based rows above it.
+ */
+.cmplz-tcf-container .cmplz-tcf-list-item {
+  padding-inline-start: 18px;
+}
 /*# sourceMappingURL=tcf.css.map */

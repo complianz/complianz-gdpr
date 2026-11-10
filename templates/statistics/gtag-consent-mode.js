@@ -14,6 +14,7 @@ gtag('consent', 'default', {
 	'ad_storage': "denied",
 	'ad_user_data': 'denied',
 	'ad_personalization': 'denied',
+	'wait_for_update': {wait_for_update},
 });
 
 document.addEventListener("cmplz_fire_categories", function (e) {

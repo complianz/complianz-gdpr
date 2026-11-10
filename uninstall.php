@@ -45,6 +45,7 @@ if ( isset( $cmplz_settings['clear_data_on_uninstall'] ) && $cmplz_settings['cle
 		'cmplz_detected_stats_type',
 		'cmplz_detected_thirdparty_services',
 		'cmplz_disabled_placeholders',
+		'cmplz_disabled_placeholders_migrated',
 		'cmplz_dismissed_warnings',
 		'cmplz_dnsmpd_db_version',
 		'cmplz_documents_update_date',

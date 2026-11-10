@@ -659,14 +659,17 @@ function cmplz_insert_placeholder_text( container, category, service ) {
 				//make service human readable
 				let service_nicename = service ? service.replace( '-', ' ' ) : '';
 				service_nicename = service_nicename.charAt( 0 ).toUpperCase() + service_nicename.slice( 1 );
-				placeholder_text = placeholder_text.replace( '{service}', service_nicename );
+				placeholder_text = placeholder_text.replace( /\{service\}/gi, () => service_nicename );
 				body = cmplz_create_element( 'div', placeholder_text );
 				body.innerHTML = cmplz_sanitize_placeholder_html( placeholder_text );
 				body.classList.add( 'cmplz-blocked-content-notice' );
 				const btn = body.querySelector( 'button' );
 				btn.setAttribute( 'data-service', service );
 				btn.setAttribute( 'data-category', category );
-				btn.setAttribute( 'aria-label', complianz.aria_label.replace( '{service}', service_nicename ) );
+				// WCAG 2.5.3: the accessible name must contain the visible label, so lead with it.
+				const aria_label = complianz.aria_label.replace( /\{service\}/gi, () => service_nicename );
+				const visible_label = btn.textContent.trim();
+				btn.setAttribute( 'aria-label', visible_label ? visible_label + ': ' + aria_label : aria_label );
 				const pageLinks = complianz.page_links[ complianz.region ];
 				const link = body.querySelector( '.cmplz-links a' );
 				if ( pageLinks && pageLinks.hasOwnProperty( 'cookie-statement' ) ) {
@@ -680,12 +683,13 @@ function cmplz_insert_placeholder_text( container, category, service ) {
 			} else {
 				const btn = cmplz_create_element( 'button', '' );
 				const category_nicename = complianz.categories.hasOwnProperty( category ) ? complianz.categories[ category ] : 'marketing';
-				btn.innerText = placeholder_text.replace( '{category}', category_nicename );
+				btn.innerText = placeholder_text.replace( /\{category\}/gi, () => category_nicename );
 				btn.classList.add( 'cmplz-blocked-content-notice', 'cmplz-accept-category', 'cmplz-accept-' + category ); //'cmplz-accept-'+category is deprecated
 
 				btn.setAttribute( 'data-service', service );
 				btn.setAttribute( 'data-category', category );
-				btn.setAttribute( 'aria-label', complianz.aria_label.replace( '{category}', category ) );
+				// Use the same translated category name as the visible text so the label contains it (WCAG 2.5.3).
+				btn.setAttribute( 'aria-label', complianz.aria_label.replace( /\{category\}/gi, () => category_nicename ) );
 				body = btn;
 			}
 
@@ -1190,7 +1194,7 @@ window.conditionally_show_banner = function() {
 
 	cmplz_set_category_as_body_class();
 	//fire cats event, but do not fire a track, as we do this on exit.
-	cmplz_fire_categories_event();
+	cmplz_fire_categories_event( 'init' );
 	if ( ! cmplz_do_not_track() ) {
 		if ( complianz.consenttype === 'optin' ) {
 			if ( complianz.forceEnableStats ) {
@@ -2183,12 +2187,16 @@ function cmplz_set_up_auto_dismiss() {
 /*
  * Fire a event wich passes all consented categories
  * Separated from the actual category consent because we want to bundle it in one event
+ *
+ * @param {string} source 'init' when the stored consent is replayed on page load, 'user' (default) for an action.
+ *                        Listeners that must only react to a new user action can ignore 'init'.
  */
-function cmplz_fire_categories_event() {
+function cmplz_fire_categories_event( source = 'user' ) {
 	const details = new Object();
 	details.category = cmplz_highest_accepted_category();
 	details.categories = cmplz_accepted_categories();
 	details.region = complianz.region;
+	details.source = source;
 	const event = new CustomEvent( 'cmplz_fire_categories', { detail: details } );
 	document.dispatchEvent( event );
 }

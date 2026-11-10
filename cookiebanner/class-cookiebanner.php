@@ -1371,19 +1371,31 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 
 			$store_consent         = cmplz_ab_testing_enabled() || cmplz_get_option( 'a_b_testing' ) || cmplz_get_option( 'records_of_consent' ) === 'yes';
 			$this->dismiss_timeout = $this->dismiss_on_timeout ? 1000 * $this->dismiss_timeout : false;
-			$upload_url            = cmplz_https_upload_url();
 			// check if the css file exists. if not, use default.
-			$css_file  = $upload_url . 'css/banner-{banner_id}-{type}.css';
+			// Built by the banner loader, so the preload hint it prints on wp_head
+			// stays byte-identical to what cmplzEnsureBannerCss() requests here.
+			$css_file  = cmplz_banner_loader::get_banner_css_url( '{banner_id}', '{type}', (int) $this->banner_version );
 			$banner_id = $this->ID;
 
 			if ( ! $preview ) {
 				$upload_dir    = cmplz_upload_dir();
 				$consent_types = cmplz_get_used_consenttypes();
+				// Where every visitor gets the same stylesheet, resolve the placeholders
+				// here: it saves the javascript the substitution, and consumers that only
+				// harvest URLs from this value stop requesting one that cannot exist.
+				$deterministic = cmplz_banner_css_is_deterministic( $consent_types );
+				if ( $deterministic ) {
+					$css_file = cmplz_banner_loader::get_banner_css_url( $banner_id, reset( $consent_types ), (int) $this->banner_version );
+				}
 
+				// One missing file downgrades every consent type on purpose: a single
+				// css_file has to serve them all, and the bundled default is the only URL
+				// guaranteed to exist.
 				foreach ( $consent_types as $consent_type ) {
 					$file = "css/banner-$banner_id-$consent_type.css";
 					if ( ! file_exists( $upload_dir . $file ) ) {
-						$css_file = CMPLZ_URL . 'cookiebanner/css/defaults/banner-{type}.css';
+						$default_type = $deterministic ? $consent_type : '{type}';
+						$css_file     = CMPLZ_URL . "cookiebanner/css/defaults/banner-$default_type.css?v=" . $this->banner_version;
 					}
 				}
 			}
@@ -1427,7 +1439,7 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 				),
 				'tcf_active'           => cmplz_tcf_active(),
 				'placeholdertext'      => COMPLIANZ::$cookie_blocker->blocked_content_text(),
-				'css_file'             => $css_file . '?v=' . $this->banner_version . $script_debug,
+				'css_file'             => $css_file . $script_debug,
 				'page_links'           => $page_links,
 				'tm_categories'        => COMPLIANZ::$banner_loader->uses_google_tagmanager() || ( cmplz_get_option( 'compile_statistics', false ) === 'matomo-tag-manager' ),
 				'forceEnableStats'     => ! COMPLIANZ::$banner_loader->cookie_warning_required_stats( $region ),

@@ -179,9 +179,22 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'process_restapi_datarequest' ),
 					'args'                => array(),
-					'permission_callback' => '__return_true',
+					'permission_callback' => array( $this, 'permission_callback' ),
 				)
 			);
+		}
+
+		/**
+		 * Permission callback for the public data-request rest route. The route stays
+		 * registered (and discoverable) on every install, but only accepts requests
+		 * while the data-request/DNSMPI feature is actually in use for this site --
+		 * mirrors the gate already applied to the front-end assets (enqueue_assets)
+		 * and the admin screen (class-admin-DNSMPD.php).
+		 *
+		 * @return bool
+		 */
+		public function permission_callback(): bool {
+			return cmplz_datarequests_or_dnsmpi_active();
 		}
 
 		/**
@@ -193,18 +206,18 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 		 */
 		public function process_restapi_datarequest( WP_REST_Request $request ) {
 
-			// This endpoint is public (permission_callback __return_true) and backs the
-			// unauthenticated data-request form. Rate-limit per client IP BEFORE parsing
-			// the body, touching the DB, or sending any email, so a remote flood cannot
-			// spam arbitrary inboxes / the admin inbox or pollute wp_cmplz_dnsmpd.
+			// This endpoint is public (any visitor whose install has the feature active)
+			// and backs the unauthenticated data-request form. Rate-limit per client IP
+			// BEFORE parsing the body, touching the DB, or sending any email, so a
+			// remote flood cannot spam arbitrary inboxes / the admin inbox or pollute
+			// wp_cmplz_dnsmpd.
 			if ( ! $this->within_rate_limit() ) {
 				return $this->rate_limited_response( $this->rate_limit_window() );
 			}
 
-			$params      = $request->get_json_params();
-			$new_request = false;
-			$error       = false;
-			$message     = '';
+			$params  = $request->get_json_params();
+			$error   = false;
+			$message = '';
 
 			// check honeypot
 			if ( isset( $params['cmplz_datarequest_firstname'] ) && ! empty( $params['cmplz_datarequest_firstname'] ) ) {
@@ -241,6 +254,7 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 				// check if this email address is already registered:
 				global $wpdb;
 				$submitted_any = false;
+				$any_failed    = false;
 				$mail_row_id   = 0;
 				$options       = apply_filters( 'cmplz_datarequest_options', array() );
 				// $fieldname is used below as a DB column identifier, which cannot be bound
@@ -252,27 +266,43 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 						continue;
 					}
 					$value = isset( $params[ 'cmplz_datarequest_' . $fieldname ] ) ? intval( $params[ 'cmplz_datarequest_' . $fieldname ] ) : false;
-					if ( $value === 1 ) {
+					if ( 1 === $value ) {
 						$submitted_any = true;
 						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $fieldname is validated against the $request_type_columns allowlist above; column identifiers cannot be parameterised.
 						$count = $wpdb->get_var( $wpdb->prepare( "SELECT count(*) from {$wpdb->prefix}cmplz_dnsmpd WHERE email = %s and $fieldname=1", $email ) );
-						if ( $count == 0 ) {
-							$new_request = true;
-							$wpdb->insert(
-								$wpdb->prefix . 'cmplz_dnsmpd',
-								array(
-									'name'         => $name,
-									'email'        => $email,
-									'region'       => $region,
-									$fieldname     => $value,
-									'request_date' => time(),
-								)
-							);
+						if ( is_null( $count ) ) {
+							// get_var() returns NULL when the query itself failed (e.g. the
+							// wp_cmplz_dnsmpd table does not exist yet) — that is NOT the same
+							// as "no previous request" and must never be treated as a dedup
+							// match, or a request that was never written gets reported as done.
+							// One failed request type must fail the whole response, even if a
+							// different submitted type is a genuine duplicate below.
+							$any_failed = true;
+							continue;
+						}
+						if ( 0 < (int) $count ) {
+							// Already on file for this request type: do not re-insert, and do
+							// not reveal that via a different response (enumeration oracle).
+							continue;
+						}
+						$inserted = $wpdb->insert(
+							$wpdb->prefix . 'cmplz_dnsmpd',
+							array(
+								'name'         => $name,
+								'email'        => $email,
+								'region'       => $region,
+								$fieldname     => $value,
+								'request_date' => time(),
+							)
+						);
+						if ( $inserted ) {
 							// Reference one stored row so the deferred mail job can read the
 							// recipient (name/email) from the DB — no PII travels in the cron args.
 							if ( ! $mail_row_id ) {
 								$mail_row_id = (int) $wpdb->insert_id;
 							}
+						} else {
+							$any_failed = true;
 						}
 					}
 				}
@@ -282,6 +312,15 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 					// payload (client-side knowable) — not an enumeration signal.
 					$error   = true;
 					$message = __( 'Please select at least one request type.', 'complianz-gdpr' );
+				} elseif ( $any_failed ) {
+					// At least one submitted request type was neither written nor already on
+					// file -- e.g. the wp_cmplz_dnsmpd table doesn't exist yet or its insert
+					// failed. Checked before any per-type duplicate/success, so a genuine
+					// duplicate on one request type can never mask a failure on another. A
+					// data request must never be reported as processed when it was not
+					// actually recorded.
+					$error   = true;
+					$message = __( 'Something went wrong, please try again later.', 'complianz-gdpr' );
 				} else {
 					// The per-email cap gates the CONFIRMATION MAIL only — never the record
 					// stored above. A genuine request whose email an attacker pre-exhausted
@@ -289,7 +328,7 @@ if ( ! class_exists( 'cmplz_DNSMPD' ) ) {
 					// admin; only the confirmation mail is withheld once the address is over
 					// its cap, which bounds mail harassment. Keyed only on the email, so it
 					// never changes the response (no enumeration oracle).
-					if ( $new_request && $mail_row_id && $this->within_email_cap( $email ) ) {
+					if ( $mail_row_id && $this->within_email_cap( $email ) ) {
 						// Send mail off the request path (cron): keeps the response time
 						// independent of whether mail was sent (closes the timing side channel)
 						// and passes only the row ID (no PII) to the scheduled job.

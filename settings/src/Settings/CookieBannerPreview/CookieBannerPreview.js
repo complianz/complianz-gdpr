@@ -229,8 +229,8 @@ const CookieBannerPreview = () => {
 			const statisticsPurposesContainer = rootElement.querySelector('.cmplz-tcf .cmplz-statistics .cmplz-description');
 
 			const featuresContainer = rootElement.querySelector('.cmplz-tcf .cmplz-features .cmplz-description');
-			const specialFeaturesContainer = rootElement.querySelector('.cmplz-tcf .cmplz-specialfeatures .cmplz-title');
-			const specialPurposesContainer = rootElement.querySelector('.cmplz-tcf .cmplz-specialpurposes .cmplz-title');
+			const specialFeaturesContainer = rootElement.querySelector('.cmplz-tcf .cmplz-specialfeatures .cmplz-description');
+			const specialPurposesContainer = rootElement.querySelector('.cmplz-tcf .cmplz-specialpurposes .cmplz-description');
 
 			let f = rootElement.querySelector('.cmplz-tcf .cmplz-features');
 			let sp = rootElement.querySelector('.cmplz-tcf .cmplz-specialpurposes');

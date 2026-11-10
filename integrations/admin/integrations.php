@@ -117,18 +117,26 @@ class cmplz_integrations {
 			];
 		} else if ( $action === 'update_placeholder_status' ) {
 			$data = $request->get_json_params();
-			$id = isset($data['id']) ? sanitize_title($data['id']) : '';
+			$id = isset( $data['id'] ) ? cmplz_canonical_placeholder_id( sanitize_title( $data['id'] ) ) : '';
 			$enabled = $data['enabled'] ?? false;
-			$disabled_placeholders = get_option( 'cmplz_disabled_placeholders', array() );
-			if ( $enabled ) {
-				$key = array_search( $id, $disabled_placeholders, true );
-				if ( $key !== false ) {
+			$disabled_placeholders = (array) get_option( 'cmplz_disabled_placeholders', array() );
+
+			// clear every stored spelling of the id first, a legacy underscore entry included, so a
+			// disable cannot end up recorded only under a form the writer no longer produces. This
+			// also makes the re-index and the duplicate guard fall out of one code path.
+			foreach ( $disabled_placeholders as $key => $disabled_placeholder ) {
+				if ( is_string( $disabled_placeholder ) && cmplz_canonical_placeholder_id( $disabled_placeholder ) === $id ) {
 					unset( $disabled_placeholders[ $key ] );
 				}
-			} else if ( ! in_array( $id, $disabled_placeholders, true ) ) {
+			}
+			$disabled_placeholders = array_values( $disabled_placeholders );
+			if ( ! $enabled ) {
 				$disabled_placeholders[] = $id;
 			}
 			update_option( 'cmplz_disabled_placeholders', $disabled_placeholders );
+
+			// clear blocked scripts transient on edits.
+			cmplz_delete_transient( 'cmplz_blocked_scripts' );
 			$data = [
 				'success' => true,
 			];
@@ -328,20 +336,31 @@ class cmplz_integrations {
 	 *
 	 * @return array
 	 */
-	private function get_plugins(): array {
+	private function get_plugins( bool $with_placeholder = true ): array {
 		$plugins = [];
 		if (!cmplz_user_can_manage()) {
 			return $plugins;
 		}
 		global $cmplz_integrations_list;
+		$enforced_names = null;
 		foreach ( $cmplz_integrations_list as $plugin => $details ) {
 			$file = apply_filters( 'cmplz_integration_path', CMPLZ_PATH . "integrations/plugins/$plugin.php", $plugin );
 			if ( file_exists( $file ) && cmplz_integration_plugin_is_active( $plugin ) ) {
+				// the toggle writes the plugin id, but the enforcer is queried with the blocked-script
+				// name. Only offer the toggle when those are the same id, otherwise it is inert and
+				// contradicts the Services row that controls the same placeholder.
+				$placeholder = 'none';
+				if ( $with_placeholder && $this->has_placeholder( $plugin ) ) {
+					$enforced_names = $enforced_names ?? COMPLIANZ::$cookie_blocker->placeholder_service_names();
+					if ( cmplz_placeholder_id_in_list( $plugin, $enforced_names ) ) {
+						$placeholder = $this->get_placeholder_status( $plugin );
+					}
+				}
 				$plugins[] = [
 					'id' => $plugin,
 					'label' => $details['label'],
 					'enabled' => cmplz_integration_plugin_is_enabled($plugin),
-					'placeholder' => $this->get_placeholder_status($plugin),
+					'placeholder' => $placeholder,
 				];
 			}
 		}
@@ -401,8 +420,8 @@ class cmplz_integrations {
 			return 'none';
 		}
 
-		$disabled_placeholders = get_option( 'cmplz_disabled_placeholders', array() );
-		if ( in_array( $service, $disabled_placeholders ) ) {
+		$disabled_placeholders = (array) get_option( 'cmplz_disabled_placeholders', array() );
+		if ( cmplz_placeholder_id_in_list( $service, $disabled_placeholders ) ) {
 			return 'disabled';
 		}
 		return 'enabled';
@@ -421,7 +440,7 @@ class cmplz_integrations {
 	}
 
 	public function notify_of_plugin_integrations( $warnings ){
-		$plugins = $this->get_plugins();
+		$plugins = $this->get_plugins( false );
 		foreach ($plugins as $plugin ) {
 			if ( !$plugin['enabled']) continue;
 			$warnings['integration_enabled'] = array(

@@ -312,25 +312,49 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 		}
 
 		/**
+		 * Placeholder markers from the cmplz_placeholder_markers filter, keyed by sanitized service name.
+		 *
+		 * @return array<string, array>
+		 */
+		private function get_placeholder_markers() {
+			$markers = array();
+			foreach ( apply_filters( 'cmplz_placeholder_markers', array() ) as $name => $placeholders ) {
+				$name             = $this->sanitize_service_name( $name );
+				$markers[ $name ] = array_merge( $markers[ $name ] ?? array(), (array) $placeholders );
+			}
+
+			return $markers;
+		}
+
+		/**
+		 * Service names cmplz_placeholder_disabled() is queried with: blocked-script names and placeholder marker services.
+		 *
+		 * @return string[]
+		 */
+		public function placeholder_service_names() {
+			$names = array_column( $this->blocked_scripts(), 'name' );
+
+			return array_values( array_unique( array_merge( $names, array_keys( $this->get_placeholder_markers() ) ) ) );
+		}
+
+		/**
 		 * Get array of placeholder - placeholder_classes for non iframe blocked content
 		 *
 		 * @param array $blocked_scripts
 		 * @return array
 		 */
 		public function placeholder_markers( $blocked_scripts ) {
-			$placeholder_markers = apply_filters( 'cmplz_placeholder_markers', array() );
-
 			// current format: array('facebook' = array('class1','class2') )
 			// force into new structure
-			foreach ( $placeholder_markers as $name => $placeholders ) {
+			foreach ( $this->get_placeholder_markers() as $name => $placeholders ) {
+				$enable_placeholder = cmplz_placeholder_disabled( $name ) ? 0 : 1;
 				foreach ( $placeholders as $class ) {
-					$name              = $this->sanitize_service_name( $name );
 					$blocked_scripts[] = array(
 						'name'               => $name,
 						'placeholder'        => $name,
 						'placeholder_class'  => $class,
 						'category'           => 'marketing',
-						'enable_placeholder' => 1,
+						'enable_placeholder' => $enable_placeholder,
 						'iframe'             => 0,
 					);
 				}

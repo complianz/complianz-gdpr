@@ -21,11 +21,28 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 		private static $_this; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore -- Legacy property name kept for backward compatibility.
 
 		/**
+		 * Upper bound on banner stylesheet preload hints in a single document.
+		 *
+		 * Only one of the hinted files is ever used, so above this the wasted
+		 * bandwidth and the browser's "preloaded but not used" warnings outweigh
+		 * the saved round trip, and we hint nothing at all.
+		 */
+		private const MAX_BANNER_CSS_PRELOADS = 4;
+
+		/**
 		 * List of cookies for the current request.
 		 *
 		 * @var array
 		 */
 		public $cookies = array();
+
+		/**
+		 * Banner stylesheet URLs collected by enqueue_banner_css() in the cases
+		 * where it deliberately enqueues nothing.
+		 *
+		 * @var string[]
+		 */
+		private $banner_css_preloads = array();
 
 		/**
 		 * Constructor. Registers frontend hooks for cookie banner, GTM, and statistics scripts.
@@ -42,15 +59,23 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 
 			self::$_this = $this;
 			if ( ! is_admin() && ! cmplz_is_pagebuilder_preview() ) {
-				if ( get_option( 'cmplz_wizard_completed_once' ) && $this->site_needs_cookie_warning() ) {
-					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ), PHP_INT_MAX - 50 );
-					add_filter( 'script_loader_tag', array( $this, 'add_asyncdefer_attribute' ), 10, 2 );
-					add_action( 'wp_head', array( $this, 'cookiebanner_css' ) );
-					add_action( 'wp_footer', array( $this, 'cookiebanner_html' ) );
-					$this->dynamic_gtm_enqueue();
+				// Registered unconditionally: the wizard/warning verdict can still be
+				// stale here (integrations attach filters a plugins_loaded tier later),
+				// so enqueue_assets() re-checks it at wp_enqueue_scripts time instead.
+				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ), PHP_INT_MAX - 50 );
+				add_filter( 'script_loader_tag', array( $this, 'add_asyncdefer_attribute' ), 10, 2 );
+				add_action( 'wp_head', array( $this, 'cookiebanner_css' ) );
+				// wp_preload_resources (WP 6.1+) prints on wp_head priority 1 —
+				// ahead of wp_print_styles at 8 — and dedupes by href. The raw
+				// print is the 5.9/6.0 fallback and lands at priority 10. Both read
+				// $banner_css_preloads, which only enqueue_assets() fills, so they
+				// print nothing when no banner is served.
+				if ( function_exists( 'wp_preload_resources' ) ) {
+					add_filter( 'wp_preload_resources', array( $this, 'add_banner_css_preloads' ) );
 				} else {
-					add_action( 'wp_print_footer_scripts', array( $this, 'inline_cookie_script_no_warning' ), 10, 2 );
+					add_action( 'wp_head', array( $this, 'preload_banner_css' ) );
 				}
+				add_action( 'wp_footer', array( $this, 'cookiebanner_html' ) );
 			}
 
 			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
@@ -75,22 +100,25 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 		}
 
 		/**
-		 * Dynamically registers the inline cookie script action on the correct hook and priority based on the GTM head setting.
+		 * Prints the GTM/GA head scripts immediately, or defers the footer one via a hook.
+		 *
+		 * In production, called from inside wp_head's own active iteration (via
+		 * enqueue_assets() on wp_enqueue_scripts), so a new wp_head add_action()
+		 * here would risk WP_Hook skipping it mid-pass — printing directly avoids
+		 * that. The footer branch is unaffected and still uses add_action().
 		 */
 		public function dynamic_gtm_enqueue() {
 			if ( 'gtg' === cmplz_get_option( 'compile_statistics' ) ) {
 				$more_info = cmplz_get_option( 'compile_statistics_more_info_gtg' );
 				if ( 'google-tag-manager' === $more_info ) {
-					add_action( 'wp_head', array( $this, 'inject_gtg_gtm_consent_script' ), 0 );
+					$this->inject_gtg_gtm_consent_script();
 				} elseif ( 'google-analytics' === $more_info ) {
-					add_action( 'wp_head', array( $this, 'inject_gtg_ga_consent_script' ), 0 );
+					$this->inject_gtg_ga_consent_script();
 				}
 			}
 
 			if ( cmplz_get_option( 'gtm_code_head' ) === 'yes' ) {
-				$hook          = cmplz_get_option( 'gtm_code_head' ) ? 'wp_head' : 'wp_print_footer_scripts';
-				$hook_priority = cmplz_get_option( 'gtm_code_head' ) ? 0 : PHP_INT_MAX - 50;
-				add_action( $hook, array( $this, 'inline_cookie_script' ), $hook_priority );
+				$this->inline_cookie_script();
 			} else {
 				add_action( 'wp_print_footer_scripts', array( $this, 'inline_cookie_script' ), PHP_INT_MAX - 50 );
 			}
@@ -343,9 +371,26 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 		/**
 		 * Enqueue cookie banner javascript
 		 *
+		 * Re-checks the wizard/warning verdict here (not at construct time, see
+		 * __construct()); if no warning is needed, swaps the banner hooks for the
+		 * "no warning" inline script instead.
+		 *
 		 * @return void
 		 */
 		public function enqueue_assets() {
+			if ( ! get_option( 'cmplz_wizard_completed_once' ) || ! $this->site_needs_cookie_warning() ) {
+				remove_filter( 'script_loader_tag', array( $this, 'add_asyncdefer_attribute' ), 10 );
+				remove_action( 'wp_head', array( $this, 'cookiebanner_css' ) );
+				remove_filter( 'wp_preload_resources', array( $this, 'add_banner_css_preloads' ) );
+				remove_action( 'wp_head', array( $this, 'preload_banner_css' ) );
+				remove_action( 'wp_footer', array( $this, 'cookiebanner_html' ) );
+				add_action( 'wp_print_footer_scripts', array( $this, 'inline_cookie_script_no_warning' ), 10 );
+
+				return;
+			}
+
+			$this->dynamic_gtm_enqueue();
+
 			$minified       = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
 			$banner         = cmplz_get_cookiebanner( apply_filters( 'cmplz_user_banner_id', cmplz_get_default_banner_id() ) );
 			$cookiesettings = $banner->get_front_end_settings();
@@ -420,25 +465,47 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 		}
 
 		/**
+		 * Build the URL of a generated banner stylesheet exactly as the front-end
+		 * javascript requests it. Single source of truth for that URL:
+		 * cmplzEnsureBannerCss() fetches complianz.css_file, which
+		 * CMPLZ_COOKIEBANNER::get_front_end_settings() builds with this method,
+		 * and the preload hints the same file. A hint that differs by so much as
+		 * the cache buster is a second request instead of a warm cache.
+		 *
+		 * @param int|string $banner_id      Banner id, or the '{banner_id}' placeholder.
+		 * @param string     $consent_type   Consent type, or the '{type}' placeholder.
+		 * @param int        $banner_version Version of that banner; the cache buster.
+		 *
+		 * @return string
+		 */
+		public static function get_banner_css_url( $banner_id, string $consent_type, int $banner_version ): string {
+			return cmplz_https_upload_url() . "css/banner-{$banner_id}-{$consent_type}.css?v=" . $banner_version;
+		}
+
+		/**
 		 * Enqueue the banner stylesheet server-side ONLY when the variant is
 		 * deterministic, so it lands in the server-rendered HTML and the
 		 * Interactivity API router preserves it across client-side navigation.
 		 *
-		 * Deterministic = no A/B testing AND exactly one used consent type
-		 * (which also makes it safe under geo-IP, since the variant cannot change
-		 * per region). In every other case enqueue nothing and let the JS inject
-		 * the resolved single variant + re-enable it after navigation, so we never
-		 * load more than one banner stylesheet at a time (avoiding cross-variant
-		 * CSS rule conflicts).
+		 * Deterministic is what cmplz_banner_css_is_deterministic() decides: no A/B
+		 * testing AND exactly one used consent type. In every other case enqueue
+		 * nothing and let the JS inject the resolved single variant + re-enable it
+		 * after navigation, so we never load more than one banner stylesheet at a
+		 * time (avoiding cross-variant CSS rule conflicts).
+		 *
+		 * Enqueueing nothing must not also mean fetching nothing: without a hint
+		 * the stylesheet is not requested until the deferred bundle runs, which is
+		 * long enough to show an unstyled banner. So collect preload hints instead
+		 * — a preload warms the cache without applying rules, so the invariant
+		 * above survives.
 		 *
 		 * @return void
 		 */
 		public function enqueue_banner_css() {
-			if ( cmplz_ab_testing_enabled() ) {
-				return;
-			}
-			$consent_types = cmplz_get_used_consenttypes();
-			if ( count( $consent_types ) !== 1 ) {
+			$this->banner_css_preloads = array();
+			$consent_types             = cmplz_get_used_consenttypes();
+			if ( ! cmplz_banner_css_is_deterministic( $consent_types ) ) {
+				$this->collect_banner_css_preloads( $consent_types );
 				return;
 			}
 
@@ -460,6 +527,101 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 		}
 
 		/**
+		 * Collect the banner stylesheets the front-end javascript may request, so
+		 * they can be hinted from the document head.
+		 *
+		 * @param string[] $consent_types Consent types in use on this site.
+		 *
+		 * @return void
+		 */
+		private function collect_banner_css_preloads( array $consent_types ) {
+			// With SCRIPT_DEBUG the javascript appends time() to the URL
+			// (CMPLZ_COOKIEBANNER::get_front_end_settings()), so no href we can
+			// print here will ever match and the hint would only add a request.
+			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+				return;
+			}
+
+			// Only geo-IP can change the consent type after the HTML is built: with
+			// it off the javascript keeps the server-rendered complianz.consenttype,
+			// so exactly one variant is ever fetched and hinting the others is waste.
+			// The banner id is a different matter — under A/B it is drawn per visitor
+			// by get_user_banner_id(), which picks at random AND writes to
+			// cmplz_statistics, so it cannot be resolved here.
+			$hinted_types = cmplz_geoip_enabled()
+				? $consent_types
+				: array( COMPLIANZ::$company->get_default_consenttype() );
+
+			// Keep the rows: cmplz_get_cookiebanners() is a select *, so they already
+			// carry the banner_version each hint needs as its cache buster.
+			$banners = cmplz_ab_testing_enabled()
+				? cmplz_get_cookiebanners()
+				: array( cmplz_get_cookiebanner( cmplz_get_default_banner_id() ) );
+
+			$upload_dir = cmplz_upload_dir();
+			$urls       = array();
+			foreach ( $banners as $banner ) {
+				$banner_id = (int) $banner->ID;
+
+				// One missing file makes get_front_end_settings() fall back to the
+				// bundled default stylesheet for EVERY consent type of this banner,
+				// so a hint would name a URL the browser never requests. That check
+				// runs over every USED consent type, not just the hinted ones.
+				foreach ( $consent_types as $consent_type ) {
+					if ( ! file_exists( $upload_dir . "css/banner-{$banner_id}-{$consent_type}.css" ) ) {
+						continue 2;
+					}
+				}
+
+				foreach ( $hinted_types as $consent_type ) {
+					$urls[] = self::get_banner_css_url( $banner_id, $consent_type, (int) $banner->banner_version );
+				}
+			}
+
+			// Only one hint is ever used. Above the cap the wasted bytes and the
+			// browser's "preloaded but not used" warnings outweigh the saved round
+			// trip, so hint nothing. Counted on the hints, not on the candidates.
+			if ( count( $urls ) > self::MAX_BANNER_CSS_PRELOADS ) {
+				return;
+			}
+
+			$this->banner_css_preloads = $urls;
+		}
+
+		/**
+		 * Feed the collected stylesheets to core's preload printer (WP 6.1+).
+		 *
+		 * @param array $resources Resources core will print.
+		 *
+		 * @return array
+		 */
+		public function add_banner_css_preloads( $resources ) {
+			if ( ! is_array( $resources ) ) {
+				$resources = array();
+			}
+			foreach ( $this->banner_css_preloads as $url ) {
+				$resources[] = array(
+					'href' => $url,
+					'as'   => 'style',
+				);
+			}
+			return $resources;
+		}
+
+		/**
+		 * Print the collected stylesheets as preload hints. Fallback for WordPress
+		 * versions without wp_preload_resources().
+		 *
+		 * @return void
+		 */
+		public function preload_banner_css() {
+			foreach ( $this->banner_css_preloads as $url ) {
+				// Protocol allowlist, matching what core's preload printer applies.
+				printf( '<link rel="preload" as="style" href="%s" />' . "\n", esc_url( $url, array( 'http', 'https' ) ) );
+			}
+		}
+
+		/**
 		 * Inline css to default hide the banner until fully loaded
 		 *
 		 * @return void
@@ -468,6 +630,15 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 			?>
 			<style>.cmplz-hidden {
 					display: none !important;
+				}
+
+				/* Sizes the close icon before the banner stylesheet arrives. The
+					same rule is in the generated sheet, and the template carries
+					width/height attributes — but templates/cookiebanner.php is
+					theme-overridable, so a copied template only gets it here. */
+				.cmplz-cookiebanner .cmplz-close svg {
+					width: 20px;
+					height: 20px;
 				}</style>
 				<?php
 		}
@@ -936,10 +1107,11 @@ if ( ! class_exists( 'cmplz_banner_loader' ) ) {
 				$enable_tcf_support = cmplz_tcf_active() ? 'true' : 'false';
 				$ads_data_redaction = cmplz_get_option( 'cmplz-gtag-ads_data_redaction' ) === 'yes' ? 'true' : 'false';
 				$urlpassthrough     = cmplz_get_option( 'cmplz-gtag-urlpassthrough' ) === 'yes' ? 'true' : 'false';
+				$wait_for_update    = max( 0, (int) apply_filters( 'cmplz_gtag_wait_for_update', 500 ) ); // Milliseconds GA4 holds the first hit for the saved consent.
 				$script             = cmplz_get_template( "statistics/gtag$consent_mode.js" );
 				$script             = str_replace(
-					array( '{G_code}', '{additional_tags}', '{anonymize_ip}', '{enable_tcf_support}', '{ads_data_redaction}', '{url_passthrough}' ),
-					array( $code, $additional_tags, $anonymize_ip, $enable_tcf_support, $ads_data_redaction, $urlpassthrough ),
+					array( '{G_code}', '{additional_tags}', '{anonymize_ip}', '{enable_tcf_support}', '{ads_data_redaction}', '{url_passthrough}', '{wait_for_update}' ),
+					array( $code, $additional_tags, $anonymize_ip, $enable_tcf_support, $ads_data_redaction, $urlpassthrough, $wait_for_update ),
 					$script
 				);
 

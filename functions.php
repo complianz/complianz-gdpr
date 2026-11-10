@@ -159,6 +159,50 @@ if ( !function_exists('cmplz_sanitize_title_preserve_uppercase')) {
 	}
 }
 
+if ( ! function_exists( 'cmplz_canonical_placeholder_id' ) ) {
+	/**
+	 * Get the canonical form of a placeholder id
+	 *
+	 * The dash form is canonical: that is what sanitize_title() leaves us with for the ids the
+	 * settings UI and the blocked scripts use. Pre 7.0 versions stored the underscore form in
+	 * cmplz_disabled_placeholders, so both forms are still in the wild.
+	 *
+	 * @param string $id Placeholder id in either the dash or the legacy underscore form.
+	 *
+	 * @return string
+	 */
+	function cmplz_canonical_placeholder_id( string $id ): string {
+		return str_replace( '_', '-', $id );
+	}
+}
+
+if ( ! function_exists( 'cmplz_placeholder_id_in_list' ) ) {
+	/**
+	 * Check if a placeholder id occurs in a list of placeholder ids, in whichever form it is stored
+	 *
+	 * Both sides are canonicalized, so a legacy underscore entry matches the dash form the rest of
+	 * the plugin queries with, and the other way around. This is the single matcher for
+	 * cmplz_disabled_placeholders: the reader and the enforcer used to apply different rules to the
+	 * same option, which left a stale underscore entry disabling a placeholder the settings UI
+	 * reported as enabled.
+	 *
+	 * @param string $id  Placeholder id to look for.
+	 * @param array  $ids Stored placeholder ids, in any form.
+	 *
+	 * @return bool
+	 */
+	function cmplz_placeholder_id_in_list( string $id, array $ids ): bool {
+		$id = cmplz_canonical_placeholder_id( $id );
+		foreach ( $ids as $stored_id ) {
+			if ( is_string( $stored_id ) && cmplz_canonical_placeholder_id( $stored_id ) === $id ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 if ( ! function_exists( 'cmplz_uses_google_analytics' ) ) {
 
 	/**
@@ -2457,6 +2501,28 @@ if ( ! function_exists( 'cmplz_get_used_consenttypes' ) ) {
 		}
 
 		return $consent_types;
+	}
+}
+
+if ( ! function_exists( 'cmplz_banner_css_is_deterministic' ) ) {
+	/**
+	 * Whether every visitor of this page gets the same banner stylesheet, so its
+	 * URL can be resolved server-side instead of by the javascript.
+	 *
+	 * False when the variant is drawn per visitor and the value would end up in
+	 * cached HTML shared by all of them: under A/B testing the banner id is drawn
+	 * per request, and with more than one used consent type geo-IP picks the type
+	 * per request. Note this is about the URL being invariant, not about geo-IP
+	 * being inactive — with one used type geo-IP can still report 'other'
+	 * (pro/filters-actions.php:141), which suppresses the banner rather than
+	 * changing its stylesheet.
+	 *
+	 * @param string[] $consent_types Consent types in use, from cmplz_get_used_consenttypes().
+	 *
+	 * @return bool
+	 */
+	function cmplz_banner_css_is_deterministic( array $consent_types ) {
+		return ! cmplz_ab_testing_enabled() && count( $consent_types ) === 1;
 	}
 }
 
