@@ -27,6 +27,12 @@ const AceEditorControl = (props) => {
 		};
 	}, [inputValue]);
 
+	useEffect(() => {
+		if ( inputValue !== props.value ) {
+			setInputValue(props.value);
+		}
+	}, [props.value]);
+
 	const handleChange = ( value ) => {
 		//strip off <script> tags
 		if (value.includes('<script>') || value.includes('</script>')) {
