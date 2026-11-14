@@ -155,6 +155,7 @@ const CookieBannerPreview = () => {
 
 		setBannerToFieldsSynced(true);
 		updateField('manage_consent', selectedBanner['revoke'] );
+		updateFieldsData(selectedSubMenuItem);
 	}
 
 	/**
