@@ -68,19 +68,23 @@ if ( !function_exists('cmplz_divi_map_script')) {
 		ob_start();
 		?>
 		<script>
-			let cmplz_activated_divi_recaptcha = false;
-			document.addEventListener("cmplz_enable_category", function (e) {
-				if (!cmplz_activated_divi_recaptcha && (e.detail.category==='marketing' || e.detail.service === 'google-recaptcha') ){
-					cmplz_divi_init_recaptcha();
-				}
-			});
+			// Idempotent: this after-script may be re-injected by cmplz_run_script.
+			window.cmplz_activated_divi_recaptcha = window.cmplz_activated_divi_recaptcha || false;
+			if ( ! window.cmplz_divi_recaptcha_hooked ) {
+				window.cmplz_divi_recaptcha_hooked = true;
+				document.addEventListener("cmplz_enable_category", function (e) {
+					if (!window.cmplz_activated_divi_recaptcha && (e.detail.category==='marketing' || e.detail.service === 'google-recaptcha') ){
+						cmplz_divi_init_recaptcha();
+					}
+				});
+			}
 
 			function cmplz_divi_init_recaptcha() {
 				if ('undefined' === typeof window.jQuery || 'undefined' === typeof window.etCore ) {
 					setTimeout(cmplz_divi_init_recaptcha, 500);
 				} else {
 					window.etCore.api.spam.recaptcha.init();
-					cmplz_activated_divi_recaptcha = true;
+					window.cmplz_activated_divi_recaptcha = true;
 				}
 			}
 		</script>
@@ -104,12 +108,17 @@ if ( !function_exists('cmplz_divi_map_script')) {
 		ob_start();
 		?>
 		<script>
-			let cmplz_activated_divi_maps = false;
-			document.addEventListener("cmplz_enable_category", function (e) {
-				if (!cmplz_activated_divi_maps && (e.detail.category==='marketing' || e.detail.service === 'google-maps') ){
-					cmplz_divi_init_map();
-				}
-			});
+			// Idempotent: this after-script may be re-injected by cmplz_run_script.
+			window.cmplz_activated_divi_maps = window.cmplz_activated_divi_maps || false;
+			if ( ! window.cmplz_divi_maps_hooked ) {
+				window.cmplz_divi_maps_hooked = true;
+				document.addEventListener("cmplz_enable_category", function (e) {
+					if (!window.cmplz_activated_divi_maps && (e.detail.category==='marketing' || e.detail.service === 'google-maps') ){
+						cmplz_divi_init_map();
+					}
+				});
+				setTimeout(cmplz_divi_init_map, 300);
+			}
 
 			function cmplz_divi_init_map() {
 				if ('undefined' === typeof window.jQuery || 'undefined' === typeof window.et_pb_map_init ) {
@@ -118,11 +127,10 @@ if ( !function_exists('cmplz_divi_map_script')) {
 					let map_container = jQuery(".et_pb_map_container");
 					map_container.each(function () {
 						window.et_pb_map_init(jQuery(this));
-						cmplz_activated_divi_maps = true;
+						window.cmplz_activated_divi_maps = true;
 					})
 				}
 			}
-			setTimeout(cmplz_divi_init_map, 300);
 		</script>
 
 		<?php
