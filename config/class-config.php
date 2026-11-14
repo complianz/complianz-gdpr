@@ -465,6 +465,18 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 				return null;
 			}
 			if ( in_array( $name, self::LOCALIZED_PROPS, true ) ) {
+				/**
+				 * Only translate once the textdomain can be loaded, i.e. from the
+				 * `init` hook onwards. Translating earlier triggers WordPress'
+				 * "Function _load_textdomain_just_in_time was called incorrectly"
+				 * notice (WP 6.7+). Before `init` we return the untranslated
+				 * (English source) values, which have the exact same structure,
+				 * so early data-only callers keep working.
+				 */
+				if ( ! $this->translations_available() ) {
+					return $this->$name;
+				}
+
 				if ( method_exists( $this, 'get_i18n_' . $name ) ) {
 					$method = 'get_i18n_' . $name;
 					return $this->$method();
@@ -474,6 +486,20 @@ if ( ! class_exists( 'cmplz_config' ) ) {
 			}
 
 			return $this->$name;
+		}
+
+
+		/**
+		 * Whether it is safe to load translations for the plugin textdomain.
+		 *
+		 * Translations should not be loaded before the `init` action. Loading
+		 * them earlier triggers the `_load_textdomain_just_in_time` notice added
+		 * in WordPress 6.7.
+		 *
+		 * @return bool True once the `init` action is running or has run.
+		 */
+		private function translations_available(): bool {
+			return did_action( 'init' ) || doing_action( 'init' );
 		}
 
 
