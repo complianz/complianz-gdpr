@@ -1102,13 +1102,25 @@ window.cmplz_deny_all = function() {
 };
 
 /*
+ * Policy IDs only go up. A visitor ID below the current one means the policy changed.
+ * A visitor ID above the inline one means the page was cached before the change, so the inline ID is stale.
+ *
+ * */
+
+function cmplz_policy_id_outdated( user_policy_id ) {
+	const user = parseInt( user_policy_id );
+	const current = parseInt( complianz.current_policy_id );
+	return isNaN( user ) || isNaN( current ) || user < current;
+}
+
+/*
  * If current cookie policy has changed, reset cookie consent
  *
  * */
 
 function cmplz_check_cookie_policy_id() {
 	const user_policy_id = cmplz_get_cookie( 'policy_id' );
-	if ( user_policy_id && ( parseInt( complianz.current_policy_id ) !== parseInt( user_policy_id ) ) ) {
+	if ( user_policy_id && cmplz_policy_id_outdated( user_policy_id ) ) {
 		cmplz_deny_all();
 		cmplz_set_banner_status( 'show' );
 		cmplz_clear_cookies( 'cmplz' );
@@ -2407,7 +2419,10 @@ function cmplz_clear_cookies( cookie_part ) {
  * */
 
 function cmplz_set_accepted_cookie_policy_id() {
-	cmplz_set_cookie( 'policy_id', complianz.current_policy_id );
+	// A page cached before a policy change carries an older ID: never lower the stored one, but still renew its expiry.
+	const stored_policy_id = parseInt( cmplz_get_cookie( 'policy_id' ) );
+	const stale_page = stored_policy_id > parseInt( complianz.current_policy_id );
+	cmplz_set_cookie( 'policy_id', stale_page ? stored_policy_id : complianz.current_policy_id );
 }
 
 /*

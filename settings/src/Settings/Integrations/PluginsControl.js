@@ -191,14 +191,14 @@ const PluginsControl = () => {
 					'complianz-gdpr'
 				) }
 				{ readMore(
-					'https://complianz.io/developers-guide-for-third-party-integrations'
+					'https://complianz.io/help/wordpress/configuration/developers-guide-for-third-party-integrations/'
 				) }
 				{ __(
 					'Enabled plugins will be blocked on the front-end of your website until the user has given consent (opt-in), or after the user has revoked consent (opt-out). When possible a placeholder is activated. You can also disable or configure the placeholder to your liking.',
 					'complianz-gdpr'
 				) }
 				{ readMore(
-					'https://complianz.io/blocking-recaptcha-manually/'
+					'https://complianz.io/help/wordpress/configuration/blocking-recaptcha-manually/'
 				) }
 			</p>
 			{ cmplz_settings.scan_upsell?.code === 'webshop' && (

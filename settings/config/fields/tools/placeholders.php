@@ -101,7 +101,7 @@ function cmplz_placeholders_fields($fields){
 					'label' => 'default',
 					'title' => __( "Custom placeholders", 'complianz-gdpr' ),
 					'text'  => __( "Choose the style that best complements your website's design.", 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/changing-the-default-social-placeholders/',
+					'url'   => 'https://complianz.io/help/wordpress/customization/customize-service-placeholders/',
 				]
 			],
 			'options'   => array(
@@ -125,7 +125,7 @@ function cmplz_placeholders_fields($fields){
 				'label' => 'default',
 				'title' => __( "Custom placeholders", 'complianz-gdpr' ),
 				'text'  => __( "You can change your placeholders manually or use Premium to do it for you.", 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/changing-the-default-social-placeholders/',
+				'url'   => 'https://complianz.io/help/wordpress/customization/customize-service-placeholders/',
 			],
 			'react_conditions' => [
 				'relation' => 'AND',
@@ -173,7 +173,7 @@ function cmplz_placeholders_fields($fields){
 				'label' => 'default',
 				'title' => __( "Custom ratio for Google Maps", 'complianz-gdpr' ),
 				'text'  => __( "If you select custom, you need to add your custom image to your site.", 'complianz-gdpr'),
-				'url'   => 'https://complianz.io/changing-the-google-maps-placeholder/',
+				'url'   => 'https://complianz.io/help/wordpress/customization/customize-service-placeholders/',
 			],
 		],
 

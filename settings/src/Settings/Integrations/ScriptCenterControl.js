@@ -28,7 +28,7 @@ const ScriptCenterControl = () => {
 		<>
 			<p>
 				{__( "The script center should be used to add and block third-party scripts and iFrames before consent is given, or when consent is revoked. For example Hotjar and embedded video’s.", 'complianz-gdpr' ) }
-				{ readMore('https://complianz.io/script-center/')}
+				{ readMore('https://complianz.io/help/wordpress/configuration/integrating-plugins/')}
 			</p>
 			{ (disabled ) &&
 				<div className="cmplz-settings-overlay">

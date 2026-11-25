@@ -48,7 +48,7 @@ function cmplz_tools_fields( $fields ) {
 				'label' => 'default',
 				'title' => __( "Responding to data requests", 'complianz-gdpr' ),
 				'text'  => __( 'You have an open data requests ready for response? Get started here.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/responding-to-a-data-request/',
+				'url'   => 'https://complianz.io/help/wordpress/faq/responding-to-a-data-request/',
 			],
 		],
 		[

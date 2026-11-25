@@ -1080,6 +1080,17 @@ function cmplz_check_upgrade() {
 		update_option( 'cmplz_disabled_placeholders_migrated', true, false );
 	}
 
+	// Remove the placeholders downloaded before cmplz_download_to_site() started checking the host and
+	// the content of what it fetched, and the cached URLs pointing at them. The monthly cron would get
+	// there eventually; this does it on the upgrade itself. Free shipped the check in 7.5.8; Premium
+	// runs the same cleanup from its own version in pro/upgrade.php.
+	if ( ! defined( 'cmplz_premium' ) && $prev_version && version_compare( $prev_version, '7.5.8', '<' ) ) {
+		cmplz_cron_clean_placeholders();
+		foreach ( array( 'cmplz_googlemaps_image_', 'cmplz_youtube_image_', 'cmplz_vimeo_image_', 'cmplz_dailymotion_image_' ) as $prefix ) {
+			cmplz_delete_transients_by_prefix( $prefix );
+		}
+	}
+
 	// regenerate cookie policy snapshot.
 	update_option( 'cmplz_generate_new_cookiepolicy_snapshot', true, false );
 

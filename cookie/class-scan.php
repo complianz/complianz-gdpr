@@ -602,7 +602,7 @@ if ( ! class_exists( 'cmplz_scan' ) ) {
 				return array();
 			}
 			$posts = get_transient( 'cmplz_pages_list' );
-			if ( ! $posts ) {
+			if ( ! is_array( $posts ) || empty( $posts ) ) {
 				$posts           = $this->get_fixed_pages();
 				$post_types      = $this->get_scannable_post_types();
 				$not_in          = $this->get_webshop_page_ids();
@@ -680,7 +680,7 @@ if ( ! class_exists( 'cmplz_scan' ) ) {
 				set_transient( 'cmplz_pages_list', $posts, MONTH_IN_SECONDS );
 			}
 
-			return array_filter( $posts );
+			return is_array( $posts ) ? array_filter( $posts ) : array();
 		}
 
 		/**
@@ -1137,7 +1137,7 @@ if ( ! class_exists( 'cmplz_scan' ) ) {
 								: __( 'Limited scan coverage', 'complianz-gdpr' );
 						},
 						'subtitle'       => __( "The free Website Scan can't fully cover your site.", 'complianz-gdpr' ),
-						'body'           => $cmplz_is_new_install ? __( 'Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks.', 'complianz-gdpr' ) : __( 'Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks. Get 40% OFF with code SC4N1T4LL. Limited Offer, Get it Now!', 'complianz-gdpr' ),
+						'body'           => $cmplz_is_new_install ? __( 'Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks.', 'complianz-gdpr' ) : __( 'Your free plan covers only 50 posts. Upgrade to scan your full site and automatically keep your cookie policy up to date with live cookiedatabase.org sync, avoid manual configuration and lower compliance risks. Get 10% OFF with code SC4N1T4LL. Limited Offer, Get it Now!', 'complianz-gdpr' ),
 						'cta_field_id'   => 'scan-site-has-volume',
 						'cta_url'        => $cmplz_is_new_install ? 'https://complianz.io/pricing/' : 'https://complianz.io/pricing-subpages/',
 					)

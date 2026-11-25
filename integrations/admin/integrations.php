@@ -445,7 +445,7 @@ class cmplz_integrations {
 			if ( !$plugin['enabled']) continue;
 			$warnings['integration_enabled'] = array(
 				'open' => __('We have enabled integrations for plugins and services, please double-check your configuration.', 'complianz-gdpr' ),
-				'url' => 'https://complianz.io/enabled-integration/',
+				'url' => 'https://complianz.io/help/wordpress/configuration/enabled-integration/',
 				'include_in_progress' => false,
 			);
 			break;

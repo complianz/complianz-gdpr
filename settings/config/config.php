@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) or die();
  *      'label' => 'default',
  *      'title' => __( "Configuration", "complianz-gdpr" ),
  *      'text'  => __( "The URL depends on your configuration of Matomo.", 'complianz-gdpr' ),
- *      'url'   => 'https://complianz.io/configuring-matomo-for-wordpress-with-complianz/',
+ *      'url'   => 'https://complianz.io/help/wordpress/configuration/configuring-matomo-for-wordpress-with-complianz/',
  * ],
  *
  * - a tooltip or comment cannot contain html or a URL.

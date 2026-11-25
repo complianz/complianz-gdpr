@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) or die( "you do not have access to this page!" );
 //			'dismissable'       => true,
 //			'warning_condition' => '_true_',
 //			'open'              => __( 'You have installed the Add To Any plugin that uses the WP Consent API.', 'complianz-gdpr' ),
-//			'url'               => 'https://complianz.io/proposal-to-add-a-consent-api-to-wordpress/',
+//			'url'               => 'https://complianz.io/help/wordpress/faq/proposal-to-add-a-consent-api-to-wordpress/',
 //		);
 //	}
 //	return $warnings;

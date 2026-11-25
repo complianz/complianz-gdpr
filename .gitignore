@@ -14,3 +14,6 @@ prepros.config
 .idea/complianz.iml
 integrations/.DS_Store
 /vendor
+/wp-content/
+/test-results/
+/graphify-out/

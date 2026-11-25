@@ -351,13 +351,13 @@ $cmplz_integrations_list = apply_filters( 'cmplz_integrations', array(
 
 	'facebook-for-wordpress' => array(
 		'constant_or_function' => 'FacebookPixelPlugin\\FacebookForWordpress',
-		'label'                => 'Official Facebook Pixel',
+		'label'                => 'Meta Pixel for WordPress',
 		'firstparty_marketing' => false,
 	),
 
 	'facebook-for-woocommerce' => array(
 		'constant_or_function' => 'facebook_for_woocommerce',
-		'label'                => 'Facebook for WooCommerce',
+		'label'                => 'Meta for WooCommerce',
 		'firstparty_marketing' => false,
 	),
 

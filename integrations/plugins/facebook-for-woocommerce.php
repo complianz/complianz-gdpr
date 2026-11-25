@@ -34,3 +34,17 @@ function cmplz_facebookforwoocommerce_detected_social_media( $social_media ) {
 add_filter( 'cmplz_detected_social_media',
 	'cmplz_facebookforwoocommerce_detected_social_media' );
 
+add_filter( 'cmplz_image_tags', 'cmplz_facebookforwoocommerce_imagetags' );
+
+/**
+ * Block the pixel image of the <noscript> fallback. A visitor without JavaScript cannot see the banner or give
+ * consent, but the image would still be requested.
+ *
+ * @param array $tags Image URLs to block.
+ * @return array
+ */
+function cmplz_facebookforwoocommerce_imagetags( $tags ) {
+	$tags[] = 'facebook.com/tr?';
+
+	return $tags;
+}

@@ -1,0 +1,385 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Variable \$formatted_date in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 2
+			path: DNSMPD/class-admin-DNSMPD.php
+
+		-
+			message: '#^Class Cmplz_Processing referenced with incorrect case\: cmplz_processing\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: complianz-gpdr-premium.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-au.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-br.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-ca.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-eu.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-uk.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-us.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: config/documents/cookie-policy-za.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: config/documents/documents.php
+
+		-
+			message: '#^Function get_transient invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: config/warnings.php
+
+		-
+			message: '#^Result of function cmplz_dn_fetch_notifications \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
+			path: config/warnings.php
+
+		-
+			message: '#^Function consent_api_registered not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: documents/admin-class-documents.php
+
+		-
+			message: '#^Method cmplz_documents_admin\:\:get_created_pages\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: documents/admin-class-documents.php
+
+		-
+			message: '#^Variable \$region might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: documents/admin-class-documents.php
+
+		-
+			message: '#^Variable \$type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: documents/admin-class-documents.php
+
+		-
+			message: '#^Instantiated class Mpdf\\Mpdf not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: documents/class-document.php
+
+		-
+			message: '#^Variable \$mpdf_args might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: documents/class-document.php
+
+		-
+			message: '#^Variable \$mpdf_default_temp_dir might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: documents/class-document.php
+
+		-
+			message: '#^Variable \$subject in empty\(\) always exists and is always falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: documents/class-document.php
+
+		-
+			message: '#^Function cmplz_get_option invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: functions.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: integrations/admin/integrations.php
+
+		-
+			message: '#^Function rsssl_get_option not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: integrations/admin/integrations.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: pro/class-geoip.php
+
+		-
+			message: '#^Instantiated class GeoIp2\\Database\\Reader not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: pro/class-geoip.php
+
+		-
+			message: '#^Variable \$regions in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: pro/class-geoip.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: pro/class-import.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: pro/class-licensing.php
+
+		-
+			message: '#^Method cmplz_license\:\:license_notices\(\) invoked with 3 parameters, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: pro/class-licensing.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/au/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/au/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/br/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/br/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/ca/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/ca/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/disclaimer.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 21
+			path: pro/config/documents/documents.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/eu/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/impressum.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/uk/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/uk/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/us/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/us/privacy-policy.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/za/privacy-policy-children.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: pro/config/documents/za/privacy-policy.php
+
+		-
+			message: '#^Variable \$purpose_personal_data_index might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: pro/config/dynamic-document-elements.php
+
+		-
+			message: '#^Variable \$conclusions in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: pro/dataleak/class-dataleak.php
+
+		-
+			message: '#^Variable \$region might not be defined\.$#'
+			identifier: variable.undefined
+			count: 22
+			path: pro/dataleak/type-1/questions.php
+
+		-
+			message: '#^Variable \$region might not be defined\.$#'
+			identifier: variable.undefined
+			count: 43
+			path: pro/dataleak/type-2/questions.php
+
+		-
+			message: '#^Variable \$region might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: pro/dataleak/type-3/questions.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: pro/datarequests/class-datarequests.php
+
+		-
+			message: '#^Function __ invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: pro/processing-agreements/EU/processing-agreement.php
+
+		-
+			message: '#^Instantiated class Mpdf\\Mpdf not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: pro/records-of-consent/class-records-of-consent.php
+
+		-
+			message: '#^Variable \$merged in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: pro/scan/class-wsc-scan-pro.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: pro/tcf/tcf-admin.php
+
+		-
+			message: '#^Access to static property \$document on an unknown class COMPLIANZ_TC\.$#'
+			identifier: class.notFound
+			count: 1
+			path: settings/config/fields/defaults.php
+
+		-
+			message: '#^Variable \$installer might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: settings/settings.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: upgrade.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: websitescan/class-wsc-auth.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: websitescan/class-wsc-onboarding.php
+
+		-
+			message: '#^Undefined variable\: \$data$#'
+			identifier: variable.undefined
+			count: 2
+			path: websitescan/class-wsc-scanner.php
+
+		-
+			message: '#^Variable \$data in isset\(\) is never defined\.$#'
+			identifier: isset.variable
+			count: 1
+			path: websitescan/class-wsc-scanner.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: websitescan/class-wsc-settings.php
+
+		-
+			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
+			identifier: arguments.count
+			count: 1
+			path: websitescan/class-wsc-settings.php

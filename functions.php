@@ -1849,9 +1849,110 @@ if ( ! function_exists( 'cmplz_count_socialmedia' ) ) {
 }
 
 
+if ( ! function_exists( 'cmplz_image_mime_from_file' ) ) {
+	/**
+	 * Detect a raster image type from the file's magic bytes.
+	 *
+	 * Only the formats a placeholder can be are accepted: JPEG, PNG, GIF and WebP. Anything else,
+	 * SVG and other XML or text in particular, returns false. The check reads the file itself, not
+	 * its extension or the remote Content-Type, so it also holds for a download named .jpg.
+	 *
+	 * @param string $file Path to a local file.
+	 *
+	 * @return string|false Mime type, or false when the file is not an accepted raster image.
+	 */
+	function cmplz_image_mime_from_file( $file ) {
+		if ( ! is_string( $file ) || ! is_readable( $file ) ) {
+			return false;
+		}
+		// Direct read of the first bytes of a local temp file: WP_Filesystem has no partial binary read.
+		$handle = fopen( $file, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		if ( ! $handle ) {
+			return false;
+		}
+		$head = fread( $handle, 12 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+		if ( ! is_string( $head ) || strlen( $head ) < 12 ) {
+			return false;
+		}
+
+		if ( "\xFF\xD8\xFF" === substr( $head, 0, 3 ) ) {
+			return 'image/jpeg';
+		}
+		if ( "\x89PNG\r\n\x1A\n" === substr( $head, 0, 8 ) ) {
+			return 'image/png';
+		}
+		if ( 'GIF87a' === substr( $head, 0, 6 ) || 'GIF89a' === substr( $head, 0, 6 ) ) {
+			return 'image/gif';
+		}
+		if ( 'RIFF' === substr( $head, 0, 4 ) && 'WEBP' === substr( $head, 8, 4 ) ) {
+			return 'image/webp';
+		}
+
+		return false;
+	}
+}
+
+if ( ! function_exists( 'cmplz_download_host_allowed' ) ) {
+	/**
+	 * Whether a placeholder may be downloaded from this URL.
+	 *
+	 * The URL has to be http(s) to one of the thumbnail hosts of the services that use
+	 * cmplz_download_to_site(). A URL that only mentions such a host in its path or query, or that
+	 * carries user info before the host, is refused.
+	 *
+	 * @param string $src Absolute URL.
+	 *
+	 * @return bool
+	 */
+	function cmplz_download_host_allowed( $src ) {
+		$parts = wp_parse_url( (string) $src );
+		if ( ! is_array( $parts ) || empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
+			return false;
+		}
+		if ( ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ) {
+			return false;
+		}
+		if ( isset( $parts['user'] ) || isset( $parts['pass'] ) ) {
+			return false;
+		}
+
+		/**
+		 * Hosts placeholders may be downloaded from. An entry also matches its subdomains.
+		 *
+		 * @param string[] $hosts
+		 */
+		$allowed = apply_filters(
+			'cmplz_download_allowed_hosts',
+			array(
+				'img.youtube.com',
+				'i.ytimg.com',
+				'i.vimeocdn.com',
+				'dmcdn.net',
+				'maps.googleapis.com',
+			)
+		);
+		$host    = strtolower( $parts['host'] );
+		foreach ( (array) $allowed as $allowed_host ) {
+			$allowed_host = strtolower( trim( (string) $allowed_host ) );
+			if ( '' === $allowed_host ) {
+				continue;
+			}
+			if ( $host === $allowed_host || substr( $host, - strlen( '.' . $allowed_host ) ) === '.' . $allowed_host ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 	/**
 	 * Download a placeholder from youtube or video to this website
+	 *
+	 * The URL must be on an allowed thumbnail host and the response must be a JPEG, PNG, GIF or
+	 * WebP by its magic bytes; otherwise nothing is written and the default placeholder is returned.
 	 *
 	 * @param string      $src
 	 * @param bool|string $id
@@ -1868,10 +1969,15 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 		) {
 			$src = str_replace( '//', 'https://', $src );
 		}
+		if ( ! cmplz_download_host_allowed( $src ) ) {
+			return cmplz_default_placeholder();
+		}
 		if ( ! $id ) {
 			$id = time();
 		}
-		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		if ( ! function_exists( 'download_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
 		$upload_dir = cmplz_upload_dir('placeholders');
 
 		//set the path
@@ -1883,8 +1989,9 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 		//download file
 		$tmpfile = download_url( $src, $timeout = 25 );
 
-		//check for errors
-		if ( is_wp_error( $tmpfile ) ) {
+		// Check for errors, and that the response is a raster image before it is stored anywhere web-accessible.
+		$mime = is_wp_error( $tmpfile ) ? false : cmplz_image_mime_from_file( $tmpfile );
+		if ( ! $mime ) {
 			$new_src = cmplz_default_placeholder();
 		} else {
 			//remove current file
@@ -1902,9 +2009,9 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 			unlink( $tmpfile );
 		} // must unlink afterwards
 
-		if ( file_exists( $file ) ) {
+		if ( $mime && file_exists( $file ) ) {
 			try {
-				$new_src = cmplz_create_webp( $file, $new_src );
+				$new_src = cmplz_create_webp( $file, $new_src, $mime );
 			} catch ( Exception $e ) {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 					error_log( $e->getMessage() );
@@ -1963,7 +2070,17 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 
 if (!function_exists('cmplz_create_webp')){
 
-	function cmplz_create_webp($file, $new_src) {
+	/**
+	 * Convert a downloaded placeholder to WebP.
+	 *
+	 * @param string $file    Local path of the downloaded image.
+	 * @param string $new_src Public URL of that file.
+	 * @param string $mime    Mime type detected from the file content; passed to the image editor so
+	 *                        the file is decoded as what it is, not as what its extension says.
+	 *
+	 * @return string The WebP URL when the conversion succeeded, otherwise $new_src.
+	 */
+	function cmplz_create_webp( $file, $new_src, $mime = '' ) {
 		switch ( $file ) {
 			case strpos( $file, '.jpeg' )!==false:
 			case strpos( $file, '.jpg' )!==false:
@@ -1978,7 +2095,12 @@ if (!function_exists('cmplz_create_webp')){
 		//@todo: new filename is returned by save, so can be used for output instead of brute force extension replace.
 		$webp_file = str_replace( $ext, ".webp", $file );
 		$webp_new_src = str_replace( $ext, ".webp", $new_src );
-		$image = wp_get_image_editor($file);
+
+		$image = wp_get_image_editor( $file, $mime ? array( 'mime_type' => $mime ) : array() );
+		if ( is_wp_error( $image ) ) {
+			return $new_src;
+		}
+
 		$result = $image->save($webp_file, 'image/webp');
 		if ( is_wp_error( $result ) ) {
 			return $new_src;
@@ -2991,7 +3113,7 @@ if ( ! function_exists( 'cmplz_sprintf' ) ) {
 		} else {
 			$output = $args[0];
 			if ( cmplz_admin_logged_in() ){
-				$output .=  '&nbsp;<a target="_blank" href="https://complianz.io/translation-error-sprintf-printf-too-few-arguments">(Translation error)</a>';
+				$output .=  '&nbsp;<a target="_blank" href="https://complianz.io/help/wordpress/troubleshooting/translation-error-sprintf-printf-too-few-arguments/">(Translation error)</a>';
 			}
 			return $output;
 		}
@@ -3030,7 +3152,7 @@ if ( ! function_exists( 'cmplz_printf' ) ) {
 		} else {
 			$output = $args[0];
 			if ( cmplz_admin_logged_in() ){
-				$output .=  '&nbsp;<a target="_blank" href="https://complianz.io/translation-error-sprintf-printf-too-few-arguments">(Translation error)</a>';
+				$output .=  '&nbsp;<a target="_blank" href="https://complianz.io/help/wordpress/troubleshooting/translation-error-sprintf-printf-too-few-arguments/">(Translation error)</a>';
 			}
 			echo $output;
 		}

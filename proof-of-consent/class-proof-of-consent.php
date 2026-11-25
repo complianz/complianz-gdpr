@@ -302,7 +302,7 @@ if ( ! class_exists( 'cmplz_proof_of_consent' ) ) {
                             to %1$shttps://complianz.io/consent%2$s.',
 						'complianz-gdpr'
 					),
-					'<a target="_blank" href="https://complianz.io/consent">',
+					'<a target="_blank" href="https://complianz.io/help/wordpress/faq/consent/">',
 					'</a>'
 				) . '</p>';
 				COMPLIANZ::$document->generate_pdf( 'cookie-statement', $region, false, true, $intro, $settings_html );

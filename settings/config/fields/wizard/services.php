@@ -23,7 +23,7 @@ function cmplz_services_fields( $fields ) {
 						'This could break website functionality.',
 						'complianz-gdpr'
 					),
-					'url'   => 'https://complianz.io/introducing-the-cookieshredder/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/introducing-the-cookieshredder/',
 				),
 			),
 			array(
@@ -56,7 +56,7 @@ function cmplz_services_fields( $fields ) {
 						'When possible a placeholder is activated. You can also disable or configure the placeholder to your liking. You can disable services and placeholders under Integrations.',
 						'complianz-gdpr'
 					),
-					'url'   => 'https://complianz.io/integrating-plugins/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/integrating-plugins/',
 				),
 				'react_conditions'        => array(
 					'relation' => 'AND',
@@ -83,7 +83,7 @@ function cmplz_services_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Blocking reCaptcha', 'complianz-gdpr' ),
 					'text'  => __( 'If you choose to block reCAPTCHA, please make sure you add a placeholder to your forms.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/blocking-recaptcha-manually/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/blocking-recaptcha-manually/',
 				),
 			),
 			array(
@@ -99,9 +99,9 @@ function cmplz_services_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Self-hosting Google Fonts', 'complianz-gdpr' ),
 					'text'  => __( 'Your site uses Google Fonts. For best privacy compliance, we recommend to self host Google Fonts. To self host, follow the instructions in the below link.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/self-hosting-google-fonts-for-wordpress/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/self-hosting-google-fonts-for-wordpress/',
 				),
-				'comment'           => __( "If you choose 'No', Complianz will block all known Google Fonts sources.", 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'Please read this %1$sarticle%2$s why self-hosting Google Fonts is recommended.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/self-hosting-google-fonts-for-wordpress/">', '</a>' ),
+				'comment'           => __( "If you choose 'No', Complianz will block all known Google Fonts sources.", 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'Please read this %1$sarticle%2$s why self-hosting Google Fonts is recommended.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/help/wordpress/configuration/self-hosting-google-fonts-for-wordpress/">', '</a>' ),
 				'react_conditions'  => array(
 					'relation' => 'AND',
 					array(
@@ -134,7 +134,7 @@ function cmplz_services_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Integrating Hubspot', 'complianz-gdpr' ),
 					'text'  => __( 'Did you enable the consent module in your HubSpot account?', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/hubspot-integration/',
+					'url'   => 'https://complianz.io/help/wordpress/integrations/hubspot-integration/',
 				),
 
 			),
@@ -151,7 +151,7 @@ function cmplz_services_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Integrating Hotjar', 'complianz-gdpr' ),
 					'text'  => __( 'You can configure Hotjar privacy-friendly, if you do this, no consent is required for Hotjar.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/configuring-hotjar-for-gdpr/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/configuring-hotjar-for-gdpr/',
 				),
 				'react_conditions'        => array(
 					'relation' => 'AND',
@@ -223,7 +223,7 @@ function cmplz_services_fields( $fields ) {
 				'menu_id'                 => 'services',
 				'premium'                 => array(
 					'disabled' => false,
-					'url'      => 'https://complianz.io/tcf-for-wordpress',
+					'url'      => 'https://complianz.io/help/wordpress/configuration/guide-to-implementing-the-tcf-framework-in-wordpress-with-complianz/',
 				),
 				'type'                    => 'radio',
 				'required'                => true,

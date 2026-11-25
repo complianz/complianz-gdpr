@@ -21,7 +21,7 @@ function cmplz_wizard_fields( $fields ) {
 				'label' => 'default',
 				'title' => __( 'Which region(s) do I target?', 'complianz-gdpr' ),
 				'text'  => __( 'You don’t need to configure your website for ‘accidental’ visitors. Only choose the regions your website is intended for.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/what-regions-do-i-target/',
+				'url'   => 'https://complianz.io/help/wordpress/faq/what-regions-do-i-target/',
 			),
 			'default'                 => false,
 			'revoke_consent_onchange' => true,
@@ -417,7 +417,7 @@ function cmplz_wizard_fields( $fields ) {
 				'title' => __( 'Records of Consent', 'complianz-gdpr' ),
 				'text'  => __( 'Enabling this option will extend our Proof of Consent method with user consent registration.', 'complianz-gdpr' ) . ' ' .
 					__( 'This option is recommended in combination with TCF and will store consent data in your database.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/records-of-consent',
+				'url'   => 'https://complianz.io/help/wordpress/configuration/records-of-consent/',
 			),
 		),
 
@@ -437,7 +437,7 @@ function cmplz_wizard_fields( $fields ) {
 				'label' => 'default',
 				'title' => __( 'What are data request forms?', 'complianz-gdpr' ),
 				'text'  => __( 'This will enable Data Requests Forms for your Privacy Statements.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/data-requests-forms/',
+				'url'   => 'https://complianz.io/help/wordpress/faq/data-requests-forms/',
 			),
 		),
 		array(

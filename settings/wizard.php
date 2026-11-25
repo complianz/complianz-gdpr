@@ -144,7 +144,7 @@ if ( ! class_exists( 'cmplz_wizard' ) ) {
 			$ids   = array_column( $fields, 'id' );
 			$index = array_search( $field_id, $ids, true );
 			$field = $fields[ $index ] ?? false;
-			if ( $field && isset( $field['revoke_consent_onchange'] ) && $field['revoke_consent_onchange'] ) {
+			if ( $field && isset( $field['revoke_consent_onchange'] ) && $field['revoke_consent_onchange'] && ! $this->is_unchanged_default( $field, $field_value ) ) {
 				COMPLIANZ::$banner_loader->upgrade_active_policy_id();
 				if ( ! get_option( 'cmplz_generate_new_cookiepolicy_snapshot' ) ) {
 					update_option( 'cmplz_generate_new_cookiepolicy_snapshot', time(), false );
@@ -224,6 +224,44 @@ if ( ! class_exists( 'cmplz_wizard' ) ) {
 		public function get_lock_user(): int {
 			$user_id = get_transient( 'cmplz_wizard_locked_by_user' ) ? get_transient( 'cmplz_wizard_locked_by_user' ) : get_current_user_id();
 			return (int) $user_id;
+		}
+
+		/**
+		 * Whether a field that was never stored is being saved with the value it already showed by default.
+		 *
+		 * A field added in an update has no stored value, so the wizard displays its default and posts it on the
+		 * next save. That is not a change, so it must not revoke consent. Only call this from the
+		 * cmplz_before_save_options filter: the new value is written after it runs, so the stored option still
+		 * holds the state before this save. The default is sanitized like the incoming value (an empty checkbox is 0).
+		 *
+		 * @param array $field       Field config.
+		 * @param mixed $field_value New value of the field, sanitized.
+		 *
+		 * @return bool
+		 */
+		private function is_unchanged_default( array $field, $field_value ): bool {
+			$stored = get_option( 'cmplz_options', array() );
+			if ( ! is_array( $stored ) || isset( $stored[ $field['id'] ] ) ) {
+				return false;
+			}
+
+			$default = apply_filters( 'cmplz_default_value', $field['default'] ?? '', $field['id'], $field ) ?? '';
+			$default = cmplz_sanitize_field( $default, cmplz_sanitize_field_type( $field['type'] ?? 'text' ), $field['id'] );
+			if ( is_array( $field_value ) || is_array( $default ) ) {
+				// Lists are compared by their values, keyed arrays by their keys, so the order of ticked options does not matter.
+				$normalize = static function ( $value ): array {
+					$value = (array) $value;
+					if ( array_keys( $value ) === array_keys( array_values( $value ) ) ) {
+						sort( $value );
+					} else {
+						ksort( $value );
+					}
+					return $value;
+				};
+				return $normalize( $field_value ) == $normalize( $default ); // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 vs '1' must not matter.
+			}
+
+			return (string) $field_value === (string) $default;
 		}
 
 		/**

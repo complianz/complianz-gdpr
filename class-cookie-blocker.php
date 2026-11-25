@@ -7,6 +7,27 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 		public $cookie_list         = array();
 		public $delete_cookies_list = array();
 
+		/**
+		 * The attributes of an opening tag, up to the next attribute of interest or the closing >.
+		 * A quoted value is consumed whole, so a > inside it does not end the tag, and a src= inside it
+		 * is never where the next piece of the pattern starts. A quoted value stops at a <, so a stray
+		 * quote in a malformed tag fails that tag instead of running the match into the next ones.
+		 */
+		const ATTRIBUTES = '(?:[^>"\']|"[^"<]*"|\'[^\'<]*\')*?';
+
+		/**
+		 * One <img> tag and its src (or data-src) value. The quote class is ['"] only, and the match
+		 * stays inside the tag: the page buffer also carries visitor content (comment author names end
+		 * up in the avatar alt), so text like src=|...| must never be read as an image URL.
+		 * Multi-line tags (FB pixel) match because whitespace is part of the attribute run.
+		 */
+		const IMAGE_PATTERN = '/<img\b' . self::ATTRIBUTES . '\s[\w-]*src=(?|"([^"]*)"|\'([^\']*)\')' . self::ATTRIBUTES . '>/';
+
+		/**
+		 * One <link rel="stylesheet"> tag and its href value, same quote class and tag boundary.
+		 */
+		const STYLE_PATTERN = '/<link\b' . self::ATTRIBUTES . '\srel=(?:"stylesheet"|\'stylesheet\')' . self::ATTRIBUTES . '\shref=(?|"([^"]*)"|\'([^\']*)\')' . self::ATTRIBUTES . '>/i';
+
 		function __construct() {
 			if ( isset( self::$_this ) ) {
 				wp_die(
@@ -456,6 +477,8 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 			if ( cmplz_is_amp() ) {
 				$buffer = apply_filters( 'cmplz_cookieblocker_amp', $buffer );
 			} else {
+				// Lets an integration change the page before the blocker looks at it (see integrations/meta-signals.php).
+				$buffer = apply_filters( 'cmplz_cookieblocker_before_replace', $buffer );
 				$buffer = $this->replace_tags( $buffer );
 			}
 
@@ -560,7 +583,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 			 * Handle images from third party services, e.g. google maps
 			 * */
 			$image_tags    = apply_filters( 'cmplz_image_tags', array() );
-			$image_pattern = '/<img.*?src=[\'|"](\X*?)[\'|"].*?>/s'; // matches multiline with s operator, for FB pixel
+			$image_pattern = self::IMAGE_PATTERN;
 			if ( preg_match_all( $image_pattern, $output, $matches, PREG_PATTERN_ORDER )
 			) {
 				foreach ( $matches[1] as $key => $image_url ) {
@@ -592,7 +615,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 			/**
 			 * Handle styles (e.g. google fonts)
 			 * */
-			$style_pattern = '/<link.*?rel=[\'|"]stylesheet[\'|"][^>].*?href=[\'|"](\X*?)[\'|"][^>]*?>/i';
+			$style_pattern = self::STYLE_PATTERN;
 			if ( preg_match_all( $style_pattern, $output, $matches, PREG_PATTERN_ORDER ) ) {
 				foreach ( $matches[1] as $key => $style_url ) {
 					$total_match = $matches[0][ $key ];
@@ -866,14 +889,14 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 			}
 
 			// Check text/javascript
-			$pattern = '/<script[^>].*?\K(type=[\'|\"]text\/javascript[\'|\"])(?=.*>)/i';
+			$pattern = '/<script[^>].*?\K(type=[\'\"]text\/javascript[\'\"])(?=.*>)/i';
 			preg_match( $pattern, $script, $matches );
 			if ( $matches ) {
 				return preg_replace( $pattern, 'type="text/plain"', $script, 1 );
 			}
 
 			// Check type="module"
-			$pattern_module = '/(<script[^>]*?)(type=[\'|\"]module[\'|\"])([^>]*?>)/i';
+			$pattern_module = '/(<script[^>]*?)(type=[\'\"]module[\'\"])([^>]*?>)/i';
 			preg_match( $pattern_module, $script, $matches_module );
 			if ( $matches_module ) {
 				return preg_replace( $pattern_module, '$1 type="text/plain" data-script-type="module" $3', $script, 1 );
@@ -963,7 +986,7 @@ if ( ! class_exists( 'cmplz_cookie_blocker' ) ) {
 		public function add_data( $html, $el, $id, $content ) {
 			$content = esc_attr( $content );
 			$id      = esc_attr( $id );
-			$pattern = '/<' . preg_quote( $el, '/' ) . '[^>].*?\K(data-' . preg_quote( $id, '/' ) . '=[\'|\"]' . preg_quote( $content, '/' ) . '[\'|\"])(?=.*>)/i';
+			$pattern = '/<' . preg_quote( $el, '/' ) . '[^>].*?\K(data-' . preg_quote( $id, '/' ) . '=[\'\"]' . preg_quote( $content, '/' ) . '[\'\"])(?=.*>)/i';
 			preg_match( $pattern, $html, $matches );
 			if ( ! $matches ) {
 				$pos = strpos( $html, "<$el" );

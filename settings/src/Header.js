@@ -25,7 +25,7 @@ const Header = () => {
 					</nav>
 				</div>
 				<div className="cmplz-header-right">
-					<a className="cmplz-knowledge-base-link" href="https://complianz.io/docs" target="_blank" rel="noopener noreferrer">{__("Documentation", "complianz-gdpr")}</a>
+					<a className="cmplz-knowledge-base-link" href="https://complianz.io/help/" target="_blank" rel="noopener noreferrer">{__("Documentation", "complianz-gdpr")}</a>
 					{cmplz_settings.is_premium &&
 						<a href="#tools/support"
 						   className="button button-black"

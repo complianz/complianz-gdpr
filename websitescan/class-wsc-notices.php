@@ -39,7 +39,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'Missing token', 'complianz-gdpr' ),
 					'text'     => __( 'The token is missing from the URL which you are using to authenticate.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/authentication-failed',
+					'url'      => 'https://complianz.io/help/wordpress/troubleshooting/website-scan-authentication-errors/',
 				);
 			}
 			if ( get_option( 'cmplz_wsc_error_email_auth_failed' ) ) {
@@ -48,7 +48,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'Authentication failed', 'complianz-gdpr' ),
 					'text'     => __( 'The authentication of your e-mail address failed. Please try again later.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/authentication-failed',
+					'url'      => 'https://complianz.io/help/wordpress/troubleshooting/website-scan-authentication-errors/',
 				);
 			}
 
@@ -58,7 +58,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'Token not retrieved', 'complianz-gdpr' ),
 					'text'     => __( 'The token for the api could not be retrieved.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/authentication-failed',
+					'url'      => 'https://complianz.io/help/wordpress/troubleshooting/website-scan-authentication-errors/',
 				);
 			}
 			if ( get_option( 'cmplz_wsc_error_email_not_sent' ) ) {
@@ -67,7 +67,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'E-mail verification not sent', 'complianz-gdpr' ),
 					'text'     => __( 'The e-mail to verify your e-mail address could not be sent. Please check your e-mail address or try again later.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/authentication-failed',
+					'url'      => 'https://complianz.io/help/wordpress/troubleshooting/website-scan-authentication-errors/',
 				);
 			}
 			if ( ! cmplz_wsc_auth::wsc_is_authenticated() ) {
@@ -76,7 +76,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'Try our new Website Scan!', 'complianz-gdpr' ),
 					'text'     => __( 'In the latest release of Complianz, we introduce our newest Website Scan. This scan will not only retrieve services and cookies but also help you configure our plugin and keep you up-to-date if changes are made that might need legal changes.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/about-the-website-scan',
+					'url'      => 'https://complianz.io/help/wordpress/faq/about-the-website-scan/',
 				);
 			}
 			if ( ! cmplz_wsc_auth::wsc_is_authenticated() ) {
@@ -94,7 +94,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'Check your email!', 'complianz-gdpr' ),
 					'text'     => __( 'Your authentication is still on pending, check your emails for a confirmation.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/about-the-website-scan#pending',
+					'url'      => 'https://complianz.io/help/wordpress/faq/about-the-website-scan/#pending',
 				);
 			}
 
@@ -104,7 +104,7 @@ if ( ! class_exists( 'cmplz_wsc_notices' ) ) {
 					'label'    => 'warning',
 					'title'    => __( 'REST API not accessible', 'complianz-gdpr' ),
 					'text'     => __( 'The Website Scan requires the WordPress REST API to be publicly accessible. It appears to be blocked, possibly by a security plugin. The batch scan will not work until this is resolved.', 'complianz-gdpr' ),
-					'url'      => 'https://complianz.io/rest-api-required',
+					'url'      => 'https://complianz.io/help/wordpress/instructions/errors-on-complianz-rest-api-troubleshooting-endpoint-exclusion/',
 				);
 			}
 

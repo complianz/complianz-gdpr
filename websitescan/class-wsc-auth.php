@@ -689,7 +689,14 @@ if ( ! class_exists( 'cmplz_wsc_auth' ) ) {
 
 			$service_key   = sprintf( '%s_enabled', $service );
 			$response_body = json_decode( wp_remote_retrieve_body( $request ) );
-			$is_open       = isset( $response_body->$service_key ) && 'true' === $response_body->$service_key;
+
+			if ( ! is_object( $response_body ) ) {
+				cmplz_wsc_logger::log_errors( 'wsc_api_open', 'Invalid circuit breaker response: expected a JSON object.' );
+				set_transient( $transient_key, 0, 2 * MINUTE_IN_SECONDS );
+				return false;
+			}
+
+			$is_open = isset( $response_body->$service_key ) && 'true' === $response_body->$service_key;
 
 			do_action( 'cmplz_wsc_api_open_response', $response_body, $service );
 

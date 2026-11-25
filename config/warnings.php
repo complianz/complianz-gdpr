@@ -12,79 +12,110 @@
 const COMPLIANZ_DYNAMIC_NOTIFICATIONS_ENDPOINT             = 'https://notifications.complianz.io/';
 const COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_KEY        = 'cmplz_dn_notifications_';
 const COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION = 24 * HOUR_IN_SECONDS;
+const COMPLIANZ_DYNAMIC_NOTIFICATIONS_FETCH_EVENT          = 'cmplz_dn_fetch_event';
+const COMPLIANZ_DYNAMIC_NOTIFICATIONS_ATTEMPTS_OPTION      = 'cmplz_dn_attempts';
 
-// Hook into the admin_init action to update the notifications.
+// Hook into the admin_init action to schedule the notifications update.
 add_action( 'admin_init', 'cmplz_dn_update' );
+// Fetch the notifications in the background, so the admin request never waits for the endpoint.
+add_action( COMPLIANZ_DYNAMIC_NOTIFICATIONS_FETCH_EVENT, 'cmplz_dn_fetch_notifications' );
 // Hook into the cmplz_warning_types filter to include the notifications in the warnings array.
 add_filter( 'cmplz_warning_types', 'cmplz_dn_include_notifications' );
 
 /**
- * Update the notifications.
+ * Schedule an update of the notifications when they are not cached yet.
+ *
+ * Never fetches inline: the request to the endpoint runs in a separate WP-Cron request. When
+ * WP-Cron is disabled, it runs at shutdown after the response was sent, where the server supports that.
  *
  * @return void
  */
 function cmplz_dn_update(): void {
+	// Allow the dynamic notifications to be disabled.
+	if ( ! apply_filters( 'cmplz_dynamic_notifications_enabled', true ) ) {
+		return;
+	}
+
 	// Retrieve the user language, return just the language code (en, nl, de, etc).
 	$language = cmplz_dn_get_language();
 	// Generate the transient key.
 	$transient_key = cmplz_dn_transient_key( $language );
-	// Check for the presence of the transients of the fetched notifications.
-	$notifications = get_transient( $transient_key, false );
 
-	// If the transient is not set, fetch the notifications.
-	if ( ! is_array( $notifications ) ) {
-		$notifications = cmplz_dn_fetch_notifications();
+	// Notifications are cached, nothing to do.
+	if ( is_array( get_transient( $transient_key ) ) ) {
+		return;
 	}
+
+	// Not more than one attempt per 24 hours, even if the transient does not persist (e.g. a broken object cache).
+	if ( ! cmplz_dn_claim_attempt( $language ) ) {
+		return;
+	}
+
+	// WP-Cron disabled: fetch at shutdown, after the response was sent to the browser. Without
+	// fastcgi_finish_request() that would keep the request open, so only schedule the event
+	// (a system cron may still run it).
+	if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON && function_exists( 'fastcgi_finish_request' ) ) {
+		add_action(
+			'shutdown',
+			function () use ( $language ) {
+				fastcgi_finish_request();
+				cmplz_dn_fetch_notifications( $language );
+			}
+		);
+		return;
+	}
+
+	wp_schedule_single_event( time(), COMPLIANZ_DYNAMIC_NOTIFICATIONS_FETCH_EVENT, array( $language ) );
+}
+
+/**
+ * Register a fetch attempt for a language, unless one was already made in the last 24 hours.
+ *
+ * The attempts are stored in an option instead of a transient, so the throttle also works
+ * when transients do not persist.
+ *
+ * @param string $language The language code.
+ * @return bool True if the attempt was claimed, false if one was already made recently.
+ */
+function cmplz_dn_claim_attempt( string $language ): bool {
+	$attempts = get_option( COMPLIANZ_DYNAMIC_NOTIFICATIONS_ATTEMPTS_OPTION, array() );
+	$attempts = is_array( $attempts ) ? $attempts : array();
+	$now      = time();
+
+	if ( isset( $attempts[ $language ] ) && $now - (int) $attempts[ $language ] < COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION ) {
+		return false;
+	}
+
+	$attempts[ $language ] = $now;
+	update_option( COMPLIANZ_DYNAMIC_NOTIFICATIONS_ATTEMPTS_OPTION, $attempts, false );
+
+	return true;
 }
 
 /**
  * Fetch the notifications from the endpoint.
  *
+ * @param string $language The language code.
  * @return void
  */
-function cmplz_dn_fetch_notifications(): void {
-	$notifications = array();
-
-	$endpoint       = cmplz_dn_endpoint();
-	$plugin_version = COMPLIANZ::$wsc_scanner->get_cmplz_version();
-	$language       = cmplz_dn_get_language();
-
+function cmplz_dn_fetch_notifications( string $language ): void {
 	// Define the transient key.
 	$transient_key = cmplz_dn_transient_key( $language );
 
-	$payload = array(
-		'version'  => $plugin_version,
-		'language' => $language,
-	);
+	$response = cmplz_dn_request( $language );
 
-	$response = wp_remote_post(
-		$endpoint,
-		array(
-			'headers' => array(
-				'Content-Type' => 'application/json',
-			),
-			'body'    => wp_json_encode( $payload ),
-			'timeout' => 15,
-		)
-	);
+	// The endpoint only supports a fixed list of languages and answers 400 for any other. Fall back to English.
+	if ( 'en' !== $language && 400 === (int) wp_remote_retrieve_response_code( $response ) ) {
+		$response = cmplz_dn_request( 'en' );
+	}
 
-	if ( is_wp_error( $response ) ) {
+	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
 		// Avoid fetching notifications repeatedly if the response is invalid and set an empty array.
 		cmplz_dn_set_empty_notifications( $transient_key );
 		return;
 	}
 
-	$status = wp_remote_retrieve_response_code( $response );
-
-	if ( 200 !== $status ) {
-		// Avoid fetching notifications repeatedly if the response is invalid and set an empty array.
-		cmplz_dn_set_empty_notifications( $transient_key );
-		return;
-	}
-
-	$body = wp_remote_retrieve_body( $response );
-
-	$raw_notifications = json_decode( $body, true );
+	$raw_notifications = json_decode( wp_remote_retrieve_body( $response ), true );
 
 	// Check if the response is valid.
 	if ( ! is_array( $raw_notifications ) || ! isset( $raw_notifications['notifications'] ) || ! is_array( $raw_notifications['notifications'] ) ) {
@@ -93,11 +124,32 @@ function cmplz_dn_fetch_notifications(): void {
 		return;
 	}
 
-	// Get the sub-array with the notifications.
-	$notifications = $raw_notifications['notifications'];
-
 	// Store the notifications for 24 hours.
-	$saved = set_transient( $transient_key, $notifications, COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION );
+	set_transient( $transient_key, $raw_notifications['notifications'], COMPLIANZ_DYNAMIC_NOTIFICATIONS_TRANSIENT_EXPIRATION );
+}
+
+/**
+ * Request the notifications for a language from the endpoint.
+ *
+ * @param string $language The language code.
+ * @return array|WP_Error The response.
+ */
+function cmplz_dn_request( string $language ) {
+	$payload = array(
+		'version'  => COMPLIANZ::$wsc_scanner->get_cmplz_version(),
+		'language' => $language,
+	);
+
+	return wp_remote_post(
+		cmplz_dn_endpoint(),
+		array(
+			'headers' => array(
+				'Content-Type' => 'application/json',
+			),
+			'body'    => wp_json_encode( $payload ),
+			'timeout' => 5,
+		)
+	);
 }
 
 /**
@@ -211,9 +263,10 @@ function cmplz_dn_transient_key( string $language ): string {
  * @return string The language for the notifications.
  */
 function cmplz_dn_get_language(): string {
-	$language = get_user_locale();
-	// Cut the language, stripping after the underscore.
-	return substr( $language, 0, strpos( $language, '_' ) );
+	$locale = get_user_locale();
+	$pos    = strpos( $locale, '_' );
+	// Cut the language, stripping after the underscore. Locales without one (ja, fi, ca) are used as is.
+	return false === $pos ? $locale : substr( $locale, 0, $pos );
 }
 
 /** End of Dynamic Notifications */
@@ -231,13 +284,13 @@ function cmplz_load_warning_types() {
 			'migrate_js'                     => array(
 				'warning_condition' => 'get_value_enable_migrate_js==yes',
 				'open'              => __( 'Migrate.js, which allowed a smooth upgrade to 6.0, has been deprecated.', 'complianz-gdpr' ),
-				'url'               => 'https://complianz.io/migrate-js-deprecated/',
+				'url'               => 'https://complianz.io/help/wordpress/instructions/migrate-js-deprecated/',
 				'admin_notice'      => true,
 			),
 			'enable_quebec_region'           => array(
 				'warning_condition' => 'cmplz_requires_quebec_notice',
 				'open'              => cmplz_quebec_notice(),
-				'url'               => 'https://complianz.io/quebec-bill-64/',
+				'url'               => 'https://complianz.io/help/privacy-and-regulations/legal-requirements/quebec-bill-64/',
 				'admin_notice'      => true,
 				'dismissible'       => true,
 			),
@@ -246,7 +299,7 @@ function cmplz_load_warning_types() {
 					'get_value_respect_dnt==yes',
 				),
 				'completed'          => __( 'Do Not Track and Global Privacy Control are respected.', 'complianz-gdpr' ),
-				'url'                => 'https://complianz.io/browser-privacy-controls/',
+				'url'                => 'https://complianz.io/help/wordpress/configuration/browser-privacy-controls/',
 			),
 			'ajax_fallback'                  => array(
 				'warning_condition' => 'get_option_cmplz_ajax_fallback_active',
@@ -260,7 +313,7 @@ function cmplz_load_warning_types() {
 				),
 				'open'                => __( 'You have currently selected an informal language, which will result in informal use of language on the legal documents. If you prefer the formal style, you can activate this in the general settings.', 'complianz-gdpr' ),
 				'include_in_progress' => true,
-				'url'                 => 'https://complianz.io/informal-language-in-legal-documents/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/informal-language-in-legal-documents/',
 
 			),
 			'google-fonts'                   => array(
@@ -268,9 +321,9 @@ function cmplz_load_warning_types() {
 				'warning_condition'   => 'banner_loader->show_google_fonts_notice',
 				'success_conditions'  => array(),
 				// translators: %s is a placeholder for the anchor link.
-				'open'                => __( 'Google Fonts requires your attention.', 'complianz-gdpr' ) . ' ' . __( 'We have added additional support and recommend reviewing your settings.', 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'Please read this %1$sarticle%2$s to read our position on self-hosting Google Fonts and Privacy by Design.', 'complianz-gdpr' ), '<a href="https://complianz.io/self-hosting-google-fonts-for-wordpress/" target="_blank">', '</a>' ),
+				'open'                => __( 'Google Fonts requires your attention.', 'complianz-gdpr' ) . ' ' . __( 'We have added additional support and recommend reviewing your settings.', 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'Please read this %1$sarticle%2$s to read our position on self-hosting Google Fonts and Privacy by Design.', 'complianz-gdpr' ), '<a href="https://complianz.io/help/wordpress/configuration/self-hosting-google-fonts-for-wordpress/" target="_blank">', '</a>' ),
 				'include_in_progress' => true,
-				'url'                 => 'https://complianz.io/self-hosting-google-fonts-for-wordpress/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/self-hosting-google-fonts-for-wordpress/',
 			),
 			'cookies-changed'                => array(
 				'plus_one'            => true,
@@ -355,7 +408,7 @@ function cmplz_load_warning_types() {
 							__( 'After the issue has been resolved, please re-run a scan to clear this message.', 'complianz-gdpr' ),
 				'include_in_progress' => true,
 				'dismissible'         => true,
-				'url'                 => 'https://complianz.io/duplicate-implementation-of-analytics/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/duplicate-implementation-of-analytics/',
 			),
 			'console-errors'                 => array(
 				'warning_condition'   => 'banner_loader->site_needs_cookie_warning',
@@ -368,7 +421,7 @@ function cmplz_load_warning_types() {
 							. cmplz_get_console_errors()
 							. '</div>',
 				'include_in_progress' => true,
-				'url'                 => 'https://complianz.io/cookie-banner-does-not-appear/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/cookie-banner-does-not-appear/',
 			),
 			'cookie-banner-enabled'          => array(
 				'success_conditions'  => array(
@@ -378,7 +431,7 @@ function cmplz_load_warning_types() {
 				'urgent'              => __( 'Your site is not configured to show a consent banner at the moment.', 'complianz-gdpr' ),
 				'include_in_progress' => true,
 				'dismissible'         => true,
-				'url'                 => 'https://complianz.io/cookie-banner-does-not-appear/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/cookie-banner-does-not-appear/',
 			),
 			'pretty-permalinks-error'        => array(
 				'success_conditions'  => array(
@@ -398,7 +451,7 @@ function cmplz_load_warning_types() {
 				'urgent'              => __( 'Your uploads folder is not writable. Complianz needs this folder to save the consent banner CSS.', 'complianz-gdpr' ),
 				'include_in_progress' => true,
 				'dismissible'         => false,
-				'url'                 => 'https://complianz.io/folder-permissions/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/folder-permissions/',
 			),
 			'custom-google-maps'             => array(
 				'warning_condition'   => 'cmplz_uses_google_maps',
@@ -408,7 +461,7 @@ function cmplz_load_warning_types() {
 				'plus_one'            => false,
 				'open'                => __( 'We see you have enabled Google Maps as a service, but we can\'t find an integration. You can integrate manually if needed.', 'complianz-gdpr' ),
 				'include_in_progress' => true,
-				'url'                 => 'https://complianz.io/custom-google-maps-implementation/',
+				'url'                 => 'https://complianz.io/help/wordpress/customization/custom-google-maps-implementation/',
 			),
 			'other-cookie-plugins'           => array(
 				'warning_condition'   => 'cmplz_detected_cookie_plugin',
@@ -423,7 +476,7 @@ function cmplz_load_warning_types() {
 				'premium'             => __( 'Are you showing ads on your site? Consider implementing TCF.', 'complianz-gdpr' ),
 				'include_in_progress' => false,
 				'dismissible'         => false,
-				'url'                 => 'https://complianz.io/implementing-tcf-on-your-website/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/guide-to-implementing-the-tcf-framework-in-wordpress-with-complianz/',
 			),
 			'sync-privacy-statement'         => array(
 				'premium'             => __( 'Create a Privacy Statement and other Legal Documents with Complianz.', 'complianz-gdpr' ),
@@ -436,28 +489,28 @@ function cmplz_load_warning_types() {
 				'premium'             => __( 'Legal compliance for webshops.', 'complianz-gdpr' ),
 				'include_in_progress' => false,
 				'dismissible'         => false,
-				'url'                 => 'https://complianz.io/legal-compliance-for-ecommerce/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/legal-compliance-for-ecommerce/',
 			),
 			'configure-tag-manager'          => array(
 				'warning_condition'   => 'cmplz_uses_google_tagmanager_or_analytics',
 				'premium'             => __( 'Learn more about Google Consent Mode V2.', 'complianz-gdpr' ),
 				'include_in_progress' => false,
 				'dismissible'         => false,
-				'url'                 => 'https://complianz.io/consent-mode-for-7-0/',
+				'url'                 => 'https://complianz.io/help/wordpress/configuration/consent-mode-for-7-0/',
 			),
 			'targeting-multiple-regions'     => array(
 				'warning_condition'   => 'cmplz_targeting_multiple_regions',
 				'premium'             => __( 'Are you targeting multiple regions?', 'complianz-gdpr' ),
 				'include_in_progress' => false,
 				'dismissible'         => false,
-				'url'                 => 'https://complianz.io/what-regions-do-i-target/',
+				'url'                 => 'https://complianz.io/help/wordpress/faq/what-regions-do-i-target/',
 			),
 			'textdomain-just-in-time-notice' => array(
 				'dismissible'         => true,
 				'open'                => __( 'You might see a notice about Complianz when debugging your WordPress website. Although not a breaking issue, please know we\'re attending to this issue.', 'complianz-gdpr' ),
 				'warning_condition'   => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? '_true_' : '_false_',
 				'include_in_progress' => false,
-				'url'                 => 'https://complianz.io/about-function-_load_textdomain_just_in_time-was-called-incorrectly/',
+				'url'                 => 'https://complianz.io/help/wordpress/faq/about-function-_load_textdomain_just_in_time-was-called-incorrectly/',
 			),
 			'clarity-consent-mode'           => array(
 				'plus_one'          => true,

@@ -45,7 +45,7 @@ function cmplz_menu() {
 							'id'       => 'impressum',
 							'title'    => __( 'Imprint', 'complianz-gdpr' ),
 							'intro'    => __( 'We need some information to be able to generate your Imprint. Not all fields are required.', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/impressum-required-information',
+							'helpLink' => 'https://complianz.io/help/wordpress/configuration/impressum-required-information/',
 						),
 						array(
 							'id'       => 'disclaimer',
@@ -109,21 +109,21 @@ function cmplz_menu() {
 						array(
 							'id'                    => 'cookie-scan',
 							'title'                 => __( 'Website Scan', 'complianz-gdpr' ),
-							'intro'                 => __( 'Complianz will scan several pages of your website for first-party cookies and known third-party scripts. The scan will be recurring monthly to keep you up-to-date!', 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'For more information, %1$sread our 5 tips%2$s about the site scan.', 'complianz-gdpr' ), '<a href="https://complianz.io/cookie-scan-results/" target="_blank">', '</a>' ),
-							'helpLink'              => 'https://complianz.io/cookie-scan-results/',
+							'intro'                 => __( 'Complianz will scan several pages of your website for first-party cookies and known third-party scripts. The scan will be recurring monthly to keep you up-to-date!', 'complianz-gdpr' ) . ' ' . cmplz_sprintf( __( 'For more information, %1$sread our 5 tips%2$s about the site scan.', 'complianz-gdpr' ), '<a href="https://complianz.io/help/wordpress/configuration/cookie-scan-results/" target="_blank">', '</a>' ),
+							'helpLink'              => 'https://complianz.io/help/wordpress/configuration/cookie-scan-results/',
 							'save_buttons_required' => false,
 						),
 						array(
 							'id'       => 'consent-statistics',
 							'title'    => __( 'Statistics', 'complianz-gdpr' ),
 							'intro'    => __( 'Below you can choose to implement your statistics tooling with Complianz. We will add the needed snippets and control consent at the same time', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/statistics-implementation',
+							'helpLink' => 'https://complianz.io/help/wordpress/configuration/statistics-implementation/',
 						),
 						array(
 							'id'       => 'statistics-configuration',
 							'title'    => __( 'Statistics configuration', 'complianz-gdpr' ),
 							'intro'    => __( 'If you choose Complianz to handle your statistics implementation, please delete the current implementation.', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/statistics-implementation#configuration',
+							'helpLink' => 'https://complianz.io/help/wordpress/configuration/statistics-implementation/#configuration',
 						),
 						array(
 							'id'    => 'services',
@@ -143,14 +143,14 @@ function cmplz_menu() {
 								'The below questions will help you configure a vendor list of your choosing. Only vendors that adhere to the purposes and special features you configure will be able to serve ads.',
 								'complianz-gdpr'
 							),
-							'helpLink' => 'https://complianz.io/tcf-for-wordpress/',
+							'helpLink' => 'https://complianz.io/help/wordpress/configuration/guide-to-implementing-the-tcf-framework-in-wordpress-with-complianz/',
 						),
 						array(
 							'id'                    => 'cookie-descriptions',
 							'title'                 => 'Cookiedatabase.org',
 							'intro'                 => __( 'Complianz provides your Cookie Policy with comprehensive cookie descriptions, supplied by cookiedatabase.org.', 'complianz-gdpr' ) . ' '
 								. __( 'We connect to this open-source database using an external API, which sends the results of the cookiescan (a list of found cookies, used plugins and your domain) to cookiedatabase.org, for the sole purpose of providing you with accurate descriptions and keeping them up-to-date on a regular basis.', 'complianz-gdpr' ),
-							'helpLink'              => 'https://complianz.io/our-cookiedatabase-a-new-initiative/',
+							'helpLink'              => 'https://complianz.io/help/wordpress/configuration/our-cookiedatabase-a-new-initiative/',
 							'save_buttons_required' => false,
 						),
 					),
@@ -164,13 +164,13 @@ function cmplz_menu() {
 							'id'       => 'create-documents',
 							'title'    => __( 'Documents', 'complianz-gdpr' ),
 							'intro'    => __( 'Generate your documents, then you can add them to your menu directly or do it manually after the wizard is finished.', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/how-to-create-a-menu-in-wordpress/',
+							'helpLink' => 'https://complianz.io/help/wordpress/faq/how-to-create-a-menu-in-wordpress/',
 						),
 						array(
 							'id'       => 'document-menu',
 							'title'    => __( 'Link to menu', 'complianz-gdpr' ),
 							'intro'    => __( 'It\'s possible to use region redirect when GEO IP is enabled, and you have multiple policies and statements.', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/how-to-redirect-your-policies-based-on-region/',
+							'helpLink' => 'https://complianz.io/help/wordpress/configuration/how-to-redirect-your-policies-based-on-region/',
 						),
 					),
 				),
@@ -217,7 +217,7 @@ function cmplz_menu() {
 					'id'       => 'banner-texts',
 					'title'    => __( 'Texts', 'complianz-gdpr' ),
 					'intro'    => __( 'Here you can edit the texts on your banner.', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/social-media-on-a-cookiebanner/',
+					'helpLink' => 'https://complianz.io/help/wordpress/configuration/social-media-on-a-cookiebanner/',
 				),
 				array(
 					'id'       => 'custom-css',
@@ -233,17 +233,17 @@ function cmplz_menu() {
 				array(
 					'id'       => 'integrations-services',
 					'title'    => __( 'Services', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/integrating-plugins/',
+					'helpLink' => 'https://complianz.io/help/wordpress/configuration/integrating-plugins/',
 				),
 				array(
 					'id'       => 'integrations-plugins',
 					'title'    => __( 'Plugins', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/integrating-plugins/',
+					'helpLink' => 'https://complianz.io/help/wordpress/configuration/integrating-plugins/',
 				),
 				array(
 					'id'       => 'integrations-script-center',
 					'title'    => __( 'Script Center', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/integrating-plugins/',
+					'helpLink' => 'https://complianz.io/help/wordpress/configuration/integrating-plugins/',
 				),
 			),
 		),
@@ -293,7 +293,7 @@ function cmplz_menu() {
 								cmplz_sprintf(
 									/* translators: 1: URL, 2: aria-label text */
 									__( 'we recommend using our <a href="%1$s" target="_blank" rel="noopener noreferrer" aria-label="%2$s">online support form</a> instead.', 'complianz-gdpr' ),
-									'https://complianz.io/support',
+									'https://complianz.io/help/',
 									esc_attr__( 'Online support form (opens in new tab)', 'complianz-gdpr' )
 								) . '<br><br>' .
 								'<strong>' . __( 'Please note:', 'complianz-gdpr' ) . '</strong> ' . __( 'Your support request may be processed by Emma, an automated AI assistant. The information you provide will be used solely for the purpose of handling and resolving your support inquiry.', 'complianz-gdpr' ),
@@ -310,17 +310,17 @@ function cmplz_menu() {
 				array(
 					'id'       => 'data-requests',
 					'title'    => __( 'Data Requests', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/data-requests-forms/',
+					'helpLink' => 'https://complianz.io/help/wordpress/faq/data-requests-forms/',
 					'groups'   => array(
 						array(
 							'id'       => 'datarequest-entries',
 							'title'    => __( 'Data Requests', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/responding-to-a-data-request/',
+							'helpLink' => 'https://complianz.io/help/wordpress/faq/responding-to-a-data-request/',
 						),
 						array(
 							'id'       => 'settings',
 							'title'    => __( 'Settings', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/data-requests-forms/',
+							'helpLink' => 'https://complianz.io/help/wordpress/faq/data-requests-forms/',
 						),
 					),
 				),
@@ -331,7 +331,7 @@ function cmplz_menu() {
 						array(
 							'id'       => 'placeholders-appearance',
 							'title'    => __( 'Placeholder Style', 'complianz-gdpr' ),
-							'helpLink' => 'https://complianz.io/changing-the-default-social-placeholders/',
+							'helpLink' => 'https://complianz.io/help/wordpress/customization/customize-service-placeholders/',
 						),
 						array(
 							'id'    => 'placeholders-settings',
@@ -357,7 +357,7 @@ function cmplz_menu() {
 				array(
 					'id'       => 'multisite',
 					'title'    => __( 'Multisite options', 'complianz-gdpr' ),
-					'helpLink' => 'https://complianz.io/cross-domain-cookie-consent/',
+					'helpLink' => 'https://complianz.io/help/wordpress/configuration/cross-domain-cookie-consent/',
 				),
 				array(
 					'id'                    => 'processing-agreements',
@@ -368,7 +368,7 @@ function cmplz_menu() {
 						array(
 							'id'           => 'create-processing-agreements',
 							'title'        => __( 'Create Processing Agreements', 'complianz-gdpr' ),
-							'helpLink'     => 'https://complianz.io/do-i-need-a-processing-agreement-with-complianz/',
+							'helpLink'     => 'https://complianz.io/help/wordpress/configuration/do-i-need-a-processing-agreement-with-complianz/',
 							'intro'        => __( 'Here you can create and upload processing agreements. These are necessary when you allow other third parties to process your data.', 'complianz-gdpr' ),
 							'premium'      => true,
 							'upgrade'      => 'https://complianz.io/pricing/',
@@ -429,13 +429,13 @@ function cmplz_menu() {
 				array(
 					'id'                    => 'records-of-consent',
 					'title'                 => __( 'Records of Consent', 'complianz-gdpr' ),
-					'helpLink'              => 'https://complianz.io/records-of-consent/',
+					'helpLink'              => 'https://complianz.io/help/wordpress/configuration/records-of-consent/',
 					'save_buttons_required' => false,
 					'groups'                => array(
 						array(
 							'id'           => 'create-records-of-consent',
 							'title'        => __( 'General', 'complianz-gdpr' ),
-							'helpLink'     => 'https://complianz.io/records-of-consent/',
+							'helpLink'     => 'https://complianz.io/help/wordpress/configuration/records-of-consent/',
 							'premium'      => true,
 							'upgrade'      => 'https://complianz.io/pricing/',
 							'premium_text' => __( 'View and manage Records of Consent with %1$sComplianz GDPR Premium%2$s', 'complianz-gdpr' ),

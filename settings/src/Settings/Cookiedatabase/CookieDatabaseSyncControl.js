@@ -111,7 +111,7 @@ const CookieDatabaseSyncControl = () => {
 					'warning',
 					explanation,
 					__( 'No cookies found', 'complianz-gdpr' ),
-					'https://complianz.io/cookie-scan-results/'
+					'https://complianz.io/help/wordpress/configuration/cookie-scan-results/'
 				);
 			} else if ( noCookieNoticeShown ) {
 				removeHelpNotice( 'cookiedatabase_sync' );

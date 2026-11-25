@@ -434,12 +434,12 @@ function cmplz_add_cookiebanner_settings( $fields ) {
 					"Unlike the regular cookie wall, the soft cookie wall doesn't block visitors that do not deny consent or dismiss the banner. It will however forces a choice before visitors enter your website.",
 					'complianz-gdpr'
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
-				) . ' ' . cmplz_sprintf( __( 'Read more about %1$sthe soft cookie wall%2$s.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/the-soft-cookie-wall/" aria-label="Read more about the soft cookie wall">', '</a>' ),
+				) . ' ' . cmplz_sprintf( __( 'Read more about %1$sthe soft cookie wall%2$s.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/help/wordpress/configuration/the-soft-cookie-wall/" aria-label="Read more about the soft cookie wall">', '</a>' ),
 				'help'             => array(
 					'label' => 'default',
 					'title' => __( 'Soft cookie wall', 'complianz-gdpr' ),
 					'text'  => __( 'Read more about our privacy-friendly cookie wall.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/the-soft-cookie-wall/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/the-soft-cookie-wall/',
 				),
 				'react_conditions' => array(
 					'relation' => 'AND',

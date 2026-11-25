@@ -64,7 +64,7 @@ function cmplz_proof_of_consent_fields($fields){
 				'label' => 'default',
 				'title' => __( "What are records of consent?", 'complianz-gdpr' ),
 				'text'  => __( 'Records of Consent are required in certain circumstances, you can read our article about dealing with records of consent and why it is needed.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/records-of-consent/',
+				'url'   => 'https://complianz.io/help/wordpress/configuration/records-of-consent/',
 			],
 			'react_conditions' => [
 				'relation' => 'AND',

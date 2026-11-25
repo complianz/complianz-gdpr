@@ -196,7 +196,7 @@ if ( ! class_exists( 'cmplz_wsc_settings' ) ) {
 								'title'        => __( 'Website Scan', 'complianz-gdpr' ),
 								'intro'        => __( 'Here you can manage your credentials. If you don’t want to use the Website Scan, you can reset it. A token will be created to verify your website. After creating your credentials, please make sure to check your email for a confirmation.', 'complianz-gdpr' ),
 								'premium_text' => __( 'View and manage Processing Agreements with %1$sComplianz GDPR Premium%2$s', 'complianz-gdpr' ),
-								'helpLink'     => 'https://complianz.io/about-the-website-scan/',
+								'helpLink'     => 'https://complianz.io/help/wordpress/faq/about-the-website-scan/',
 							);
 							$menu[ $key ]['menu_items'][ $menu_key ]['groups'][] = $websiteScanItem;
 						}

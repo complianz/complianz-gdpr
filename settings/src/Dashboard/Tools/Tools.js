@@ -39,7 +39,7 @@ const Tools = () => {
 			viewLink: "#tools/data-requests",
 			enableLink: "#wizard/security-consent",
 			field: {name:"datarequest",value: 'yes'},
-			link: "https://complianz.io/definition/what-is-a-data-request/",
+			link: "https://complianz.io/help/wordpress/faq/responding-to-a-data-request/",
 			plusone: <PlusOnes count={totalOpen}/>
 		},
 		{
@@ -47,7 +47,7 @@ const Tools = () => {
 			viewLink: "#tools/records-of-consent",
 			enableLink: "#wizard/security-consent",
 			field: {name:"records_of_consent",value: 'yes'},
-			link: "https://complianz.io/records-of-consent/",
+			link: "https://complianz.io/help/wordpress/configuration/records-of-consent/",
 		},
 		{
 			title: __("Processing Agreements", "complianz-gdpr"),
@@ -57,21 +57,21 @@ const Tools = () => {
 		{
 			title: __("Consent Statistics", "complianz-gdpr"),
 			viewLink: "#tools/ab-testing",
-			link: "https://complianz.io/a-quick-introduction-to-a-b-testing/",
+			link: "https://complianz.io/help/wordpress/faq/a-quick-introduction-to-a-b-testing/",
 		},
 		{
 			title: __("A/B Testing", "complianz-gdpr"),
 			viewLink: "#tools/ab-testing",
-			link: "https://complianz.io/a-quick-introduction-to-a-b-testing/",
+			link: "https://complianz.io/help/wordpress/faq/a-quick-introduction-to-a-b-testing/",
 		},
 		{
 			title: __("Translations", "complianz-gdpr"),
 			viewLink: "#tools/translations",
-			link: "https://complianz.io/translations/",
+			link: "https://complianz.io/help/wordpress/customization/dynamic-translations/",
 		},
 		{
 			title: __("Documentation", "complianz-gdpr"),
-			link: "https://complianz.io/support/",
+			link: "https://complianz.io/help/",
 		},
 		{
 			title: __("Premium Support", "complianz-gdpr"),

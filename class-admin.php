@@ -236,7 +236,7 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 
 			$support_link = defined( 'cmplz_free' )
 				? 'https://wordpress.org/support/plugin/complianz-gdpr'
-				: cmplz_get_referral_url( 'articles', 'plugins-page-support', 'https://complianz.io/support' );
+				: cmplz_get_referral_url( 'articles', 'plugins-page-support', 'https://complianz.io/help/' );
 			$faq_link     = '<a target="_blank" href="' . $support_link . '">'
 							. __( 'Support', 'complianz-gdpr' ) . '</a>';
 			array_unshift( $links, $faq_link );

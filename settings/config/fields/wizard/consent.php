@@ -19,7 +19,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 						'If you want to clear all cookies from the plugin, you can do so here. If you want to start with a clean slate, you might need to clear your browsercache, to make sure all cookies are removed from your browser as well.',
 						'complianz-gdpr'
 					),
-					'url'   => 'https://complianz.io/cookie-scan-results/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/cookie-scan-results/',
 				),
 			),
 			array(
@@ -75,7 +75,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 						'If you select the option that IP addresses are anonymized, and let Complianz handle the statistics, Complianz will ensure that ip addresses are anonymized by default, unless consent is given for statistics.',
 						'complianz-gdpr'
 					),
-					'url'   => 'https://complianz.io/how-to-configure-google-analytics-for-gdpr/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/how-to-configure-google-analytics-for-gdpr/',
 				),
 			),
 			array(
@@ -95,7 +95,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => 'Configuring Google Tag Manager',
 					'text'  => __( 'You can configure Google Tag Manager for Complianz, and, if applicable, adjust configuration for Google Analytics for GDPR and other opt-in based privacy laws.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/definitive-guide-to-tag-manager-and-complianz/',
+					'url'   => 'https://complianz.io/help/wordpress/integrations/definitive-guide-to-tag-manager-and-complianz/',
 				),
 				'react_conditions'        => array(
 					'relation' => 'AND',
@@ -119,7 +119,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => __( 'GTG Deployment Steps', 'complianz-gdpr' ),
 					'text'  => __( 'Do you want to know about GTG deployment steps?', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/google-tag-gateway',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/google-tag-gateway/',
 				),
 			),
 			array(
@@ -154,7 +154,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => 'Matomo',
 					'text'  => __( 'Learn more about using cookieless tracking with Matomo.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/cookieless-tracking-matomo/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/cookieless-tracking-matomo/',
 				),
 				'react_conditions'        => array(
 					'relation' => 'AND',
@@ -208,7 +208,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'title' => __( 'Script Center', 'complianz-gdpr' ),
 					'text'  => __( 'Below you can choose to implement your statistics script with Complianz.', 'complianz-gdpr' ) . '&nbsp;' .
 								__( 'We will add the needed snippets and control consent at the same time.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/integrating-plugins/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/integrating-plugins/',
 				),
 			),
 			array(
@@ -239,7 +239,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'disabled' => false,
 				),
 				'label'            => __( 'Do you want to enable Google Consent Mode V2?', 'complianz-gdpr' ),
-				'comment'          => cmplz_sprintf( __( 'Please read this %1$sarticle%2$s to make sure Consent Mode is working as expected.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/simplified-guide-to-google-consent-mode-v2/">', '</a>' ),
+				'comment'          => cmplz_sprintf( __( 'Please read this %1$sarticle%2$s to make sure Consent Mode is working as expected.', 'complianz-gdpr' ), '<a target="_blank" href="https://complianz.io/help/wordpress/integrations/simplified-guide-to-google-consent-mode-v2/">', '</a>' ),
 				'options'          => array(
 					'yes' => __( 'Yes', 'complianz-gdpr' ),
 					'no'  => __( 'No', 'complianz-gdpr' ),
@@ -256,7 +256,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => 'About Google Consent Mode',
 					'text'  => __( 'Enabling this feature means all Google tags will be handled by Google Consent Mode. You will need to read the integration manual below, and double-check to see if it works for your setup.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/consent-mode-for-7-0/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/consent-mode-for-7-0/',
 				),
 			),
 			array(
@@ -273,7 +273,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Do you want to block all Google Tags before consent?', 'complianz-gdpr' ),
 					'text'  => __( 'By default Consent Mode is enabled in Advanced Mode. This means tags are loaded before consent, but depending on user preferences selects the appropriate tracking mechanisms, e.g. cookieless tracking or cookies, automatically. If you answer Yes, Complianz will only apply Consent Mode after consent.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/consent-mode-for-7-0/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/consent-mode-for-7-0/',
 				),
 				'options'          => array(
 					'yes' => __( 'Yes', 'complianz-gdpr' ),
@@ -378,7 +378,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( 'Configuring Consent Mode & Tag Manager', 'complianz-gdpr' ),
 					'text'  => __( 'You can choose the official Consent Mode template by Complianz from the template gallery, or use local initialization.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/consent-mode-for-7-0/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/consent-mode-for-7-0/',
 				),
 			),
 			array(
@@ -394,7 +394,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => __( 'Tracking ID', 'complianz-gdpr' ),
 					'text'  => __( 'If you add the ID for your Statistics tool here, Complianz will configure your site for statistics tracking.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/consent-mode-for-7-0/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/consent-mode-for-7-0/',
 				),
 				'react_conditions'        => array(
 					'relation' => 'OR',
@@ -544,7 +544,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => __( 'Configuration by Complianz', 'complianz-gdpr' ),
 					'text'  => __( 'The URL depends on your configuration of Matomo.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/configuring-matomo-for-wordpress-with-complianz/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/configuring-matomo-for-wordpress-with-complianz/',
 				),
 			),
 			array(
@@ -591,7 +591,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => __( 'Configuration', 'complianz-gdpr' ),
 					'text'  => __( 'The URL depends on your configuration of Matomo.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/configuring-matomo-for-wordpress-with-complianz/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/configuring-matomo-for-wordpress-with-complianz/',
 				),
 			),
 			array(
@@ -630,7 +630,7 @@ function cmplz_wizard_consent_fields( $fields ) {
 					'label' => 'default',
 					'title' => __( 'Configuration', 'complianz-gdpr' ),
 					'text'  => __( 'Because Clicky always sets a so-called unique identifier cookie, consent for statistics is always required.', 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/configuring-clicky-for-gdpr/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/configuring-clicky-for-gdpr/',
 				),
 			),
 			array(

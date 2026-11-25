@@ -37,9 +37,15 @@ const useFields = create(( set, get ) => ({
 	},
 	setHighLightField: (highLightField) => set(state => ({ highLightField })),
 	fetchAllFieldsCompleted: () => {
-		let notCompletedRequiredFields = get().fields.filter(field => field.required && isCompletableField(field) && !field.conditionallyDisabled && ( field.never_saved || field.value.length===0 || !field.value) );
-		let notCompletedFields = get().fields.filter(field => isCompletableField(field) && !field.conditionallyDisabled && (field.never_saved || field.value.length===0 || !field.value) );
-		let completableFields = get().fields.filter(field => isCompletableField(field) && !field.conditionallyDisabled  );
+		const allFields = get().fields;
+		//saving a step stores every field on it, so a never saved field on a step that has stored siblings was usually added after that step was saved, by an update.
+		//on a site that completed the wizard before, such a field is answered by its default. A step that was never saved still has to be answered.
+		const savedMenuIds = new Set( allFields.filter(field => !field.never_saved).map(field => field.menu_id) );
+		const isAnsweredByDefault = field => cmplz_settings.wizard_completed && field.default && savedMenuIds.has(field.menu_id);
+		const isUnanswered = field => ( field.never_saved && !isAnsweredByDefault(field) ) || field.value.length===0 || !field.value;
+		let notCompletedRequiredFields = allFields.filter(field => field.required && isCompletableField(field) && !field.conditionallyDisabled && isUnanswered(field) );
+		let notCompletedFields = allFields.filter(field => isCompletableField(field) && !field.conditionallyDisabled && isUnanswered(field) );
+		let completableFields = allFields.filter(field => isCompletableField(field) && !field.conditionallyDisabled  );
 		set(() => ({
 			notCompletedRequiredFields: notCompletedRequiredFields,
 			allRequiredFieldsCompleted: notCompletedRequiredFields.length===0,

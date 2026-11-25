@@ -252,6 +252,7 @@ function cmplz_plugin_admin_scripts() {
 					'regions'              => COMPLIANZ::$config->regions,
 					'user_id'              => get_current_user_id(),
 					'is_multisite'         => is_multisite(),
+					'wizard_completed'     => (bool) COMPLIANZ::$wizard->wizard_completed_once(),
 					'is_multisite_plugin'  => defined( 'cmplz_premium_multisite' ),
 					'onboarding_complete'  => cmplz_wsc_auth::wsc_is_authenticated() || COMPLIANZ::$wsc_onboarding->wsc_is_dismissed(),
 					'wsc_is_authenticated' => cmplz_wsc_auth::wsc_is_authenticated(),
@@ -574,7 +575,7 @@ function cmplz_reset_settings() {
 		'cmplz_review_notice_shown',
 		'cmplz_wizard_completed_once',
 		'cmplz_options',
-		'complianz_active_policy_id',
+		// complianz_active_policy_id is kept: the banner assumes policy IDs only go up, and a reset to 1 would leave visitors with a higher cookie unrevoked.
 		'complianz_scan_token',
 		'cmplz_license_notice_dismissed',
 		'cmplz_license_status',

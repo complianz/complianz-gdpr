@@ -6,7 +6,7 @@ Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 7.5.7
+Stable tag: 7.5.8
 
 Publish your cookie banner or notice in minutes. Automatically scan cookies, and create policies to align with GDPR, CCPA, and Google Consent Mode. 
 
@@ -226,6 +226,22 @@ Complianz uses geo-based detection to show the correct consent banner for each v
 The free version works on a single site. Complianz Premium supports WordPress multisite networks and includes features for managing consent across multiple domains. 
 
 == Changelog ==
+= 7.5.8 =
+* November 25th, 2026
+* Security: The cookie blocker only downloads placeholder images from the thumbnail hosts of the supported services, and only when the response is a raster image.
+* Security: Fixed a Stored Cross-Site Scripting vulnerability in the Thrive Architect and Elementor cookie blockers.
+* Security: Updated front-end dependencies, including DOMPurify, to remediate known vulnerabilities in the Settings and Gutenberg bundles.
+* Fix: Visitors lost their consent and saw the banner again when a cached page carried an outdated cookie policy ID.
+* Fix: Saving the wizard after an update no longer changes the active policy ID when no setting was changed, which could re-show the consent banner on cached sites.
+* Fix: The dashboard no longer marks a completed wizard as urgent when an update adds new settings that have a default answer.
+* Fix: The banner stylesheet could be served empty or incomplete while it was being regenerated, leaving the banner unstyled.
+* Fix: Meta Pixel for WordPress and Meta for WooCommerce now follow the consent choice, and no events are sent to Meta before marketing consent.
+* Fix: Prevent a fatal error in wp-admin when the cookie scan page list cache holds an invalid value.
+* Fix: Admin pages no longer wait on the dynamic notifications request, and it no longer repeats on every load when the cache does not persist.
+* Fix: Dynamic notifications now load for languages without a region suffix, such as Finnish and Catalan, and fall back to English for languages the notification service does not support.
+* Fix: Fatal error on WP-Cron when the Website Scan availability check received an invalid response.
+* Fix: Updated "more info" links in the dashboard to the new help center URLs.
+
 = 7.5.7 =
 * November 4th, 2026
 * Fix: On sites with more than one consent type, the cookie banner briefly appeared unstyled with an oversized close icon, because its stylesheet was only fetched after the banner script ran.

@@ -145,7 +145,7 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 						$this->api_url         = 'https://complianz.io';
 						$this->dashboard_url   = add_query_arg( array( 'page' => 'complianz' ), admin_url( 'admin.php' ) );
 						$this->account_url     = cmplz_get_referral_url( 'articles', 'upgrade-account', 'https://complianz.io/account' );
-						$this->instructions    = cmplz_get_referral_url( 'articles', 'upgrade-instructions', 'https://complianz.io/how-to-install-complianz-gdpr-premium-plugin' );
+						$this->instructions    = cmplz_get_referral_url( 'articles', 'upgrade-instructions', 'https://complianz.io/help/wordpress/configuration/how-to-install-complianz-gdpr-premium-plugin/' );
 						break;
 				}
 			}

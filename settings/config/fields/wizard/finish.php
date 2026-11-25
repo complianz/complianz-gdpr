@@ -57,7 +57,7 @@ function cmplz_wizard_finish_fields( $fields ) {
 					'label' => 'warning',
 					'title' => __( "Using Safe Mode", 'complianz-gdpr' ),
 					'text'  => __( "If the Cookie Blocker causes an issue, you can enable Safe Mode under settings. Disabling Safe Mode will activate the Cookie Blocker.", 'complianz-gdpr' ),
-					'url'   => 'https://complianz.io/debugging-issues/',
+					'url'   => 'https://complianz.io/help/wordpress/configuration/debugging-issues/',
 				],
 //				'condition_action'        => 'disable',
 //				'react_conditions'        => [

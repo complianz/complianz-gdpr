@@ -81,7 +81,7 @@ function cmplz_field_notices(): array {
 			'label'    => 'warning',
 			'title'    => __( 'Divi detected', 'complianz-gdpr' ),
 			'text'     => __( 'Your site uses Divi. If you use reCAPTCHA on your site, you may need to disable the reCAPTCHA integration in Complianz. ', 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/blocking-recaptcha-divi/',
+			'url'      => 'https://complianz.io/help/wordpress/configuration/blocking-recaptcha-divi/',
 		);
 	}
 
@@ -102,7 +102,7 @@ function cmplz_field_notices(): array {
 			'label'    => 'warning',
 			'title'    => 'Google Tag Manager',
 			'text'     => __( "You're using Google Tag Manager. This means you need to configure Tag Manager to use the below categories.", 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/definitive-guide-to-tag-manager-and-complianz/',
+			'url'      => 'https://complianz.io/help/wordpress/integrations/definitive-guide-to-tag-manager-and-complianz/',
 		);
 	}
 
@@ -112,7 +112,7 @@ function cmplz_field_notices(): array {
 			'label'    => 'warning',
 			'title'    => __( 'Using categories is mandatory', 'complianz-gdpr' ),
 			'text'     => __( 'Categories are mandatory for your statistics configuration.', 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/categories-are-mandatory-for-your-statistics-configuration',
+			'url'      => 'https://complianz.io/help/wordpress/configuration/categories-are-mandatory-for-your-statistics-configuration/',
 		);
 	}
 	/**
@@ -145,7 +145,7 @@ function cmplz_field_notices(): array {
 			'label'    => 'default',
 			'title'    => __( 'First-party marketing cookies', 'complianz-gdpr' ),
 			'text'     => __( 'You use plugins which place first-party marketing cookies. Complianz cannot only block such cookies if the plugin conforms to the WP Consent API, or you have enabled Consent Per Service', 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/first-party-marketing-cookies',
+			'url'      => 'https://complianz.io/help/wordpress/configuration/first-party-marketing-cookies/',
 		);
 	}
 
@@ -183,7 +183,7 @@ function cmplz_field_notices(): array {
 			'title'       => __( 'TCF enabled: Review customization guidelines', 'complianz-gdpr' ),
 			'text'        => __(
 				"You have enabled TCF. Please check the do's and don'ts regarding customizations:
-		                     <a href='https://complianz.io/customizing-the-tcf-banner/?utm_source=tipstricks&utm_medium=plugin&utm_campaign=articles&utm_id=66&utm_content=tcf' target='_blank' aria-label='Read more about TCF customization guidelines'>Read more about TCF customization guidelines</a>",
+		                     <a href='https://complianz.io/help/wordpress/customization/customizing-the-tcf-banner/?utm_source=tipstricks&utm_medium=plugin&utm_campaign=articles&utm_id=66&utm_content=tcf' target='_blank' aria-label='Read more about TCF customization guidelines'>Read more about TCF customization guidelines</a>",
 				'complianz-gdpr'
 			),
 			'dismissible' => true,
@@ -201,7 +201,7 @@ function cmplz_field_notices(): array {
 								"Currently, the only active cookie category is Functional. In some regions, when only one category is available, the cookie banner may not be displayed. We recommend double-checking your settings and, if needed, following this guide on why cookie banners sometimes don't show, and how to force the banner to display.",
 								'complianz-gdpr'
 							),
-			'url'         => 'https://complianz.io/cookie-banner-does-not-appear/',
+			'url'         => 'https://complianz.io/help/wordpress/configuration/cookie-banner-does-not-appear/',
 			'dismissible' => true,
 		);
 	}
@@ -212,7 +212,20 @@ function cmplz_field_notices(): array {
 			'label'    => 'warning',
 			'title'    => __( 'Clarity Consent Mode V2', 'complianz-gdpr' ),
 			'text'     => __( 'Enforced from October 31st 2025; see how it works.', 'complianz-gdpr' ),
-			'url'      => 'https://complianz.io/microsoft-consent-mode/',
+			'url'      => 'https://complianz.io/help/wordpress/configuration/microsoft-consent-mode/',
+		);
+	}
+
+	// Complianz drives the consent engine of the Meta plugin instead of blocking its scripts.
+	$meta_plugin = cmplz_meta_signals_plugin();
+	if ( $meta_plugin && cmplz_meta_signals_integration_enabled( $meta_plugin ) && ( 'wp' === $meta_plugin || cmplz_meta_signals_woo_connected() ) ) {
+		$meta_plugin_name = 'wp' === $meta_plugin ? 'Meta Pixel for WordPress' : 'Meta for WooCommerce';
+		$notices[]        = array(
+			'field_id' => 'integrations-plugins',
+			'label'    => 'default',
+			'title'    => __( 'Meta pixel consent', 'complianz-gdpr' ),
+			// translators: %s: name of the active Meta plugin (Meta Pixel for WordPress or Meta for WooCommerce).
+			'text'     => cmplz_sprintf( __( "Because you're using %s, Complianz does not block the Meta pixel scripts. Instead, it controls the consent engine of the plugin: the pixel starts on hold and nothing is sent to Meta until marketing consent is given. After consent the events on hold are released, and after a refusal or a revoke the pixel is put on hold again.", 'complianz-gdpr' ), $meta_plugin_name ),
 		);
 	}
 

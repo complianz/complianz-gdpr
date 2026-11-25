@@ -55,7 +55,7 @@ class CMPLZ_Elementor_Pro {
 				'label' => 'default',
 				'title' => __( "Legal Hub", 'complianz-gdpr' ),
 				'text'  => __( 'If you choose to create your Legal Hub with Elementor Pro we will import our default template.', 'complianz-gdpr' ),
-				'url'   => 'https://complianz.io/creating-the-legal-hub/',
+				'url'   => 'https://complianz.io/help/wordpress/customization/creating-the-legal-hub/',
 			];
 		}
 

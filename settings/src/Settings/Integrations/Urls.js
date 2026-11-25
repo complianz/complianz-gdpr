@@ -58,7 +58,7 @@ const Urls = (props) => {
 				{type==='block_script' && __("URLs that should be blocked before consent.", "complianz-gdpr")}
 				{type==='whitelist_script' &&
 					<>{__("URLs that should be whitelisted.", "complianz-gdpr")}
-						{readMore("https://complianz.io/whitelisting-inline-script/") }
+						{readMore("https://complianz.io/help/wordpress/configuration/whitelisting-inline-script/") }
 					</>
 				}
 			</label>

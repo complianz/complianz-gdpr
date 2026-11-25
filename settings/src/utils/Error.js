@@ -7,7 +7,7 @@ const Error = (props) => {
 		console.log(props.error);
 	}
 	let description = false;
-	let url = 'https://complianz.io/support';
+	let url = 'https://complianz.io/help/';
 
 	let generic_rest_blocked_message = __("Please check if security settings on the server or a plugin is blocking the requests from Complianz.", "complianz-gdpr");
 	let message = false;

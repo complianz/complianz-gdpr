@@ -1271,6 +1271,24 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 				return;
 			}
 			set_transient( 'cmplz_generate_css_active', true, 10 );
+			$ob_level = ob_get_level();
+			try {
+				$this->write_css_files( $preview );
+			} finally {
+				// A throw while the cmplz_banner_css output is buffered must not leave the buffer open.
+				while ( ob_get_level() > $ob_level ) {
+					ob_end_clean();
+				}
+				delete_transient( 'cmplz_generate_css_active' );
+			}
+		}
+
+		/**
+		 * Build the css for each used consent type and write it to the uploads folder.
+		 *
+		 * @param bool $preview Whether to write the admin preview files instead of the live ones.
+		 */
+		private function write_css_files( bool $preview ): void {
 			$upload_dir    = cmplz_upload_dir( 'css' );
 			$consent_types = cmplz_get_used_consenttypes();
 			// when there's nothing yet, get the default
@@ -1316,14 +1334,53 @@ if ( ! class_exists( 'cmplz_cookiebanner' ) ) {
 				$css  = $this->sanitize_css( apply_filters( 'cmplz_cookiebanner_css', $css ) );
 				$file = $preview ? "{$upload_dir}banner-preview-{$banner_id}-$consent_type.css" : "{$upload_dir}banner-{$banner_id}-$consent_type.css";
 				if ( file_exists( $upload_dir ) && is_writable( $upload_dir ) ) {
-					$handle = fopen( $file, 'wb' );
-					fwrite( $handle, $css );
-					fclose( $handle );
+					$this->write_css_file_atomically( $file, $css );
 				}
 				// Trigger the action after file generation to allow custom handling
 				do_action( 'cmplz_after_css_generation', $file, $css, $upload_dir, $banner_id, $consent_type );
 			}
-			delete_transient( 'cmplz_generate_css_active' );
+		}
+
+		/**
+		 * Replace the css file without ever exposing a truncated one: the file is publicly served as a static asset,
+		 * so it is written to a temp file in the same folder and then renamed over the live file.
+		 * Direct PHP file functions are used on purpose, WP_Filesystem has no atomic replace.
+		 *
+		 * When only the rename is refused (for example on Windows while the web server has the file open, or when the
+		 * file cannot be replaced by this user) the file is written in place instead, which is what happened before.
+		 * That is never done after a failed temp file write: it could truncate the live file and then fail as well.
+		 * No LOCK_EX: web servers ignore advisory locks, and it makes the write fail on filesystems without flock support.
+		 *
+		 * @param string $file Absolute path of the css file to replace.
+		 * @param string $css  The css to write.
+		 *
+		 * @return bool True when the live file was updated, false when it was not. A fallback or failure is logged when WP_DEBUG is on.
+		 */
+		private function write_css_file_atomically( string $file, string $css ): bool {
+			$tmp_file    = $file . '.tmp-' . uniqid( '', true );
+			$failed_step = '';
+			if ( false === file_put_contents( $tmp_file, $css ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+				$failed_step = 'write';
+			} else {
+				// A temp file is created with the umask of the process, the chmod makes sure the web server can read it.
+				// Best effort: if the chmod is refused the temp file keeps the umask mode, as a file created by the old in-place write did.
+				chmod( $tmp_file, defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+				if ( ! rename( $tmp_file, $file ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+					$failed_step = 'rename';
+				}
+			}
+
+			if ( '' === $failed_step ) {
+				return true;
+			}
+
+			wp_delete_file( $tmp_file );
+			$written_in_place = 'rename' === $failed_step && false !== file_put_contents( $file, $css ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$outcome = $written_in_place ? 'wrote it in place instead.' : 'file not updated.';
+				error_log( "Complianz: could not replace banner css file $file atomically, $failed_step failed, $outcome" ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+			return $written_in_place;
 		}
 
 		/**

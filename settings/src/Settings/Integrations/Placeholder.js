@@ -51,7 +51,7 @@ const Category = (props) => {
 						<p>{__('Enter the div class or ID that should be targeted.',
 							'complianz-gdpr')}
 							{readMore(
-								'https://complianz.io/integrating-plugins/#placeholder/')}</p>
+								'https://complianz.io/help/wordpress/configuration/integrating-plugins/#placeholder/')}</p>
 						<TextInput
 							disabled={fetching}
 							value={script.placeholder_class || ''}

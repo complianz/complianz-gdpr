@@ -16,6 +16,21 @@ function cmplz_facebook_script( $tags ) {
 	return $tags;
 }
 
+add_filter( 'cmplz_image_tags', 'cmplz_facebook_image_tags' );
+
+/**
+ * Block the pixel image of the <noscript> fallback that comes with a hand-inserted Meta pixel. A visitor without
+ * JavaScript cannot see the banner or give consent, but the image would still be requested.
+ *
+ * @param array $tags Image URLs to block.
+ * @return array
+ */
+function cmplz_facebook_image_tags( $tags ) {
+	$tags[] = 'facebook.com/tr?';
+
+	return $tags;
+}
+
 /**
  * Add some custom css for the placeholder
  */

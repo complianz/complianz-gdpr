@@ -238,7 +238,7 @@ const ServicesControl = () => {
 		<>
 			<p>
 				{ __( "Enabled services will be blocked on the front-end of your website until the user has given consent (opt-in), or after the user has revoked consent (opt-out). When possible a placeholder is activated. You can also disable or configure the placeholder to your liking.", 'complianz-gdpr' )}
-				{ readMore( "https://complianz.io/blocking-recaptcha-manually/" )}
+				{ readMore( "https://complianz.io/help/wordpress/configuration/blocking-recaptcha-manually/" )}
 			</p>
 			<div className="cmplz-table-header">
 				<div className="cmplz-table-header-controls">

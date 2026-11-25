@@ -64,7 +64,7 @@ function cmplz_wp_google_map_warnings_types( $warnings ) {
 		'dismissable'       => true,
 		'warning_condition' => '_true_',
 		'open'              => __( 'The WP Maps Pro integration has changed with the help of the authors of WP Maps, please check your implementation.', 'complianz-gdpr' ),
-		'url'               => 'https://complianz.io/wp-maps-pro-google-is-not-defined/',
+		'url'               => 'https://complianz.io/help/wordpress/configuration/wp-maps-pro-google-is-not-defined/',
 	);
 
 	return $warnings;

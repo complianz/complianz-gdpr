@@ -79,7 +79,12 @@ function cmplz_clear_scheduled_hooks() {
 function cmplz_cron_clean_placeholders() {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	$dirname = cmplz_upload_dir( 'placeholders' );
-	array_map( 'unlink', glob( "$dirname/*.*" ) );
+	// Not *.*: thumbnails stored with their remote basename (Vimeo, Dailymotion) have no extension.
+	foreach ( (array) glob( "$dirname/*" ) as $file ) {
+		if ( is_file( $file ) ) {
+			wp_delete_file( $file );
+		}
+	}
 }
 
 /**

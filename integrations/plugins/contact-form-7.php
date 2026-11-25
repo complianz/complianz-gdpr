@@ -269,7 +269,7 @@ function cmplz_cf7_warnings_types($warnings)
 		'plus_one' => true,
 		'warning_condition' => '_true_',
 		'open' => __( 'Due to continuous breaking changes in Contact Form 7 we are dropping the CF7 integration as of CF7 5.4. We have concluded that the only viable solution is for Contact Form 7 to integrate with the WP Consent API.', 'complianz-gdpr' ),
-		'url' => 'https://complianz.io/why-the-wp-consent-api-is-important-a-case-study-with-cf7-and-recaptcha/',
+		'url' => 'https://complianz.io/help/wordpress/integrations/why-the-wp-consent-api-is-important-a-case-study-with-cf7-and-recaptcha/',
 	);
 
 	return $warnings;
