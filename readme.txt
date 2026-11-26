@@ -6,7 +6,7 @@ Requires at least: 5.9
 License: GPL2
 Requires PHP: 7.4
 Tested up to: 7.1
-Stable tag: 7.5.8
+Stable tag: 7.5.9
 
 Publish your cookie banner or notice in minutes. Automatically scan cookies, and create policies to align with GDPR, CCPA, and Google Consent Mode. 
 
@@ -226,6 +226,13 @@ Complianz uses geo-based detection to show the correct consent banner for each v
 The free version works on a single site. Complianz Premium supports WordPress multisite networks and includes features for managing consent across multiple domains. 
 
 == Changelog ==
+= 7.5.9 =
+* November 26th, 2026
+* Security: Hardened the handling of dynamic notifications.
+* Security: Placeholder images are now re-encoded and saved with an extension that matches their image type.
+* Security: Requests from the plugin to Complianz servers now always verify the TLS certificate.
+* Fix: Uninstalling the plugin now removes more of its stored options.
+
 = 7.5.8 =
 * November 25th, 2026
 * Security: The cookie blocker only downloads placeholder images from the thumbnail hosts of the supported services, and only when the response is a raster image.

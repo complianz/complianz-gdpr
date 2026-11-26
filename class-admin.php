@@ -3,6 +3,12 @@ defined( 'ABSPATH' ) or die();
 
 if ( ! class_exists( 'cmplz_admin' ) ) {
 	class cmplz_admin {
+		/**
+		 * Returned by call_condition() for a condition string that is not allowed to run.
+		 * A string sentinel rather than null, so a condition that legitimately returns null keeps its meaning.
+		 */
+		private const CONDITION_NOT_ALLOWED = '__cmplz_condition_not_allowed__';
+
 		private static $_this;
 		public $error_message   = '';
 		public $success_message = '';
@@ -336,23 +342,23 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 			</style>
 			<div id="message"
 				class="updated fade notice is-dismissible cmplz-admin-notice really-simple-plugins"
-				data-admin_notice_id="<?php echo $id; ?>"
+				data-admin_notice_id="<?php echo esc_attr( $id ); ?>"
 				style="border-left:4px solid #333">
 				<div class="cmplz-admin-notice-container">
-					<div class="cmplz-admin-notice-logo"><img width=80px"
-																src="<?php echo CMPLZ_URL; ?>assets/images/icon-logo.svg"
+					<div class="cmplz-admin-notice-logo"><img width="80"
+																src="<?php echo esc_url( CMPLZ_URL . 'assets/images/icon-logo.svg' ); ?>"
 																alt="logo">
 					</div>
 					<div class="cmplz-admin-notice-content">
 						<p><?php echo wp_kses_post( $warning['open'] ); ?>
 						<?php
 						if ( isset( $warning['url'] ) ) {
-							$target        = strpos( $warning['url'], 'complianz.io' ) !== false ? 'target="_blank"' : '';
+							$open_in_new_tab = strpos( $warning['url'], 'complianz.io' ) !== false;
 							$warning_title = isset( $warning['title'] ) ? $warning['title'] : __( 'this topic', 'complianz-gdpr' );
 							$link_text     = cmplz_sprintf( __( 'Read more about %s', 'complianz-gdpr' ), $warning_title );
 							$aria_label    = cmplz_sprintf( __( 'Read more about %s', 'complianz-gdpr' ), $warning_title );
 							?>
-								<a href="<?php echo esc_url_raw( $warning['url'] ); ?>" <?php echo $target; ?> aria-label="<?php echo esc_attr( $aria_label ); ?>"><?php echo $link_text; ?></a>
+								<a href="<?php echo esc_url_raw( $warning['url'] ); ?>" target="<?php echo $open_in_new_tab ? '_blank' : '_self'; ?>" aria-label="<?php echo esc_attr( $aria_label ); ?>"><?php echo esc_html( $link_text ); ?></a>
 								<?php
 						}
 						?>
@@ -541,13 +547,94 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 		}
 
 		/**
+		 * Whether a plugin function may be used as a warning condition.
+		 *
+		 * Only functions of the plugin itself (cmplz_ prefix) are callable from a condition string.
+		 * This is defense in depth: condition strings come from the local config and from the
+		 * cmplz_warning_types filter, never from remote data, but even so they must not be able to
+		 * reach arbitrary PHP functions such as system() or exec().
+		 *
+		 * @param string $function_name Name of the function in the condition string.
+		 * @return bool
+		 */
+		private function is_allowed_condition_function( string $function_name ): bool {
+			return 1 === preg_match( '/^cmplz_[a-z0-9_]+$/i', $function_name ) && function_exists( $function_name );
+		}
+
+		/**
+		 * Whether a COMPLIANZ::$class->method pair may be used as a warning condition.
+		 *
+		 * @param string $property Name of a static property on COMPLIANZ holding an object.
+		 * @param string $method   Method name on that object.
+		 * @return bool
+		 */
+		private function is_allowed_condition_method( string $property, string $method ): bool {
+			if ( 1 !== preg_match( '/^[a-z0-9_]+$/i', $property ) || 1 !== preg_match( '/^[a-z0-9_]+$/i', $method ) ) {
+				return false;
+			}
+			if ( ! property_exists( 'COMPLIANZ', $property ) ) {
+				return false;
+			}
+			$instance = COMPLIANZ::${$property};
+
+			return is_object( $instance ) && method_exists( $instance, $method );
+		}
+
+		/**
+		 * Call a function or method condition, after checking it is allowed.
+		 *
+		 * @param string $func Condition in the form 'cmplz_fn', 'cmplz_fn(arg)', 'prop->method' or 'prop->method(arg)'.
+		 * @return mixed The output of the call, or self::CONDITION_NOT_ALLOWED when the condition is not allowed.
+		 */
+		private function call_condition( string $func ) {
+			if ( preg_match( '/(.*)->(.*)/i', $func, $matches ) ) {
+				if ( preg_match( '/(.*)->(.*)\((.*)\)/i', $func, $sub_matches ) ) {
+					$class    = $sub_matches[1];
+					$function = $sub_matches[2];
+					$variable = $sub_matches[3];
+					if ( ! $this->is_allowed_condition_method( $class, $function ) ) {
+						return self::CONDITION_NOT_ALLOWED;
+					}
+					return COMPLIANZ::${$class}->$function( $variable );
+				}
+				$class    = $matches[1];
+				$function = $matches[2];
+				if ( ! $this->is_allowed_condition_method( $class, $function ) ) {
+					return self::CONDITION_NOT_ALLOWED;
+				}
+				return COMPLIANZ::${$class}->$function();
+			}
+
+			if ( preg_match( '/(.*)\((.*)\)/i', $func, $matches ) ) {
+				$func     = $matches[1];
+				$variable = $matches[2];
+				if ( ! $this->is_allowed_condition_function( $func ) ) {
+					return self::CONDITION_NOT_ALLOWED;
+				}
+				return $func( $variable );
+			}
+
+			if ( ! $this->is_allowed_condition_function( $func ) ) {
+				return self::CONDITION_NOT_ALLOWED;
+			}
+			return $func();
+		}
+
+		/**
 		 * Get output of function, in format 'function', or 'class()->sub()->function'
 		 * We can pass one variable to the function
+		 *
+		 * Only cmplz_ prefixed functions and methods on COMPLIANZ static instances are evaluated;
+		 * anything else resolves to false.
 		 *
 		 * @param string $func
 		 * @return string|bool
 		 */
 		private function validate_function( $func ) {
+			if ( ! is_string( $func ) ) {
+				return false;
+			}
+
 			$invert = false;
 			if ( strpos( $func, 'NOT ' ) !== false ) {
 				$func   = str_replace( 'NOT ', '', $func );
@@ -569,23 +656,17 @@ if ( ! class_exists( 'cmplz_admin' ) ) {
 				$output = true;
 			} elseif ( $func === '_false_' ) {
 				$output = false;
-			} elseif ( preg_match( '/(.*)->(.*)/i', $func, $matches ) ) {
-				if ( preg_match( '/(.*)->(.*)\((.*)\)/i', $func, $sub_matches ) ) {
-					$class    = $sub_matches[1];
-					$function = $sub_matches[2];
-					$variable = $sub_matches[3];
-					$output   = COMPLIANZ::${$class}->$function( $variable );
-				} else {
-					$class    = $matches[1];
-					$function = $matches[2];
-					$output   = COMPLIANZ::${$class}->$function();
-				}
-			} elseif ( preg_match( '/(.*)\((.*)\)/i', $func, $matches ) ) {
-				$func     = $matches[1];
-				$variable = $matches[2];
-				$output   = $func( $variable );
 			} else {
-				$output = $func();
+				// A condition that throws must not take wp-admin down: log it and treat it as not met.
+				try {
+					$output = $this->call_condition( $func );
+				} catch ( Throwable $e ) {
+					error_log( sprintf( 'Complianz: warning condition "%s" failed: %s', $func, $e->getMessage() ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					return false;
+				}
+				if ( self::CONDITION_NOT_ALLOWED === $output ) {
+					return false;
+				}
 			}
 
 			if ( $invert ) {

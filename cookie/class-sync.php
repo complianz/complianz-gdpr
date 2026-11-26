@@ -302,7 +302,7 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 				$endpoint        = trailingslashit( CMPLZ_COOKIEDATABASE_URL ) . 'v2/cookies/';
 				$ch              = curl_init();
 
-				$ssl_verification = apply_filters( 'cmplz_ssl_verify', get_site_option( 'cmplz_ssl_verify', 'true' ) === 'true' );
+				$ssl_verification = apply_filters( 'cmplz_ssl_verify', true );
 				if ( ! $ssl_verification ) {
 					curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
 					curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
@@ -633,7 +633,7 @@ if ( ! class_exists( 'cmplz_sync' ) ) {
 
 				$ch = curl_init();
 
-				$ssl_verification = apply_filters( 'cmplz_ssl_verify', get_site_option( 'cmplz_ssl_verify', 'true' ) === 'true' );
+				$ssl_verification = apply_filters( 'cmplz_ssl_verify', true );
 				if ( ! $ssl_verification ) {
 					curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
 					curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );

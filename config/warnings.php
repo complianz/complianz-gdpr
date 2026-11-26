@@ -194,48 +194,131 @@ function cmplz_dn_include_notifications( array $warnings ): array {
  */
 function cmplz_dn_map_notifications( array $notifications ): array {
 	$mapped_notifications = array();
+	$allowed_statuses     = array( 'open', 'urgent', 'premium', 'completed' );
 
 	// Map the notifications to the warnings array.
-	// First, skip the expired notifications.
+	// First, skip the malformed and the expired notifications.
 	$notifications = array_filter(
 		$notifications,
 		function ( $notification ) {
+			if ( ! is_array( $notification ) ) {
+				return false;
+			}
+
 			// If the expiration is not set, it means it's a permanent notification. So must be included.
 			if ( ! isset( $notification['expiration'] ) ) {
 				return true;
 			}
 
 			// If the expiration is set, check if it's in the future.
-			$expiration = strtotime( $notification['expiration'] );
+			$expiration = is_string( $notification['expiration'] ) ? strtotime( $notification['expiration'] ) : false;
 
 			return $expiration > time();
 		}
 	);
 
 	foreach ( $notifications as $notification ) {
-		$mapped_notifications[ $notification['id'] ] = $notification;
-		// If the content is not set, nothing to show, skip the notification.
-		if ( ! isset( $notification['content'] ) ) {
+		// Nothing to show without an id and a message, skip the notification.
+		if ( empty( $notification['id'] ) || ! is_scalar( $notification['id'] ) || empty( $notification['content'] ) || ! is_string( $notification['content'] ) ) {
 			continue;
 		}
 
+		$id = sanitize_key( (string) $notification['id'] );
+		if ( '' === $id ) {
+			continue;
+		}
+
+		$status = isset( $notification['status'] ) && in_array( $notification['status'], $allowed_statuses, true ) ? $notification['status'] : 'open';
+
+		// Explicit allowlist of display fields. Remote data must never reach a callable:
+		// warning_condition, success_conditions and relation are deliberately never copied
+		// from the endpoint response. See cmplz_dn_resolve_condition() for conditional display.
+		$mapped = array(
+			'status'              => $status,
+			'dismissible'         => isset( $notification['dismissible'] ) ? (bool) $notification['dismissible'] : true,
+			'admin_notice'        => ! empty( $notification['admin_notice'] ),
+			'plus_one'            => ! empty( $notification['plus_one'] ),
+			'include_in_progress' => false,
+			'warning_condition'   => cmplz_dn_resolve_condition( $notification['condition'] ?? '' ) ? '_true_' : '_false_',
+			'success_conditions'  => 'completed' === $status ? array( '_true_' ) : array(),
+		);
+
+		if ( ! empty( $notification['url'] ) && is_string( $notification['url'] ) ) {
+			$url = esc_url_raw( $notification['url'], array( 'https' ) );
+			if ( '' !== $url ) {
+				$mapped['url'] = $url;
+			}
+		}
+
+		// Plain-text title, used by the admin notice as the "Read more about %s" link text.
+		if ( ! empty( $notification['title'] ) && is_string( $notification['title'] ) ) {
+			$title = sanitize_text_field( $notification['title'] );
+			if ( '' !== $title ) {
+				$mapped['title'] = $title;
+			}
+		}
+
 		// If it's an admin notice, we need to show it as open.
-		if ( isset( $notification['admin_notice'] ) ) {
-			$mapped_notifications[ $notification['id'] ]['open'] = $notification['content'];
-		} else {
-			$mapped_notifications[ $notification['id'] ][ $notification['status'] ] = $notification['content'];
-		}
+		$message_key            = $mapped['admin_notice'] ? 'open' : $status;
+		$mapped[ $message_key ] = wp_kses_post( $notification['content'] );
 
-		// Remove the content from the array.
-		unset( $mapped_notifications[ $notification['id'] ]['content'] );
-
-		// If the notification is completed, we need to for the success conditions to be true.
-		if ( 'completed' === $notification['status'] ) {
-			$mapped_notifications[ $notification['id'] ]['success_conditions'] = array( '_true_' );
-		}
+		$mapped_notifications[ $id ] = $mapped;
 	}
 
 	return $mapped_notifications;
+}
+
+/**
+ * Resolve a named display condition for a remote notification.
+ *
+ * Remote notifications may only reference a condition by name. Each name maps to a local
+ * closure; a condition string is never evaluated as code. Unknown names resolve to false,
+ * so a typo on the endpoint fails closed. A leading '!' negates the condition.
+ *
+ * @param mixed $condition The condition name sent by the endpoint ('' means always show).
+ * @return bool Whether the notification should be shown.
+ */
+function cmplz_dn_resolve_condition( $condition ): bool {
+	if ( '' === $condition || null === $condition ) {
+		return true;
+	}
+	if ( ! is_string( $condition ) ) {
+		return false;
+	}
+
+	/**
+	 * Filter the named conditions available to remote notifications.
+	 *
+	 * @param array<string,callable> $conditions Condition name => closure returning bool.
+	 */
+	$conditions = apply_filters(
+		'cmplz_dynamic_notification_conditions',
+		array(
+			'always'       => static function (): bool {
+				return true;
+			},
+			'is_free'      => static function (): bool {
+				return ! defined( 'cmplz_premium' );
+			},
+			'is_premium'   => static function (): bool {
+				return defined( 'cmplz_premium' );
+			},
+			'is_multisite' => static function (): bool {
+				return is_multisite();
+			},
+		)
+	);
+
+	$negate = 0 === strpos( $condition, '!' );
+	$name   = ltrim( $condition, '!' );
+
+	if ( ! isset( $conditions[ $name ] ) || ! is_callable( $conditions[ $name ] ) ) {
+		return false;
+	}
+
+	$result = (bool) call_user_func( $conditions[ $name ] );
+
+	return $negate ? ! $result : $result;
 }
 
 /**

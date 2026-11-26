@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the Complianz | GDPR/CCPA Cookie Consent plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Complianz | GDPR/CCPA Cookie Consent 7.5.8\n"
+"Project-Id-Version: Complianz | GDPR/CCPA Cookie Consent 7.5.9\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/complianz-gdpr\n"
 "Last-Translator: Complianz <support@complianz.io>\n"
 "Language-Team: Complianz <support@complianz.io>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-20T15:20:14+00:00\n"
+"POT-Creation-Date: 2026-11-26T15:50:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: complianz-gdpr\n"
@@ -39,11 +39,11 @@ msgstr ""
 msgid "https://www.complianz.io"
 msgstr ""
 
-#: class-admin.php:186
+#: class-admin.php:192
 msgid "It is highly recommended that you back up your data before updating to the Beta version. Beta versions are not intended for production environments or critical systems. They are best suited for users who are willing to explore new features and provide feedback."
 msgstr ""
 
-#: class-admin.php:234
+#: class-admin.php:240
 #: cookiebanner/settings.php:707
 #: settings/config/menu.php:252
 #: settings/config/menu.php:322
@@ -53,29 +53,29 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: class-admin.php:241
+#: class-admin.php:247
 #: settings/config/menu.php:285
 #: settings/config/menu.php:289
 #: settings/build/index.c0f8ac284253d29c8079.js:1
 msgid "Support"
 msgstr ""
 
-#: class-admin.php:247
+#: class-admin.php:253
 #: settings/settings.php:383
 msgid "Upgrade to premium"
 msgstr ""
 
-#: class-admin.php:351
+#: class-admin.php:357
 msgid "this topic"
 msgstr ""
 
-#: class-admin.php:352
-#: class-admin.php:353
-#: functions.php:2225
+#: class-admin.php:358
+#: class-admin.php:359
+#: functions.php:2265
 msgid "Read more about %s"
 msgstr ""
 
-#: class-admin.php:360
+#: class-admin.php:366
 #: settings/build/120.35577e3013896dd59212.js:1
 #: settings/build/1677.bdcada2a96df51f6d883.js:1
 #: settings/build/2113.4cd9a04f209a076073ad.js:1
@@ -2166,169 +2166,169 @@ msgstr ""
 msgid "Imprint"
 msgstr ""
 
-#: config/warnings.php:279
+#: config/warnings.php:362
 msgid "Your PHP version is lower than the recommended PHP version. Some features are not available. Support for this PHP version will be dropped soon."
 msgstr ""
 
-#: config/warnings.php:286
+#: config/warnings.php:369
 msgid "Migrate.js, which allowed a smooth upgrade to 6.0, has been deprecated."
 msgstr ""
 
-#: config/warnings.php:301
+#: config/warnings.php:384
 msgid "Do Not Track and Global Privacy Control are respected."
 msgstr ""
 
-#: config/warnings.php:306
+#: config/warnings.php:389
 msgid "Please check if your REST API is loading correctly. Your site currently is using the slower Ajax fallback method to load the settings."
 msgstr ""
 
-#: config/warnings.php:314
+#: config/warnings.php:397
 msgid "You have currently selected an informal language, which will result in informal use of language on the legal documents. If you prefer the formal style, you can activate this in the general settings."
 msgstr ""
 
 #. translators: %s is a placeholder for the anchor link.
-#: config/warnings.php:324
+#: config/warnings.php:407
 msgid "Google Fonts requires your attention."
 msgstr ""
 
 #. translators: %s is a placeholder for the anchor link.
-#: config/warnings.php:324
+#: config/warnings.php:407
 msgid "We have added additional support and recommend reviewing your settings."
 msgstr ""
 
 #. translators: %s is a placeholder for the anchor link.
-#: config/warnings.php:324
+#: config/warnings.php:407
 msgid "Please read this %1$sarticle%2$s to read our position on self-hosting Google Fonts and Privacy by Design."
 msgstr ""
 
-#: config/warnings.php:332
+#: config/warnings.php:415
 msgid "No cookie changes have been detected."
 msgstr ""
 
-#: config/warnings.php:333
+#: config/warnings.php:416
 msgid "Cookie changes have been detected."
 msgstr ""
 
-#: config/warnings.php:333
+#: config/warnings.php:416
 msgid "Please review your cookies for changes."
 msgstr ""
 
 #. translators: %s is a placeholder for the last scan completed date.
-#: config/warnings.php:341
+#: config/warnings.php:424
 msgid "Last site scan completed on %s."
 msgstr ""
 
-#: config/warnings.php:342
+#: config/warnings.php:425
 msgid "No site scan has been completed yet."
 msgstr ""
 
-#: config/warnings.php:351
+#: config/warnings.php:434
 msgid "All required pages have been generated."
 msgstr ""
 
-#: config/warnings.php:352
+#: config/warnings.php:435
 msgid "Not all required pages have been generated."
 msgstr ""
 
-#: config/warnings.php:357
+#: config/warnings.php:440
 msgid "Harden your website and quickly detect vulnerabilities with Really Simple Security"
 msgstr ""
 
-#: config/warnings.php:366
+#: config/warnings.php:449
 msgid "Google Analytics is being used, but is not configured in Complianz."
 msgstr ""
 
-#: config/warnings.php:374
+#: config/warnings.php:457
 msgid "Google Tag Manager is being used, but is not configured in Complianz."
 msgstr ""
 
-#: config/warnings.php:382
+#: config/warnings.php:465
 msgid "Matomo is being used, but is not configured in Complianz."
 msgstr ""
 
-#: config/warnings.php:389
+#: config/warnings.php:472
 msgid "Your documents have not been updated in the past 12 months. Run the wizard to check your settings."
 msgstr ""
 
-#: config/warnings.php:397
+#: config/warnings.php:480
 msgid "You have cookies with incomplete descriptions."
 msgstr ""
 
-#: config/warnings.php:398
+#: config/warnings.php:481
 msgid "Enable the cookiedatabase.org API for automatic descriptions, or add these manually."
 msgstr ""
 
-#: config/warnings.php:407
+#: config/warnings.php:490
 msgid "You have a duplicate implementation of your statistics tool on your site."
 msgstr ""
 
-#: config/warnings.php:408
+#: config/warnings.php:491
 msgid "After the issue has been resolved, please re-run a scan to clear this message."
 msgstr ""
 
-#: config/warnings.php:418
+#: config/warnings.php:501
 msgid "JavaScript errors are detected on the front-end of your site. This may break the consent banner functionality."
 msgstr ""
 
-#: config/warnings.php:419
+#: config/warnings.php:502
 msgid "Last error in the console:"
 msgstr ""
 
-#: config/warnings.php:430
+#: config/warnings.php:513
 msgid "Your site requires a consent banner, which has been enabled."
 msgstr ""
 
-#: config/warnings.php:431
+#: config/warnings.php:514
 msgid "Your site is not configured to show a consent banner at the moment."
 msgstr ""
 
-#: config/warnings.php:441
+#: config/warnings.php:524
 msgid "Pretty permalinks are not enabled on your site. This can cause issues with the REST API, used by Complianz."
 msgstr ""
 
-#: config/warnings.php:451
+#: config/warnings.php:534
 msgid "Your uploads folder is not writable. Complianz needs this folder to save the consent banner CSS."
 msgstr ""
 
-#: config/warnings.php:462
+#: config/warnings.php:545
 msgid "We see you have enabled Google Maps as a service, but we can't find an integration. You can integrate manually if needed."
 msgstr ""
 
 #. translators: %s is a placeholder for the compliance detected plugin name.
-#: config/warnings.php:470
+#: config/warnings.php:553
 msgid "We have detected the %s plugin on your website."
 msgstr ""
 
 #. translators: %s is a placeholder for the compliance detected plugin name.
-#: config/warnings.php:470
+#: config/warnings.php:553
 msgid "As Complianz handles all the functionality this plugin provides, you should disable this plugin to prevent unexpected behaviour."
 msgstr ""
 
-#: config/warnings.php:476
+#: config/warnings.php:559
 msgid "Are you showing ads on your site? Consider implementing TCF."
 msgstr ""
 
-#: config/warnings.php:482
+#: config/warnings.php:565
 msgid "Create a Privacy Statement and other Legal Documents with Complianz."
 msgstr ""
 
-#: config/warnings.php:489
+#: config/warnings.php:572
 msgid "Legal compliance for webshops."
 msgstr ""
 
-#: config/warnings.php:496
+#: config/warnings.php:579
 msgid "Learn more about Google Consent Mode V2."
 msgstr ""
 
-#: config/warnings.php:503
+#: config/warnings.php:586
 msgid "Are you targeting multiple regions?"
 msgstr ""
 
-#: config/warnings.php:510
+#: config/warnings.php:593
 msgid "You might see a notice about Complianz when debugging your WordPress website. Although not a breaking issue, please know we're attending to this issue."
 msgstr ""
 
-#: config/warnings.php:519
+#: config/warnings.php:602
 msgid "Clarity Consent Mode V2 is now available. Please enable it in the wizard."
 msgstr ""
 
@@ -2471,7 +2471,7 @@ msgid "On a cookie policy, the banner will be minimized by default"
 msgstr ""
 
 #: cookiebanner/class-banner-loader.php:1315
-#: functions.php:2232
+#: functions.php:2272
 msgid "Purpose pending investigation"
 msgstr ""
 
@@ -3384,52 +3384,52 @@ msgstr ""
 msgid "%s on line %s of %s"
 msgstr ""
 
-#: functions.php:2196
+#: functions.php:2236
 msgid "Miscellaneous"
 msgstr ""
 
-#: functions.php:2203
-#: functions.php:2213
+#: functions.php:2243
+#: functions.php:2253
 msgid "This data is not shared with third parties."
 msgstr ""
 
-#: functions.php:2205
-#: functions.php:2210
+#: functions.php:2245
+#: functions.php:2250
 msgid "For more information, please read the %s%s Privacy Statement%s."
 msgstr ""
 
-#: functions.php:2215
+#: functions.php:2255
 msgid "Sharing of data is pending investigation"
 msgstr ""
 
-#: functions.php:2218
+#: functions.php:2258
 msgctxt "Legal document cookie policy"
 msgid "We use %s for %s."
 msgstr ""
 
-#: functions.php:2226
+#: functions.php:2266
 msgid "Read more about %s service on Cookie Database"
 msgstr ""
 
-#: functions.php:2781
+#: functions.php:2821
 #: settings/build/3078.9d16dbae35f80432495b.js:1
 msgid "Opt-in"
 msgstr ""
 
-#: functions.php:2783
+#: functions.php:2823
 #: settings/build/3078.9d16dbae35f80432495b.js:1
 msgid "Opt-out"
 msgstr ""
 
-#: functions.php:2785
+#: functions.php:2825
 msgid "All consent types"
 msgstr ""
 
-#: functions.php:3165
+#: functions.php:3205
 msgid "In September 2023 the Quebec bill 64 will be enforced in Canada. In order to keep your site compliant, %sopt-in must be implemented for Canada%s. Please Navigate to the %sWizard%s and enable opt-in for Canada."
 msgstr ""
 
-#: functions.php:3166
+#: functions.php:3206
 msgid "Please be aware that this will activate opt-in for Canada, altering the banner and blocking non-functional scripts and cookies prior to consent. Please check the front-end of your site after activating opt-in."
 msgstr ""
 
@@ -3688,8 +3688,8 @@ msgstr ""
 
 #. translators: %1$s: opening link tag, %2$s: closing link tag.
 #: mailer/class-mail.php:71
-#: upgrade/upgrade-to-pro.php:471
-#: upgrade/upgrade-to-pro.php:472
+#: upgrade/upgrade-to-pro.php:499
+#: upgrade/upgrade-to-pro.php:500
 msgid "An error occurred:"
 msgstr ""
 
@@ -5544,75 +5544,75 @@ msgctxt "Legal document cookie policy"
 msgid "Sharing data"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:156
+#: upgrade/upgrade-to-pro.php:147
 msgid "Checking if plugin folder exists..."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:157
+#: upgrade/upgrade-to-pro.php:148
 msgid "Able to create destination folder"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:158
+#: upgrade/upgrade-to-pro.php:149
 msgid "Destination folder already exists"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:163
+#: upgrade/upgrade-to-pro.php:154
 msgid "Validating license..."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:164
+#: upgrade/upgrade-to-pro.php:155
 msgid "License valid"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:165
+#: upgrade/upgrade-to-pro.php:156
 msgid "License invalid"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:170
+#: upgrade/upgrade-to-pro.php:161
 msgid "Retrieving package information..."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:171
+#: upgrade/upgrade-to-pro.php:162
 msgid "Package information retrieved"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:172
-#: upgrade/upgrade-to-pro.php:768
+#: upgrade/upgrade-to-pro.php:163
+#: upgrade/upgrade-to-pro.php:796
 msgid "Failed to gather package information"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:177
+#: upgrade/upgrade-to-pro.php:168
 msgid "Installing plugin..."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:178
+#: upgrade/upgrade-to-pro.php:169
 msgid "Plugin installed"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:179
+#: upgrade/upgrade-to-pro.php:170
 msgid "Failed to install plugin"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:184
+#: upgrade/upgrade-to-pro.php:175
 msgid "Activating plugin..."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:185
+#: upgrade/upgrade-to-pro.php:176
 msgid "Plugin activated"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:186
+#: upgrade/upgrade-to-pro.php:177
 msgid "Failed to activate plugin"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:223
-#: upgrade/upgrade-to-pro.php:255
+#: upgrade/upgrade-to-pro.php:214
+#: upgrade/upgrade-to-pro.php:246
 msgid "SSL & Security"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:225
-#: upgrade/upgrade-to-pro.php:240
-#: upgrade/upgrade-to-pro.php:257
+#: upgrade/upgrade-to-pro.php:216
+#: upgrade/upgrade-to-pro.php:231
+#: upgrade/upgrade-to-pro.php:248
 #: settings/build/120.35577e3013896dd59212.js:1
 #: settings/build/1677.bdcada2a96df51f6d883.js:1
 #: settings/build/2113.4cd9a04f209a076073ad.js:1
@@ -5633,16 +5633,16 @@ msgstr ""
 msgid "Install"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:227
-#: upgrade/upgrade-to-pro.php:259
+#: upgrade/upgrade-to-pro.php:218
+#: upgrade/upgrade-to-pro.php:250
 msgid "Really Simple Security - Lightweight plugin, heavyweight features."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:242
+#: upgrade/upgrade-to-pro.php:233
 msgid "Configure your Cookie Notice, Cookie Consent and Cookie Policy with our Wizard and Site Scan. Supports GDPR, DSGVO, TTDSG, LGPD, POPIA, RGPD, CCPA and PIPEDA."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:271
+#: upgrade/upgrade-to-pro.php:262
 #: settings/build/4186.631686d5ae79d8e73af9.js:1
 #: settings/build/4570.a8174dadab193f2fadaa.js:1
 #: settings/build/8596.52bdd106e8a2631bfe19.js:1
@@ -5650,24 +5650,24 @@ msgstr ""
 msgid "Installed"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:317
+#: upgrade/upgrade-to-pro.php:345
 msgid "Installation finished"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:427
+#: upgrade/upgrade-to-pro.php:455
 msgid "Recommended by Really Simple Plugins"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:455
+#: upgrade/upgrade-to-pro.php:483
 #: settings/build/9487.94091d8c955c27f71f2c.js:1
 msgid "Installing"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:466
+#: upgrade/upgrade-to-pro.php:494
 msgid "Visit Dashboard"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:469
+#: upgrade/upgrade-to-pro.php:497
 #: settings/build/1027.cc7c30ba8fe533dd21eb.js:1
 #: settings/build/2980.a821ae48d0901d34b25f.js:1
 #: settings/build/6281.82d0b1acf45f90f7d684.js:1
@@ -5675,50 +5675,50 @@ msgid "Cancel"
 msgstr ""
 
 #. translators: %1$s: opening link tag, %2$s: closing link tag.
-#: upgrade/upgrade-to-pro.php:471
+#: upgrade/upgrade-to-pro.php:499
 msgid "Install %1$sManually%2$s."
 msgstr ""
 
 #. translators: %1$s: opening link tag, %2$s: closing link tag.
-#: upgrade/upgrade-to-pro.php:472
+#: upgrade/upgrade-to-pro.php:500
 msgid "Check your %1$slicense%2$s."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:547
+#: upgrade/upgrade-to-pro.php:575
 msgid "Could not rename folder!"
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:646
-#: upgrade/upgrade-to-pro.php:679
+#: upgrade/upgrade-to-pro.php:674
+#: upgrade/upgrade-to-pro.php:707
 msgid "An error occurred, please try again."
 msgstr ""
 
 #. translators: %s: license expiry date.
-#: upgrade/upgrade-to-pro.php:655
+#: upgrade/upgrade-to-pro.php:683
 msgid "Your license key expired on %s."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:661
+#: upgrade/upgrade-to-pro.php:689
 msgid "Your license key has been disabled."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:664
+#: upgrade/upgrade-to-pro.php:692
 msgid "Missing license."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:667
+#: upgrade/upgrade-to-pro.php:695
 msgid "Invalid license."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:670
+#: upgrade/upgrade-to-pro.php:698
 msgid "Your license is not active for this URL."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:673
+#: upgrade/upgrade-to-pro.php:701
 msgid "This appears to be an invalid license key for this plugin."
 msgstr ""
 
-#: upgrade/upgrade-to-pro.php:676
+#: upgrade/upgrade-to-pro.php:704
 msgid "Your license key has reached its activation limit."
 msgstr ""
 

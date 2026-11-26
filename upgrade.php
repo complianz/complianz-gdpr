@@ -1091,6 +1091,20 @@ function cmplz_check_upgrade() {
 		}
 	}
 
+	// Drop the cached dynamic notifications fetched before cmplz_dn_map_notifications() started
+	// allowlisting the remote fields, and the fetch throttle, so the next admin request fetches
+	// them again through the new mapper. The notifications are core transients, one per language;
+	// the languages fetched so far are the keys of the attempts option. Done marker rather than a
+	// version_compare, same reason as the blocks above.
+	if ( $prev_version && ! get_option( 'cmplz_dn_notifications_purged' ) ) {
+		$attempts = get_option( COMPLIANZ_DYNAMIC_NOTIFICATIONS_ATTEMPTS_OPTION, array() );
+		foreach ( array_keys( is_array( $attempts ) ? $attempts : array() ) as $language ) {
+			delete_transient( cmplz_dn_transient_key( (string) $language ) );
+		}
+		delete_option( COMPLIANZ_DYNAMIC_NOTIFICATIONS_ATTEMPTS_OPTION );
+		update_option( 'cmplz_dn_notifications_purged', true, false );
+	}
+
 	// regenerate cookie policy snapshot.
 	update_option( 'cmplz_generate_new_cookiepolicy_snapshot', true, false );
 

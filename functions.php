@@ -1954,12 +1954,15 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 	 * The URL must be on an allowed thumbnail host and the response must be a JPEG, PNG, GIF or
 	 * WebP by its magic bytes; otherwise nothing is written and the default placeholder is returned.
 	 *
+	 * The stored file never takes its extension from the URL: the extension comes from the detected
+	 * mime type, and the image is re-encoded through the WordPress image editor, so an image/script
+	 * polyglot can neither be stored under a script extension nor keep its payload.
+	 *
 	 * @param string      $src
 	 * @param bool|string $id
-	 * @param bool        $use_filename //some filenames are too long to use.
+	 * @param bool        $use_filename Append the sanitized, extension-less file name of the URL to the id. Some are too long to use.
 	 *
 	 * @return string url
-	 *
 	 *
 	 * @since 2.1.5
 	 */
@@ -1972,28 +1975,37 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 		if ( ! cmplz_download_host_allowed( $src ) ) {
 			return cmplz_default_placeholder();
 		}
-		if ( ! $id ) {
-			$id = time();
-		}
 		if ( ! function_exists( 'download_url' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
-		$upload_dir = cmplz_upload_dir('placeholders');
 
-		//set the path
-		$filename = $use_filename ? "-" . basename( $src ) : '.jpg';
-		$file     = $upload_dir . $id . $filename;
+		// File name: the id plus, optionally, the name part of the URL, both sanitized. The extension is
+		// never taken from the URL; it is set below from the detected mime type.
+		$id = sanitize_file_name( (string) $id );
+		if ( '' === $id ) {
+			$id = (string) time();
+		}
+		$stem = $id;
+		if ( $use_filename ) {
+			$url_path = wp_parse_url( $src, PHP_URL_PATH );
+			$name     = sanitize_file_name( pathinfo( basename( (string) $url_path ), PATHINFO_FILENAME ) );
+			if ( '' !== $name ) {
+				$stem .= '-' . $name;
+			}
+		}
 
-		//set the url
-		$new_src = cmplz_upload_url( "placeholders") .  $id.$filename;
+		$upload_dir = cmplz_upload_dir( 'placeholders' );
+
 		//download file
-		$tmpfile = download_url( $src, $timeout = 25 );
+		$tmpfile = download_url( $src, 25 );
 
 		// Check for errors, and that the response is a raster image before it is stored anywhere web-accessible.
-		$mime = is_wp_error( $tmpfile ) ? false : cmplz_image_mime_from_file( $tmpfile );
-		if ( ! $mime ) {
-			$new_src = cmplz_default_placeholder();
-		} else {
+		$mime      = is_wp_error( $tmpfile ) ? false : cmplz_image_mime_from_file( $tmpfile );
+		$extension = $mime ? cmplz_placeholder_extension_for_mime( $mime ) : false;
+		$saved     = false;
+		if ( $extension ) {
+			$file = $upload_dir . $stem . '.' . $extension;
+
 			//remove current file
 			if ( file_exists( $file ) ) {
 				unlink( $file );
@@ -2001,29 +2013,57 @@ if ( ! function_exists( 'cmplz_download_to_site' ) ) {
 
 			//in case the server prevents deletion, we check it again.
 			if ( ! file_exists( $file ) ) {
-				copy( $tmpfile, $file );
-			}
-		}
-
-		if ( is_string( $tmpfile ) && file_exists( $tmpfile ) ) {
-			unlink( $tmpfile );
-		} // must unlink afterwards
-
-		if ( $mime && file_exists( $file ) ) {
-			try {
-				$new_src = cmplz_create_webp( $file, $new_src, $mime );
-			} catch ( Exception $e ) {
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					error_log( $e->getMessage() );
+				// Re-encode instead of copying the downloaded bytes, so only pixel data reaches the uploads folder.
+				$editor = wp_get_image_editor( $tmpfile, array( 'mime_type' => $mime ) );
+				if ( ! is_wp_error( $editor ) ) {
+					$saved = $editor->save( $file, $mime );
 				}
 			}
 		}
 
-		if ( ! file_exists( $file ) ) {
+		// The temp download is removed on every path, success or failure.
+		if ( is_string( $tmpfile ) && file_exists( $tmpfile ) ) {
+			unlink( $tmpfile );
+		}
+
+		if ( ! is_array( $saved ) || empty( $saved['path'] ) || ! file_exists( $saved['path'] ) ) {
 			return cmplz_default_placeholder();
 		}
 
+		// The editor decides the final name: a filter such as image_editor_output_format may change the format.
+		$file    = $saved['path'];
+		$new_src = cmplz_upload_url( 'placeholders' ) . basename( $file );
+		try {
+			$new_src = cmplz_create_webp( $file, $new_src, ! empty( $saved['mime-type'] ) ? $saved['mime-type'] : $mime );
+		} catch ( Exception $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( $e->getMessage() );
+			}
+		}
+
 		return $new_src;
+	}
+}
+
+if ( ! function_exists( 'cmplz_placeholder_extension_for_mime' ) ) {
+	/**
+	 * File extension a downloaded placeholder is stored under, from its detected mime type.
+	 *
+	 * Fixed map on purpose: anything that is not one of these raster formats is not stored at all.
+	 *
+	 * @param string $mime Mime type as returned by cmplz_image_mime_from_file().
+	 *
+	 * @return string|false Extension without the dot, or false for a mime type that is not accepted.
+	 */
+	function cmplz_placeholder_extension_for_mime( $mime ) {
+		$map = array(
+			'image/jpeg' => 'jpg',
+			'image/png'  => 'png',
+			'image/gif'  => 'gif',
+			'image/webp' => 'webp',
+		);
+
+		return isset( $map[ $mime ] ) ? $map[ $mime ] : false;
 	}
 }
 

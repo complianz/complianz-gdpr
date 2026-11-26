@@ -9,15 +9,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
-	// phpcs:disable PEAR.NamingConventions.ValidClassName -- Legacy class name kept for backward compatibility.
+// Really Simple SSL ships the same installer as rsp_upgrade_to_pro, with TLS verification disabled on the
+// license activation request. A Complianz-specific class name keeps this patched copy from being skipped
+// when that plugin loads its copy first.
+if ( ! class_exists( 'cmplz_upgrade_to_pro' ) ) {
+	// phpcs:disable PEAR.NamingConventions.ValidClassName -- Lowercase class name, matching the plugin's other classes.
 	/**
 	 * Allows plugins to use their own update API.
 	 *
 	 * @author Easy Digital Downloads
 	 * @version 1.7
 	 */
-	class rsp_upgrade_to_pro {
+	class cmplz_upgrade_to_pro {
 		/**
 		 * Asset version for cache busting.
 		 *
@@ -123,64 +126,52 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 			}
 
 			if ( isset( $_GET['plugin'] ) ) {
-				$plugin = sanitize_title( wp_unslash( $_GET['plugin'] ) );
-				switch ( $plugin ) {
-					case 'rsssl_pro':
-						$rsssl_admin_url       = is_multisite() ? network_admin_url( 'settings.php' ) : admin_url( 'options-general.php' );
-						$this->slug            = is_multisite() ? 'really-simple-ssl-pro-multisite/really-simple-ssl-pro-multisite.php' : 'really-simple-ssl-pro/really-simple-ssl-pro.php';
-						$this->plugin_name     = 'Really Simple SSL Pro';
-						$this->plugin_constant = 'rsssl_pro';
-						$this->prefix          = 'rsssl_';
-						$this->api_url         = 'https://really-simple-ssl.com';
-						$this->dashboard_url   = add_query_arg( array( 'page' => 'really-simple-security' ), $rsssl_admin_url );
-						$this->account_url     = 'https://really-simple-ssl.com/account';
-						$this->instructions    = 'https://really-simple-ssl.com/knowledge-base/install-really-simple-ssl-pro';
-						break;
-					case 'cmplz_pro':
-					default:
-						$this->slug            = is_multisite() ? 'complianz-gdpr-premium-multisite/complianz-gpdr-premium.php' : 'complianz-gdpr-premium/complianz-gpdr-premium.php';
-						$this->plugin_name     = 'Complianz';
-						$this->plugin_constant = 'cmplz_premium';
-						$this->prefix          = 'cmplz_';
-						$this->api_url         = 'https://complianz.io';
-						$this->dashboard_url   = add_query_arg( array( 'page' => 'complianz' ), admin_url( 'admin.php' ) );
-						$this->account_url     = cmplz_get_referral_url( 'articles', 'upgrade-account', 'https://complianz.io/account' );
-						$this->instructions    = cmplz_get_referral_url( 'articles', 'upgrade-instructions', 'https://complianz.io/help/wordpress/configuration/how-to-install-complianz-gdpr-premium-plugin/' );
-						break;
+				// This copy only installs Complianz. Other plugins' upgrade links are left to their own installer.
+				if ( 'cmplz_pro' !== sanitize_title( wp_unslash( $_GET['plugin'] ) ) ) {
+					return;
 				}
+
+				$this->slug            = is_multisite() ? 'complianz-gdpr-premium-multisite/complianz-gpdr-premium.php' : 'complianz-gdpr-premium/complianz-gpdr-premium.php';
+				$this->plugin_name     = 'Complianz';
+				$this->plugin_constant = 'cmplz_premium';
+				$this->prefix          = 'cmplz_';
+				$this->api_url         = 'https://complianz.io';
+				$this->dashboard_url   = add_query_arg( array( 'page' => 'complianz' ), admin_url( 'admin.php' ) );
+				$this->account_url     = cmplz_get_referral_url( 'articles', 'upgrade-account', 'https://complianz.io/account' );
+				$this->instructions    = cmplz_get_referral_url( 'articles', 'upgrade-instructions', 'https://complianz.io/help/wordpress/configuration/how-to-install-complianz-gdpr-premium-plugin/' );
 			}
 
 			$this->steps = array(
 				array(
-					'action'  => 'rsp_upgrade_destination_clear',
+					'action'  => 'cmplz_upgrade_destination_clear',
 					'doing'   => __( 'Checking if plugin folder exists...', 'complianz-gdpr' ),
 					'success' => __( 'Able to create destination folder', 'complianz-gdpr' ),
 					'error'   => __( 'Destination folder already exists', 'complianz-gdpr' ),
 					'type'    => 'folder',
 				),
 				array(
-					'action'  => 'rsp_upgrade_activate_license',
+					'action'  => 'cmplz_upgrade_activate_license',
 					'doing'   => __( 'Validating license...', 'complianz-gdpr' ),
 					'success' => __( 'License valid', 'complianz-gdpr' ),
 					'error'   => __( 'License invalid', 'complianz-gdpr' ),
 					'type'    => 'license',
 				),
 				array(
-					'action'  => 'rsp_upgrade_package_information',
+					'action'  => 'cmplz_upgrade_package_information',
 					'doing'   => __( 'Retrieving package information...', 'complianz-gdpr' ),
 					'success' => __( 'Package information retrieved', 'complianz-gdpr' ),
 					'error'   => __( 'Failed to gather package information', 'complianz-gdpr' ),
 					'type'    => 'package',
 				),
 				array(
-					'action'  => 'rsp_upgrade_install_plugin',
+					'action'  => 'cmplz_upgrade_install_plugin',
 					'doing'   => __( 'Installing plugin...', 'complianz-gdpr' ),
 					'success' => __( 'Plugin installed', 'complianz-gdpr' ),
 					'error'   => __( 'Failed to install plugin', 'complianz-gdpr' ),
 					'type'    => 'install',
 				),
 				array(
-					'action'  => 'rsp_upgrade_activate_plugin',
+					'action'  => 'cmplz_upgrade_activate_plugin',
 					'doing'   => __( 'Activating plugin...', 'complianz-gdpr' ),
 					'success' => __( 'Plugin activated', 'complianz-gdpr' ),
 					'error'   => __( 'Failed to activate plugin', 'complianz-gdpr' ),
@@ -283,13 +274,50 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 		 * @return void
 		 */
 		public function init() {
+			add_action( 'admin_init', array( $this, 'remove_shared_installer_hooks' ) );
 			add_action( 'admin_footer', array( $this, 'print_install_modal' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-			add_action( 'wp_ajax_rsp_upgrade_destination_clear', array( $this, 'process_ajax_destination_clear' ) );
-			add_action( 'wp_ajax_rsp_upgrade_activate_license', array( $this, 'process_ajax_activate_license' ) );
-			add_action( 'wp_ajax_rsp_upgrade_package_information', array( $this, 'process_ajax_package_information' ) );
-			add_action( 'wp_ajax_rsp_upgrade_install_plugin', array( $this, 'process_ajax_install_plugin' ) );
-			add_action( 'wp_ajax_rsp_upgrade_activate_plugin', array( $this, 'process_ajax_activate_plugin' ) );
+			add_action( 'wp_ajax_cmplz_upgrade_destination_clear', array( $this, 'process_ajax_destination_clear' ) );
+			add_action( 'wp_ajax_cmplz_upgrade_activate_license', array( $this, 'process_ajax_activate_license' ) );
+			add_action( 'wp_ajax_cmplz_upgrade_package_information', array( $this, 'process_ajax_package_information' ) );
+			add_action( 'wp_ajax_cmplz_upgrade_install_plugin', array( $this, 'process_ajax_install_plugin' ) );
+			add_action( 'wp_ajax_cmplz_upgrade_activate_plugin', array( $this, 'process_ajax_activate_plugin' ) );
+		}
+
+		/**
+		 * Stop another plugin's copy of the shared installer from handling this Complianz upgrade.
+		 *
+		 * Really Simple SSL ships the same installer as rsp_upgrade_to_pro. Its copy also handles
+		 * plugin=cmplz_pro and sends the license key with TLS verification disabled. Both copies load on
+		 * install_pro requests, so remove its hooks and let this copy run the upgrade on its own. admin_init
+		 * runs after every plugin has loaded, and before the page assets, the modal and the AJAX handlers.
+		 *
+		 * @return void
+		 */
+		public function remove_shared_installer_hooks() {
+			global $wp_filter;
+
+			$hooks = array(
+				'admin_footer',
+				'admin_enqueue_scripts',
+				'wp_ajax_rsp_upgrade_destination_clear',
+				'wp_ajax_rsp_upgrade_activate_license',
+				'wp_ajax_rsp_upgrade_package_information',
+				'wp_ajax_rsp_upgrade_install_plugin',
+				'wp_ajax_rsp_upgrade_activate_plugin',
+			);
+			foreach ( $hooks as $hook ) {
+				if ( ! isset( $wp_filter[ $hook ] ) ) {
+					continue;
+				}
+				foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+					foreach ( $callbacks as $callback ) {
+						if ( is_array( $callback['function'] ) && is_a( $callback['function'][0], 'rsp_upgrade_to_pro' ) ) {
+							remove_action( $hook, $callback['function'], $priority );
+						}
+					}
+				}
+			}
 		}
 
 		/**
@@ -302,12 +330,12 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 		public function enqueue_assets( $hook ) {
 			if ( 'plugins.php' === $hook && isset( $_GET['install_pro'] ) ) {
 				$minified = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
-				wp_register_style( 'rsp-upgrade-css', plugin_dir_url( __FILE__ ) . "upgrade-to-pro$minified.css", false, $this->version );
-				wp_enqueue_style( 'rsp-upgrade-css' );
-				wp_enqueue_script( 'rsp-ajax-js', plugin_dir_url( __FILE__ ) . "ajax$minified.js", array(), $this->version, true );
-				wp_enqueue_script( 'rsp-upgrade-js', plugin_dir_url( __FILE__ ) . "upgrade-to-pro$minified.js", array(), $this->version, true );
+				wp_register_style( 'cmplz-upgrade-css', plugin_dir_url( __FILE__ ) . "upgrade-to-pro$minified.css", false, $this->version );
+				wp_enqueue_style( 'cmplz-upgrade-css' );
+				wp_enqueue_script( 'cmplz-upgrade-ajax-js', plugin_dir_url( __FILE__ ) . "ajax$minified.js", array(), $this->version, true );
+				wp_enqueue_script( 'cmplz-upgrade-js', plugin_dir_url( __FILE__ ) . "upgrade-to-pro$minified.js", array(), $this->version, true );
 				wp_localize_script(
-					'rsp-upgrade-js',
+					'cmplz-upgrade-js',
 					'rsp_upgrade',
 					array(
 						'steps'          => $this->steps,
@@ -633,7 +661,7 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 				$this->api_url,
 				array(
 					'timeout'   => 15,
-					'sslverify' => false,
+					'sslverify' => true,
 					'body'      => $api_params,
 				)
 			);
@@ -831,5 +859,5 @@ if ( ! class_exists( 'rsp_upgrade_to_pro' ) ) {
 	}
 	// phpcs:enable PEAR.NamingConventions.ValidClassName
 
-	$rsp_upgrade_to_pro = new rsp_upgrade_to_pro();
+	$cmplz_upgrade_to_pro = new cmplz_upgrade_to_pro();
 }

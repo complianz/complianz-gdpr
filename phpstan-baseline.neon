@@ -163,12 +163,6 @@ parameters:
 			path: pro/class-import.php
 
 		-
-			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
-			identifier: arguments.count
-			count: 1
-			path: pro/class-licensing.php
-
-		-
 			message: '#^Method cmplz_license\:\:license_notices\(\) invoked with 3 parameters, 0 required\.$#'
 			identifier: arguments.count
 			count: 2
